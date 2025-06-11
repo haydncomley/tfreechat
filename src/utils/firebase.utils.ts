@@ -11,7 +11,7 @@ const firebaseConfig = {
 	storageBucket: process.env.NEXT_PUBLIC_FB_STORAGE_BUCKET,
 	messagingSenderId: process.env.NEXT_PUBLIC_FB_MSG_SENDER_ID,
 	appId: process.env.NEXT_PUBLIC_FB_APP_ID,
-  };
+};
 
 export const app =
 	getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];

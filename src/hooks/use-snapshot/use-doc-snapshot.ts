@@ -3,7 +3,6 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import { useState, useEffect } from 'react';
 import { firestore } from '~/utils/firebase.utils';
 
-
 const docListeners = new Map<
 	string,
 	{
