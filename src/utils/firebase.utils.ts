@@ -1,17 +1,21 @@
 import { initializeApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { getFunctions } from 'firebase/functions';
 
 const firebaseConfig = {
-	apiKey: "AIzaSyDunl3KyjZzHgJx3p76KtPV6IVnUan6OT8",
-	authDomain: "tfreechat.firebaseapp.com",
-	databaseURL: "https://tfreechat-default-rtdb.europe-west1.firebasedatabase.app",
-	projectId: "tfreechat",
-	storageBucket: "tfreechat.firebasestorage.app",
-	messagingSenderId: "642659760259",
-	appId: "1:642659760259:web:a7de9c4dc14a7aa24343b6"
+	apiKey: process.env.NEXT_PUBLIC_FB_API_KEY,
+	authDomain: process.env.NEXT_PUBLIC_FB_AUTH_DOMAIN,
+	databaseURL: process.env.NEXT_PUBLIC_FB_DATABASE_URL,
+	projectId: process.env.NEXT_PUBLIC_FB_PROJECT_ID,
+	storageBucket: process.env.NEXT_PUBLIC_FB_STORAGE_BUCKET,
+	messagingSenderId: process.env.NEXT_PUBLIC_FB_MSG_SENDER_ID,
+	appId: process.env.NEXT_PUBLIC_FB_APP_ID,
   };
 
 export const app =
 	getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
 export const auth = getAuth(app);
+export const functions = getFunctions(app);
+export const firestore = getFirestore(app);
