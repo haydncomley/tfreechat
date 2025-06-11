@@ -3,15 +3,20 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "---------- DEVELOPMENT ----------": "",
     "dev": "next dev --turbopack",
-    "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "---------- DEPLOYMENT ----------": "",
+    "build": "next build",
+    "build:api": "cd firebase/functions && bun run build"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.80.6",
+    "firebase": "^11.9.1",
+    "next": "15.3.3",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "next": "15.3.3"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "typescript": "^5",
