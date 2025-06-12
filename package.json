@@ -14,8 +14,10 @@
 	},
 	"dependencies": {
 		"@tanstack/react-query": "^5.80.6",
+		"classnames": "^2.5.1",
 		"firebase": "^11.9.1",
 		"next": "15.3.3",
+		"nuqs": "^2.4.3",
 		"react": "^19.0.0",
 		"react-dom": "^19.0.0"
 	},

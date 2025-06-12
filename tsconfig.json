@@ -19,7 +19,8 @@
 			}
 		],
 		"paths": {
-			"~/*": ["./src/*"]
+			"~/*": ["./src/*"],
+			"~/types": ["./firebase/functions/src/types"]
 		}
 	},
 	"include": [

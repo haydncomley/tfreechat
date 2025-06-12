@@ -18,4 +18,4 @@ export const app =
 
 export const auth = getAuth(app);
 export const functions = getFunctions(app);
-export const firestore = getFirestore(app);
+export const firestore = getFirestore(app, 'tfreechat');
