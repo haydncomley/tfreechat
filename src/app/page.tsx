@@ -29,13 +29,13 @@ export default function Home() {
 
 	useEffect(() => {
 		const chatHasPrompt = chats.find((chat) => chat.prompt === prompt);
-		if (!chatHasPrompt) return;
+		if (!chatHasPrompt || messages.length > 0) return;
 		if (chatId !== chatHasPrompt.id) {
 			setChatId(chatHasPrompt.id);
 			setPrompt('');
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [chats.length, prompt, chatId]);
+	}, [chats.length, prompt, chatId, messages.length]);
 
 	return (
 		<div className="flex h-full w-full">
@@ -110,7 +110,7 @@ export default function Home() {
 						</div>
 					))}
 
-					{isLoading ? (
+					{isLoading && !messages.at(-1)?.reply ? (
 						<div className="flex w-full flex-col gap-2 p-4">
 							{prompt ? (
 								<>
