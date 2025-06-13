@@ -15,6 +15,7 @@ export const ActionBar = () => {
 	const [apiKey, setApiKey] = useState(
 		process.env.NEXT_PUBLIC_DEFAULT_KEY || '',
 	);
+	const [useOpenRouter, setUseOpenRouter] = useState(false);
 
 	// Query State
 	const [model, setModel] = useQueryState(
@@ -49,6 +50,7 @@ export const ActionBar = () => {
 					text: prompt,
 					ai: { secret: apiKey, model, provider },
 					chatId: currentChat?.id,
+					isOpenRouter: useOpenRouter,
 				});
 				break;
 			case 'text':
@@ -56,6 +58,7 @@ export const ActionBar = () => {
 					text: prompt,
 					ai: { secret: apiKey, model, provider },
 					chatId: currentChat?.id,
+					isOpenRouter: useOpenRouter,
 				});
 				if (currentChat?.id) setPrompt('');
 				break;
@@ -72,9 +75,23 @@ export const ActionBar = () => {
 			/>
 
 			<div className="flex flex-col gap-2 border-r p-4">
+				<div className="flex items-center gap-2">
+					<input
+						type="checkbox"
+						checked={useOpenRouter}
+						onChange={(e) => setUseOpenRouter(e.target.checked)}
+					/>
+					Use OpenRouter
+				</div>
 				<select
 					value={provider}
-					onChange={(e) => setProvider(e.target.value)}
+					onChange={(e) => {
+						setProvider(e.target.value);
+						setModel(
+							AI_PROVIDERS.find((p) => p.id === e.target.value)?.models[0]
+								?.id || '',
+						);
+					}}
 				>
 					{AI_PROVIDERS.map((provider) => (
 						<option
@@ -85,7 +102,6 @@ export const ActionBar = () => {
 						</option>
 					))}
 				</select>
-
 				<select
 					value={model}
 					onChange={(e) => setModel(e.target.value)}
@@ -94,6 +110,7 @@ export const ActionBar = () => {
 						<option
 							key={model.id}
 							value={model.id}
+							disabled={useOpenRouter && !model.openRouterId}
 						>
 							{model.label}
 						</option>

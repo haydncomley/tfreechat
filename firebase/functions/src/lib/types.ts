@@ -15,6 +15,7 @@ export interface Provider {
 
 export interface Model {
 	id: OpenAiModels | AnthropicModels | GoogleModels | (string & {});
+	openRouterId?: string;
 	label: string;
 	capabilities?: {
 		imageGeneration?: boolean;
@@ -23,6 +24,7 @@ export interface Model {
 
 export interface Agent {
 	secret: string;
+	isOpenRouter?: boolean;
 	model: string;
 	provider: string;
 }

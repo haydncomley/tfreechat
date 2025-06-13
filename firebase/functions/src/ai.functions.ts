@@ -5,7 +5,7 @@ import { getAuth } from 'firebase-admin/auth';
 import { streamText, experimental_generateImage as generateImage } from 'ai';
 import { Agent, ChatMessage } from './lib/types';
 import { DocumentReference, FieldValue, getFirestore } from 'firebase-admin/firestore';
-import { createAgent, createImageAgent } from './lib/utilities';
+import { createAgent, createImageAgent, isValidModel } from './lib/utilities';
 import { getStorage } from "firebase-admin/storage";
 
 const app = initializeApp();
@@ -41,7 +41,7 @@ export const aiText = onRequest(async (req, res) => {
 			return;
 		}
 
-		const { text, secret, model, provider, chatId } = req.body as Partial<Agent & { text: string, chatId?: string, messageId?: string }>;
+		const { text, secret, model, provider, chatId, isOpenRouter } = req.body as Partial<Agent & { text: string, chatId?: string, messageId?: string }>;
 
 		if (!text) {
 			throw new HttpsError('invalid-argument', 'Text is required');
@@ -89,6 +89,12 @@ export const aiText = onRequest(async (req, res) => {
 			},
 		}, { merge: true });
 
+		const wantedModel = isValidModel({ provider, model, isOpenRouter: !!isOpenRouter });
+
+		if (!wantedModel) {
+			throw new HttpsError('invalid-argument', 'Invalid model');
+		}
+
 		const messages = messagesData.map((message) => [{
 			role: 'user' as const,
 			content: message.prompt,
@@ -104,7 +110,7 @@ export const aiText = onRequest(async (req, res) => {
 		res.setHeader('Connection', 'keep-alive')
 
 		const { textStream } = streamText({
-			model: createAgent({ key: secret, provider, model }),
+			model: createAgent({ key: secret, provider, model, isOpenRouter: !!isOpenRouter }),
 			...(messages.length ? {
 				messages: [
 					...messages,
@@ -178,7 +184,7 @@ export const aiImage = onRequest(async (req, res) => {
 			return;
 		}
 
-		const { text, secret, model, provider, chatId } = req.body as Partial<Agent & { text: string, chatId?: string, messageId?: string }>;
+		const { text, secret, model, provider, chatId, isOpenRouter } = req.body as Partial<Agent & { text: string, chatId?: string, messageId?: string }>;
 
 		if (!text) {
 			throw new HttpsError('invalid-argument', 'Text is required');
@@ -231,11 +237,15 @@ export const aiImage = onRequest(async (req, res) => {
 			},
 		}, { merge: true });
 
+		if (!isValidModel({ provider, model, isOpenRouter: !!isOpenRouter, capabilities: { imageGeneration: true } })) {
+			throw new HttpsError('invalid-argument', 'Invalid model');
+		}
+
 		res.setHeader('Cache-Control', 'no-cache')
 		res.setHeader('Connection', 'keep-alive')
 
 		const imageResult = await generateImage({
-			model: createImageAgent({ key: secret, provider, model }),
+			model: createImageAgent({ key: secret, provider, model, isOpenRouter: !!isOpenRouter }),
 			prompt: text,
 		});
 

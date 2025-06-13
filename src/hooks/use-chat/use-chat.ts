@@ -36,6 +36,7 @@ export const useChat = (id?: string | null) => {
 			text: string;
 			ai: Agent;
 			chatId?: string | null;
+			isOpenRouter?: boolean;
 		}) => {
 			try {
 				if (!user) throw new Error('User not authenticated');
@@ -53,6 +54,7 @@ export const useChat = (id?: string | null) => {
 					body: JSON.stringify({
 						text: options.text,
 						...options.ai,
+						isOpenRouter: options.isOpenRouter,
 						chatId: chatId === null ? undefined : (chatId ?? wantedChatId),
 					}),
 				});
@@ -127,6 +129,7 @@ export const useChat = (id?: string | null) => {
 			text: string;
 			ai: Agent;
 			chatId?: string | null;
+			isOpenRouter?: boolean;
 		}) => {
 			try {
 				if (!user) throw new Error('User not authenticated');
@@ -144,6 +147,7 @@ export const useChat = (id?: string | null) => {
 					body: JSON.stringify({
 						text: options.text,
 						...options.ai,
+						isOpenRouter: options.isOpenRouter,
 						chatId: chatId === null ? undefined : (chatId ?? wantedChatId),
 					}),
 				});

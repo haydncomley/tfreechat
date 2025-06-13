@@ -59,7 +59,7 @@ export const Feed = () => {
 									message.reply?.image ? message.prompt : message.reply.text
 								}
 								image={message.reply?.image}
-								date={message.reply?.createdAt.toDate()}
+								date={message.reply?.createdAt?.toDate()}
 								error={message.reply?.error ?? undefined}
 								meta={model?.label ? [model?.label] : undefined}
 							/>
