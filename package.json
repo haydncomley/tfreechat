@@ -16,10 +16,14 @@
 		"@tanstack/react-query": "^5.80.6",
 		"classnames": "^2.5.1",
 		"firebase": "^11.9.1",
+		"lucide-react": "^0.515.0",
+		"luxon": "^3.6.1",
 		"next": "15.3.3",
 		"nuqs": "^2.4.3",
 		"react": "^19.0.0",
-		"react-dom": "^19.0.0"
+		"react-dom": "^19.0.0",
+		"react-markdown": "^10.1.0",
+		"react-syntax-highlighter": "^15.6.1"
 	},
 	"devDependencies": {
 		"@eslint/eslintrc": "^3",
@@ -27,6 +31,7 @@
 		"@types/node": "^20",
 		"@types/react": "^19",
 		"@types/react-dom": "^19",
+		"@types/react-syntax-highlighter": "^15.5.13",
 		"eslint": "^9.28.0",
 		"eslint-config-next": "15.3.3",
 		"eslint-config-prettier": "^10.1.5",

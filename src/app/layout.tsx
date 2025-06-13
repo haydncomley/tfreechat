@@ -1,17 +1,22 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Roboto_Flex, Roboto_Mono, Roboto_Slab } from 'next/font/google';
 import { Suspense } from 'react';
 
 import { Providers } from '~/components';
 import './globals.css';
 
-const geistSans = Geist({
-	variable: '--font-geist-sans',
+const robotoFlex = Roboto_Flex({
+	variable: '--font-roboto-flex',
 	subsets: ['latin'],
 });
 
-const geistMono = Geist_Mono({
-	variable: '--font-geist-mono',
+const robotoMono = Roboto_Mono({
+	variable: '--font-roboto-mono',
+	subsets: ['latin'],
+});
+
+const robotoSlab = Roboto_Slab({
+	variable: '--font-roboto-slab',
 	subsets: ['latin'],
 });
 
@@ -29,7 +34,7 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<body
-				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+				className={`${robotoFlex.variable} ${robotoMono.variable} ${robotoSlab.variable} antialiased`}
 			>
 				<Providers>
 					<Suspense>{children}</Suspense>

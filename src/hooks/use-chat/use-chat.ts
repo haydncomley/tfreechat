@@ -29,7 +29,7 @@ export const useChat = (id?: string | null) => {
 	const {
 		mutateAsync: sendMessage,
 		isPending: isSendingMessage,
-		error,
+		error: textError,
 	} = useMutation({
 		mutationKey: ['sendMessage'],
 		mutationFn: async (options: {
@@ -117,6 +117,59 @@ export const useChat = (id?: string | null) => {
 		},
 	});
 
+	const {
+		mutateAsync: createImage,
+		isPending: isCreatingImage,
+		error: imageError,
+	} = useMutation({
+		mutationKey: ['createImage'],
+		mutationFn: async (options: {
+			text: string;
+			ai: Agent;
+			chatId?: string | null;
+		}) => {
+			try {
+				if (!user) throw new Error('User not authenticated');
+				queryClient.setQueryData(['responseStreamIsLoading'], true);
+
+				const token = await user.getIdToken();
+				const functionsUrl = `https://us-central1-${process.env.NEXT_PUBLIC_FB_PROJECT_ID}.cloudfunctions.net`;
+
+				const response = await fetch(`${functionsUrl}/aiImage`, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${token}`,
+					},
+					body: JSON.stringify({
+						text: options.text,
+						...options.ai,
+						chatId: chatId === null ? undefined : (chatId ?? wantedChatId),
+					}),
+				});
+
+				if (!response.ok) {
+					if (response.status === 401) {
+						throw new Error('Authentication failed. Please sign in again.');
+					}
+					throw new Error(`HTTP error! status: ${response.status}`);
+				}
+
+				const data = await response.json();
+				console.log(data);
+			} catch (err) {
+				throw new Error(
+					err instanceof Error ? err.message : 'An error occurred',
+				);
+			} finally {
+				queryClient.setQueryData(['responseStreamIsLoading'], false);
+			}
+		},
+		onMutate: () => {
+			queryClient.setQueryData(['responseStream'], '');
+		},
+	});
+
 	const messages = useCollectionSnapshot<ChatMessage>(
 		user?.uid && wantedChatId
 			? `users/${user.uid}/chats/${wantedChatId}/messages`
@@ -127,9 +180,11 @@ export const useChat = (id?: string | null) => {
 	return {
 		sendMessage,
 		isSendingMessage,
+		createImage,
+		isCreatingImage,
 		responseStream,
 		isResponseStreaming,
 		messages: wantedChatId ? messages : [],
-		error,
+		error: textError ?? imageError,
 	};
 };

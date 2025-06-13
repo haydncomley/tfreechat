@@ -1,13 +1,13 @@
 'use client';
 
 import { parseAsString, useQueryState } from 'nuqs';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { AI_PROVIDERS } from '~/api';
 import { useChat, useChatHistory } from '~/hooks/use-chat';
 
 export const ActionBar = () => {
-	const { sendMessage } = useChat();
+	const { sendMessage, createImage } = useChat();
 	const { currentChat } = useChatHistory();
 
 	// State
@@ -30,13 +30,36 @@ export const ActionBar = () => {
 		),
 	);
 
+	const actionType = useMemo(() => {
+		const currentModel = AI_PROVIDERS.find(
+			(p) => p.id === provider,
+		)?.models.find((m) => m.id === model);
+
+		if (currentModel?.capabilities?.imageGeneration) {
+			return 'image';
+		}
+
+		return 'text';
+	}, [model, provider]);
+
 	const handleSendMessage = () => {
-		sendMessage({
-			text: prompt,
-			ai: { secret: apiKey, model, provider },
-			chatId: currentChat?.id,
-		});
-		if (currentChat?.id) setPrompt('');
+		switch (actionType) {
+			case 'image':
+				createImage({
+					text: prompt,
+					ai: { secret: apiKey, model, provider },
+					chatId: currentChat?.id,
+				});
+				break;
+			case 'text':
+				sendMessage({
+					text: prompt,
+					ai: { secret: apiKey, model, provider },
+					chatId: currentChat?.id,
+				});
+				if (currentChat?.id) setPrompt('');
+				break;
+		}
 	};
 
 	return (
@@ -95,7 +118,7 @@ export const ActionBar = () => {
 					className="rounded-lg border p-2"
 					onClick={handleSendMessage}
 				>
-					Send
+					{`Generate ${actionType}`}
 				</button>
 			</div>
 		</div>

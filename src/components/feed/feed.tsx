@@ -1,14 +1,42 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
+
 import { AI_PROVIDERS } from '~/api';
 import { useChat } from '~/hooks/use-chat';
 
+import { FeedMessage } from './lib/feed-message';
+
 export const Feed = () => {
 	const { messages, isResponseStreaming, error, responseStream } = useChat();
+	const feedRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		if (!feedRef.current) return;
+
+		const mutationObserver = new MutationObserver((mutations) => {
+			mutations.forEach(() => {
+				feedRef.current?.scrollTo({
+					top: feedRef.current.scrollHeight,
+				});
+			});
+		});
+
+		mutationObserver.observe(feedRef.current, {
+			childList: true,
+			characterData: true,
+			subtree: true,
+		});
+
+		return () => mutationObserver.disconnect();
+	}, []);
 
 	return (
-		<div className="mx-auto flex w-full max-w-xl grow-1 flex-col gap-2 overflow-auto">
-			{messages.map((message) => {
+		<div
+			className="mx-auto flex w-full max-w-[60rem] grow-1 flex-col gap-2 overflow-auto"
+			ref={feedRef}
+		>
+			{messages.map((message, index) => {
 				const model = AI_PROVIDERS.find(
 					(p) => p.id === message.ai.provider,
 				)?.models.find((m) => m.id === message.ai.model);
@@ -16,37 +44,40 @@ export const Feed = () => {
 				return (
 					<div
 						key={message.id}
-						className="flex w-full flex-col gap-2 p-4"
+						className="flex w-full flex-col gap-2 p-2"
 					>
-						<div className="flex max-w-2/3 flex-col gap-2 self-end rounded-2xl rounded-br-md bg-blue-200 p-2">
-							<p>{message.prompt}</p>
-						</div>
-						<p className="self-end text-sm text-gray-500">
-							{message.createdAt.toDate().toLocaleString()}
-						</p>
+						<FeedMessage
+							sender="user"
+							text={message.prompt}
+							date={message.createdAt.toDate()}
+						/>
 
 						{message.reply ? (
-							<>
-								<div className="flex max-w-2/3 flex-col gap-2 self-start rounded-2xl rounded-bl-md bg-gray-200 p-2">
-									<p>{message.reply?.text}</p>
-								</div>
-								<p className="self-start text-sm text-gray-500">
-									{message.reply.createdAt.toDate().toLocaleString()}
-									{model?.label}
-								</p>
-							</>
+							<FeedMessage
+								sender="ai"
+								text={
+									message.reply?.image ? message.prompt : message.reply.text
+								}
+								image={message.reply?.image}
+								date={message.reply?.createdAt.toDate()}
+								error={message.reply?.error ?? undefined}
+								meta={model?.label ? [model?.label] : undefined}
+							/>
+						) : null}
+
+						{index === messages.length - 1 &&
+						isResponseStreaming &&
+						!message.reply ? (
+							<FeedMessage
+								isDynamic
+								text={responseStream || 'Thinking...'}
+								sender="ai"
+								meta={!!responseStream ? ['Streaming...'] : undefined}
+							/>
 						) : null}
 					</div>
 				);
 			})}
-
-			{isResponseStreaming && !messages.at(-1)?.reply ? (
-				<div className="flex w-full flex-col gap-2 p-4">
-					<div className="flex max-w-2/3 flex-col gap-2 self-start rounded-2xl rounded-bl-md bg-gray-200 p-2">
-						<p>{responseStream || 'Thinking...'}</p>
-					</div>
-				</div>
-			) : null}
 
 			{error && <p className="text-red-500">Error: {error.message}</p>}
 		</div>

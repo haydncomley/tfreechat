@@ -4,6 +4,7 @@ import classNames from 'classnames';
 
 import { useAuth } from '~/hooks/use-auth';
 import { useChatHistory } from '~/hooks/use-chat';
+import { FormatDateSince } from '~/utils/formatting.utils';
 
 export const Sidebar = () => {
 	const { user, signIn, signOut } = useAuth();
@@ -22,7 +23,7 @@ export const Sidebar = () => {
 					>
 						<p className="font-bold">{chat.summary ?? 'New Chat'}</p>
 						<p className="text-sm">
-							{chat.createdAt.toDate().toLocaleString()}
+							{FormatDateSince(chat.createdAt.toDate())}
 						</p>
 					</div>
 				))}
