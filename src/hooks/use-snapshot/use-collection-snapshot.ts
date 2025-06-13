@@ -1,6 +1,9 @@
+'use client';
+
 import type { QueryConstraint } from 'firebase/firestore';
 import { collection, onSnapshot, query } from 'firebase/firestore';
 import { useState, useEffect } from 'react';
+
 import { firestore } from '~/utils/firebase.utils';
 
 const listeners = new Map();

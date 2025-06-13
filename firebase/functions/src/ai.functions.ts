@@ -3,20 +3,12 @@ import { initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 
 import { streamText } from 'ai';
-import { createOpenAI } from '@ai-sdk/openai';
-import { Agent, ChatMessage } from '~/types';
+import { Agent, ChatMessage } from './lib/types';
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
+import { createAgent } from './lib/utilities';
 
-// Initialize Firebase Admin
 const app = initializeApp();
 const firestore = getFirestore(app, 'tfreechat');
-
-const createModel = (key: string, provider: string) => {
-	if (provider === 'openai') {
-		return createOpenAI({ apiKey: key });
-	}
-	throw new HttpsError('invalid-argument', 'Provider is required');
-};
 
 export const aiText = onRequest(async (req, res) => {
 	res.set('Access-Control-Allow-Origin', '*');
@@ -63,13 +55,10 @@ export const aiText = onRequest(async (req, res) => {
 			throw new HttpsError('invalid-argument', 'Provider is required');
 		}
 
-		console.log('## All Data Seems Okay, User', uid);
-
 		let wantedChatId = chatId ?? '';
 		const userRef = firestore.collection('users').doc(uid);
 
 		if (!wantedChatId) {
-			console.log('## No chatId, creating new one');
 			const chatRef = userRef.collection('chats').doc();
 			await chatRef.set({
 				id: chatRef.id,
@@ -79,18 +68,11 @@ export const aiText = onRequest(async (req, res) => {
 			wantedChatId = chatRef.id;
 		}
 
-		console.log('## Getting messages for chatId', wantedChatId);
-
 		const chatRef = userRef.collection('chats').doc(wantedChatId!);
 		const messagesRef = chatRef.collection('messages');
 		const messagesDoc = await messagesRef.orderBy('createdAt', 'asc').get();
 		const messagesData = messagesDoc.docs.filter(doc => doc.exists).map(doc => doc.data() as ChatMessage) ?? [];
 
-		console.log('## Valid messages', messagesData);
-		
-		const aiModel = createModel(secret, provider);
-
-		console.log('## Creating new message in', `users/${uid}/chats/${wantedChatId}/messages`);
 		const newMessageRef = messagesRef.doc();
 		await newMessageRef.set({
 			id: newMessageRef.id,
@@ -113,14 +95,12 @@ export const aiText = onRequest(async (req, res) => {
 			createdAt: message.reply.createdAt.toDate(),
 		}] : [])]).flat();
 
-		console.log('## Messages', messages.length);
-
 		res.setHeader('Content-Type', 'text/event-stream')
 		res.setHeader('Cache-Control', 'no-cache')
 		res.setHeader('Connection', 'keep-alive')
 
 		const { textStream } = streamText({
-			model: aiModel(model),
+			model: createAgent(secret, provider, model),
 			...(messages.length ? {
 				messages: [
 					...messages,
@@ -136,7 +116,6 @@ export const aiText = onRequest(async (req, res) => {
 		});
 
 		let fullText = '';
-		console.log('## Streaming text');
 
 		for await (const textPart of textStream) {
 			fullText += textPart;
@@ -152,8 +131,6 @@ export const aiText = onRequest(async (req, res) => {
 				text: fullText,
 			},
 		});
-
-		console.log('## Done');
 
 		res.end()
 	  } catch (err) {

@@ -20,7 +20,7 @@
 		],
 		"paths": {
 			"~/*": ["./src/*"],
-			"~/types": ["./firebase/functions/src/types"]
+			"~/api": ["./firebase/functions/src/lib/index"]
 		}
 	},
 	"include": [

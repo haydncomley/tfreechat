@@ -1,4 +1,20 @@
+import { AnthropicProvider } from '@ai-sdk/anthropic';
+import type { OpenAIProvider } from '@ai-sdk/openai';
 import { Timestamp } from 'firebase/firestore';
+
+type OpenAiModels = Exclude<Parameters<OpenAIProvider>[0], object>;
+type AnthropicModels = Exclude<Parameters<AnthropicProvider>[0], object>;
+
+export interface Provider {
+	id: 'openai' | 'anthropic';
+	label: string;
+	models: Model[];
+}
+
+export interface Model {
+	id: OpenAiModels | AnthropicModels;
+	label: string;
+}
 
 export interface Agent {
 	secret: string;

@@ -1,44 +1,59 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { auth } from '~/utils/firebase.utils';
-import { Agent } from '~/types';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { orderBy } from 'firebase/firestore';
+import { useQueryState } from 'nuqs';
 
-export const useChat = () => {
-	const [response, setResponse] = useState<string>('');
-	const [isLoading, setIsLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
+import { Agent, ChatMessage } from '~/api';
 
-	const chat = useCallback(
-		async (options: { text: string; ai: Agent; chatId?: string }) => {
-			setIsLoading(true);
-			setError(null);
-			setResponse(''); // Clear previous response
+import { useAuth } from '../use-auth';
+import { useCollectionSnapshot } from '../use-snapshot';
 
+export const useChat = (id?: string | null) => {
+	const { user } = useAuth();
+	const queryClient = useQueryClient();
+
+	const [chatId] = useQueryState('chat');
+	const wantedChatId = id ?? chatId;
+
+	const { data: responseStream } = useQuery({
+		queryKey: ['responseStream'],
+		queryFn: () => '',
+	});
+
+	const { data: isResponseStreaming } = useQuery({
+		queryKey: ['responseStreamIsLoading'],
+		queryFn: () => false,
+	});
+
+	const {
+		mutateAsync: sendMessage,
+		isPending: isSendingMessage,
+		error,
+	} = useMutation({
+		mutationKey: ['sendMessage'],
+		mutationFn: async (options: {
+			text: string;
+			ai: Agent;
+			chatId?: string | null;
+		}) => {
 			try {
-				// Get the current user's ID token
-				const user = auth.currentUser;
-				if (!user) {
-					throw new Error('User not authenticated');
-				}
+				if (!user) throw new Error('User not authenticated');
+				queryClient.setQueryData(['responseStreamIsLoading'], true);
 
-				const idToken = await user.getIdToken();
-
-				// Get the Firebase Functions URL
-				const functionsUrl =
-					process.env.NEXT_PUBLIC_FIREBASE_FUNCTIONS_URL ||
-					`https://us-central1-${process.env.NEXT_PUBLIC_FB_PROJECT_ID}.cloudfunctions.net`;
+				const token = await user.getIdToken();
+				const functionsUrl = `https://us-central1-${process.env.NEXT_PUBLIC_FB_PROJECT_ID}.cloudfunctions.net`;
 
 				const response = await fetch(`${functionsUrl}/aiText`, {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
-						Authorization: `Bearer ${idToken}`,
+						Authorization: `Bearer ${token}`,
 					},
 					body: JSON.stringify({
 						text: options.text,
-						...(options.chatId && { chatId: options.chatId }),
 						...options.ai,
+						chatId: chatId === null ? undefined : (chatId ?? wantedChatId),
 					}),
 				});
 
@@ -52,9 +67,7 @@ export const useChat = () => {
 				const reader = response.body?.getReader();
 				const decoder = new TextDecoder();
 
-				if (!reader) {
-					throw new Error('No response body');
-				}
+				if (!reader) throw new Error('No response body');
 
 				let buffer = '';
 				let accumulatedText = '';
@@ -67,7 +80,6 @@ export const useChat = () => {
 					buffer += decoder.decode(value, { stream: true });
 					const lines = buffer.split('\n');
 
-					// Keep the last line in buffer if it's incomplete
 					buffer = lines.pop() || '';
 
 					for (const line of lines) {
@@ -82,7 +94,7 @@ export const useChat = () => {
 								const parsed = JSON.parse(data);
 								if (parsed.text) {
 									accumulatedText += parsed.text;
-									setResponse(accumulatedText);
+									queryClient.setQueryData(['responseStream'], accumulatedText);
 								}
 							} catch (e) {
 								console.error('Failed to parse SSE data:', e);
@@ -93,22 +105,31 @@ export const useChat = () => {
 
 				return accumulatedText;
 			} catch (err) {
-				const errorMessage =
-					err instanceof Error ? err.message : 'An error occurred';
-				setError(errorMessage);
-				console.error('Chat error:', err);
-				throw err;
+				throw new Error(
+					err instanceof Error ? err.message : 'An error occurred',
+				);
 			} finally {
-				setIsLoading(false);
+				queryClient.setQueryData(['responseStreamIsLoading'], false);
 			}
 		},
-		[],
+		onMutate: () => {
+			queryClient.setQueryData(['responseStream'], '');
+		},
+	});
+
+	const messages = useCollectionSnapshot<ChatMessage>(
+		user?.uid && wantedChatId
+			? `users/${user.uid}/chats/${wantedChatId}/messages`
+			: undefined,
+		orderBy('createdAt', 'asc'),
 	);
 
 	return {
-		chat,
-		response,
-		isLoading,
+		sendMessage,
+		isSendingMessage,
+		responseStream,
+		isResponseStreaming,
+		messages: wantedChatId ? messages : [],
 		error,
 	};
 };

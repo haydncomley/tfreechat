@@ -11,7 +11,7 @@
 		"target": "es2017",
 		"baseUrl": "./",
 		"paths": {
-			"~/types": ["./src/types"]
+			"~/api": ["./src/lib/index"]
 		}
 	},
 	"compileOnSave": true,

@@ -1,3 +1,5 @@
+'use client';
+
 import { useMutation } from '@tanstack/react-query';
 import {
 	signOut as firebaseSignOut,
@@ -7,6 +9,7 @@ import {
 	GoogleAuthProvider,
 } from 'firebase/auth';
 import { useState, useEffect } from 'react';
+
 import { auth } from '~/utils/firebase.utils';
 
 export const useAuth = () => {

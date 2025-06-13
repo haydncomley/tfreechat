@@ -18,6 +18,28 @@ const eslintConfig = [
 		},
 		rules: {
 			'prettier/prettier': 'error',
+			'import/newline-after-import': ['error', { count: 1 }],
+			'import/order': [
+				'error',
+				{
+					groups: [
+						['builtin', 'external'],
+						'internal',
+						['parent', 'sibling', 'index'],
+					],
+					pathGroups: [
+						{
+							pattern: '~/**',
+							group: 'internal',
+						},
+					],
+					'newlines-between': 'always',
+					alphabetize: {
+						order: 'asc',
+						caseInsensitive: true,
+					},
+				},
+			],
 		},
 	},
 	...compat.extends('next/core-web-vitals', 'next/typescript'),
