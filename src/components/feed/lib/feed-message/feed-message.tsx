@@ -7,6 +7,7 @@ import { PrismAsync } from 'react-syntax-highlighter';
 // TODO: Choose a theme for the code blocks?
 import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
+import { glass } from '~/utils';
 import { FormatDateSince } from '~/utils/formatting.utils';
 
 export interface FeedMessageProps {
@@ -103,8 +104,9 @@ export const FeedMessage = ({
 					{
 						'px-4 py-2.5': !isImage || error,
 						'min-h-[10rem] min-w-[10rem]': isImage && !error,
-						'bg-accent text-accent-foreground rounded-br-sm': sender === 'user',
-						'bg-foreground text-background rounded-bl-sm': sender === 'ai',
+						[glass("fill")]: sender === 'user',
+						'rounded-br-sm': sender === 'user',
+						'bg-background text-foreground rounded-bl-sm': sender === 'ai',
 						'!bg-red-500 text-white': !!error,
 						'!bg-transparent': hasImageLoaded,
 					},
@@ -113,7 +115,7 @@ export const FeedMessage = ({
 				{renderContent}
 			</div>
 
-			<div className="flex gap-2 text-sm text-gray-500">
+			<div className="flex gap-2 text-sm text-accent-foreground">
 				{messageDetails?.map((value, index) => {
 					return (
 						<React.Fragment key={value}>

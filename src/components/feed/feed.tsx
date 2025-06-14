@@ -6,6 +6,7 @@ import { AI_PROVIDERS } from '~/api';
 import { useChat } from '~/hooks/use-chat';
 
 import { FeedMessage } from './lib/feed-message';
+import { glass } from '~/utils';
 
 export const Feed = () => {
 	const { messages, isResponseStreaming, error, responseStream } = useChat();
@@ -33,7 +34,7 @@ export const Feed = () => {
 
 	return (
 		<div
-			className="mx-auto flex w-full max-w-[60rem] grow-1 flex-col gap-2 overflow-auto"
+			className={`mx-auto flex w-full grow-1 flex-col gap-2 overflow-auto ${glass()} rounded-bl-2xl`}
 			ref={feedRef}
 		>
 			{messages.map((message, index) => {

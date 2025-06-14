@@ -4,15 +4,16 @@ import classNames from 'classnames';
 
 import { useAuth } from '~/hooks/use-auth';
 import { useChatHistory } from '~/hooks/use-chat';
-import { FormatDateSince } from '~/utils/formatting.utils';
+import { FormatDateSince, glass } from '~/utils';
+import { Button } from '~/components';
 
 export const Sidebar = () => {
 	const { user, signIn, signOut } = useAuth();
 	const { chats, currentChat, setCurrentChat } = useChatHistory();
 
 	return (
-		<aside className="flex h-full w-xs flex-col border-r">
-			<div className="flex grow-1 flex-col overflow-auto">
+		<aside className={`flex h-full w-xs flex-col ${glass()}`}>
+			<div className="flex grow-1 flex-col overflow-auto p-4">
 				{chats.map((chat) => (
 					<div
 						key={chat.id}
@@ -28,14 +29,16 @@ export const Sidebar = () => {
 					</div>
 				))}
 
-				<button
-					className="rounded-lg border p-2"
+				<Button
+					variant="secondary"
+					icon="Plus"
+					iconPosition="left"
 					onClick={() => setCurrentChat(null)}
 				>
 					New Chat
-				</button>
+				</Button>
 			</div>
-			<div className="border-t p-4">
+			<div className="p-4">
 				{user ? <p>Hello {user.displayName}</p> : <p>No user</p>}
 
 				{user ? (

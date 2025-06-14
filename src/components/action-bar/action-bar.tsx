@@ -5,6 +5,8 @@ import { useMemo, useState } from 'react';
 
 import { AI_PROVIDERS } from '~/api';
 import { useChat, useChatHistory } from '~/hooks/use-chat';
+import { Button, Input } from '~/components';
+import { glass } from '~/utils';
 
 export const ActionBar = () => {
 	const { sendMessage, createImage } = useChat();
@@ -66,7 +68,7 @@ export const ActionBar = () => {
 	};
 
 	return (
-		<div className="flex w-full border-t">
+		<div className={`flex w-full ${glass()} rounded-tl-2xl`}>
 			<input
 				type="hidden"
 				placeholder="API Key"
@@ -118,10 +120,10 @@ export const ActionBar = () => {
 				</select>
 			</div>
 
-			<div className="flex grow-1 items-center gap-2 p-4">
-				<textarea
-					placeholder="Message..."
-					className="grow-1 resize-none border p-2"
+			<div className="flex flex-1 items-center gap-2 p-4">
+				<Input
+					className="flex-1 self-center"
+					placeholder="Ask me something..."
 					value={prompt}
 					onChange={(e) => setPrompt(e.target.value)}
 					onKeyDown={(e) => {
@@ -131,12 +133,11 @@ export const ActionBar = () => {
 						}
 					}}
 				/>
-				<button
-					className="rounded-lg border p-2"
+				<Button
+					size="icon"
+					icon="SendHorizontal"
 					onClick={handleSendMessage}
-				>
-					{`Generate ${actionType}`}
-				</button>
+				/>
 			</div>
 		</div>
 	);
