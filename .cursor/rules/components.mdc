@@ -1,0 +1,78 @@
+---
+description: 
+globs: src/components/**
+alwaysApply: false
+---
+# Directory Structure
+src/components/
+├── component-name/
+│   ├── index.ts(x)          # Re-export file
+│   └── component-name.tsx   # Main component file
+└── index.ts                 # Global component exports
+
+# Component File Structure (component-name.tsx)
+## 1. Imports (in this order):
+import * as React from 'react';
+import { cva, type VariantProps } from 'class-variance-authority';
+import cn from 'classnames';
+// Other specific imports...
+## 2. Variant Definitions using CVA:
+const componentVariants = cva(
+  "base-classes-here", // Base styles
+  {
+    variants: {
+      variant: {
+        default: "default-variant-classes",
+        primary: "primary-variant-classes",
+        secondary: "secondary-variant-classes",
+      },
+      size: {
+        default: "default-size-classes",
+        sm: "small-size-classes",
+        lg: "large-size-classes",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+);
+## 3. TypeScript Interface:
+export interface ComponentNameProps
+  extends React.HTMLAttributes<HTMLDivElement>, // or appropriate HTML element
+    VariantProps<typeof componentVariants> {
+  // Additional custom props here
+}
+## 4. Component Implementation:
+const ComponentName = React.forwardRef<HTMLDivElement, ComponentNameProps>(
+  ({ className, variant, size, ...props }, ref) => {
+    return (
+      <div
+        className={classNames(componentVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      >
+        {/* Component content */}
+      </div>
+    );
+  }
+);
+
+ComponentName.displayName = "ComponentName";
+
+# Index File (index.ts)
+export * from './component-name';
+
+# Global Export (src/components/index.ts)
+Add your component to the main index:
+export * from './component-name';
+
+# Key Patterns to Follow:
+Use Theme Variables - Leverage CSS custom properties from @theme in globals.css
+Glass Morphism Support - Include glass effect variants using theme shadow/backdrop variables
+Accessibility - Include proper ARIA attributes and focus states
+Variant System - Use CVA for type-safe variant management
+Ref Forwarding - Always use React.forwardRef for component composition
+Consistent Naming - Use PascalCase for components, camelCase for variants
+Class Merging - Always use classNames() utility for className composition
