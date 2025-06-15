@@ -3,6 +3,7 @@ export * from './providers';
 
 // Components
 export * from './button';
+export * from './conversation-item';
 export * from './input';
 export * from './toggle-button';
 export * from './sidebar';

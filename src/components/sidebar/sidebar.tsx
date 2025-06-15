@@ -1,11 +1,9 @@
 'use client';
 
-import classNames from 'classnames';
-
 import { useAuth } from '~/hooks/use-auth';
 import { useChatHistory } from '~/hooks/use-chat';
 import { FormatDateSince, glass } from '~/utils';
-import { Button } from '~/components';
+import { Button, ConversationItem } from '~/components';
 
 export const Sidebar = () => {
 	const { user, signIn, signOut } = useAuth();
@@ -13,20 +11,16 @@ export const Sidebar = () => {
 
 	return (
 		<aside className={`flex h-full w-xs flex-col ${glass()}`}>
-			<div className="flex grow-1 flex-col overflow-auto p-4">
+			<div className="flex grow-1 flex-col overflow-auto p-2 gap-2">
 				{chats.map((chat) => (
-					<div
+					<ConversationItem
 						key={chat.id}
-						className={classNames('flex cursor-pointer flex-col p-4', {
-							'bg-red-400': currentChat?.id === chat.id,
-						})}
-						onClick={() => setCurrentChat(chat)}
-					>
-						<p className="font-bold">{chat.summary ?? 'New Chat'}</p>
-						<p className="text-sm">
-							{FormatDateSince(chat.createdAt.toDate())}
-						</p>
-					</div>
+						content={chat.summary ?? 'New Chat'}
+						time={FormatDateSince(chat.createdAt.toDate())}
+						chatId={chat.id}
+						selected={currentChat?.id === chat.id}
+						onChatSelect={setCurrentChat}
+					/>
 				))}
 
 				<Button

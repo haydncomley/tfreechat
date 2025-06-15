@@ -1,16 +1,31 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 import classNames from 'classnames';
 
+// Define base glass container styles
+const baseStyles = "relative overflow-hidden outline outline-1 outline-offset-[-1px] outline-foreground/10 transition-all duration-200";
+
+// Define glass effect styles
+const glassStyles = {
+  default: "bg-background-glass shadow-glass-light shadow-glass-dark backdrop-blur-md",
+  fill: "bg-background/60 backdrop-blur-[6px]",
+  accent: "bg-accent-quaternary/80 shadow-glass-light-lg shadow-glass-dark-lg backdrop-blur-[6px]",
+  subtle: "bg-background-glass/50 backdrop-blur-sm",
+} as const;
+
+// Helper to convert styles to hover-only styles
+const toHoverStyles = (styles: string) => 
+  styles.split(' ').map(style => `hover:${style}`).join(' ');
+
 // Main glass effect utility
 export const glassVariants = cva(
-  "relative overflow-hidden transition-all duration-200 outline outline-1 outline-offset-[-1px] outline-foreground/10",
+  "", // No base styles - all applied conditionally
   {
     variants: {
       variant: {
-        default: "bg-background-glass shadow-glass-light shadow-glass-dark backdrop-blur-md",
-        fill: "bg-background/60 backdrop-blur-[6px]",
-        accent: "bg-accent-quaternary/80 shadow-glass-light-lg shadow-glass-dark-lg backdrop-blur-[6px]",
-        subtle: "bg-background-glass/50 backdrop-blur-sm",
+        default: "",
+        fill: "",
+        accent: "",
+        subtle: "",
       },
       hover: {
         true: "",
@@ -18,30 +33,17 @@ export const glassVariants = cva(
       },
     },
     compoundVariants: [
-      // Default variant hover states
-      {
-        variant: "default",
-        hover: true,
-        class: "hover:bg-background-glass/80 hover:backdrop-blur-lg hover:shadow-glass-light-lg hover:shadow-glass-dark-lg",
-      },
-      // Fill variant hover states
-      {
-        variant: "fill",
-        hover: true,
-        class: "hover:bg-background/80 hover:backdrop-blur-md",
-      },
-      // Accent variant hover states
-      {
-        variant: "accent",
-        hover: true,
-        class: "hover:bg-accent-quaternary/90 hover:backdrop-blur-lg",
-      },
-      // Subtle variant hover states
-      {
-        variant: "subtle",
-        hover: true,
-        class: "hover:bg-background-glass/70 hover:backdrop-blur-md",
-      },
+      // Always applied styles (hover: false) - base + glass
+      { variant: "default", hover: false, class: classNames(baseStyles, glassStyles.default) },
+      { variant: "fill", hover: false, class: classNames(baseStyles, glassStyles.fill) },
+      { variant: "accent", hover: false, class: classNames(baseStyles, glassStyles.accent) },
+      { variant: "subtle", hover: false, class: classNames(baseStyles, glassStyles.subtle) },
+      
+      // Hover-only styles (hover: true) - everything on hover
+      { variant: "default", hover: true, class: classNames(toHoverStyles(baseStyles), toHoverStyles(glassStyles.default)) },
+      { variant: "fill", hover: true, class: classNames(toHoverStyles(baseStyles), toHoverStyles(glassStyles.fill)) },
+      { variant: "accent", hover: true, class: classNames(toHoverStyles(baseStyles), toHoverStyles(glassStyles.accent)) },
+      { variant: "subtle", hover: true, class: classNames(toHoverStyles(baseStyles), toHoverStyles(glassStyles.subtle)) },
     ],
     defaultVariants: {
       variant: "default",
