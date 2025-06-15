@@ -3,7 +3,7 @@ import classNames from 'classnames';
 
 // Main glass effect utility
 export const glassVariants = cva(
-  "relative overflow-hidden transition-all duration-200",
+  "relative overflow-hidden transition-all duration-200 outline outline-1 outline-offset-[-1px] outline-foreground/10",
   {
     variants: {
       variant: {

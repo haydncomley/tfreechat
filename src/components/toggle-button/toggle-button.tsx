@@ -7,15 +7,15 @@ import { icons } from 'lucide-react';
 import type { IconName } from '~/components';
 
 const toggleButtonVariants = cva(
-  "px-3.5 py-2 rounded-full inline-flex justify-center items-center gap-1 overflow-hidden transition-all cursor-pointer",
+  "px-3.5 py-2 rounded-full inline-flex justify-center items-center gap-1 overflow-hidden transition-all cursor-pointer transition-all",
   {
     variants: {
       variant: {
         default: "",
       },
       state: {
-        inactive: cn(glass("subtle", true), "text-accent-foreground"),
-        active: cn(glass("fill", true), "text-accent-foreground"),
+        inactive: glass("default"),
+        active: cn(glass("accent"), "text-accent-foreground"),
       },
     },
     defaultVariants: {

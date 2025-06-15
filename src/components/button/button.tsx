@@ -1,5 +1,4 @@
 import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 import { icons } from "lucide-react"
 import type { IconName } from "~/components"
@@ -8,7 +7,7 @@ import classNames from "classnames"
 import { glass } from "~/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer",
   {
     variants: {
       variant: {
@@ -29,7 +28,6 @@ const buttonVariants = cva(
 
 type BaseButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & 
   VariantProps<typeof buttonVariants> & {
-    asChild?: boolean
   }
 
 type DefaultButtonProps = BaseButtonProps & {
@@ -49,11 +47,9 @@ type IconButtonProps = BaseButtonProps & {
 export type ButtonProps = DefaultButtonProps | IconButtonProps
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, icon, iconPosition, children, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button"
-    
+  ({ className, variant, size, icon, iconPosition, children, ...props }, ref) => {
     return (
-      <Comp
+      <button
         className={classNames(buttonVariants({ variant, size, className }))}
         ref={ref}
         {...props}
@@ -71,7 +67,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             return <LucideIcon size={16} />
           })()
         ) : null}
-      </Comp>
+      </button>
     )
   }
 )
