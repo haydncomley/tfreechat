@@ -14,7 +14,7 @@ src/components/
 ## 1. Imports (in this order):
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { classNames } from '~/utils/classNames';
+import cn from 'classnames';
 // Other specific imports...
 ## 2. Variant Definitions using CVA:
 const componentVariants = cva(
