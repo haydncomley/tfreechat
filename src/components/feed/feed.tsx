@@ -4,9 +4,9 @@ import { useEffect, useRef } from 'react';
 
 import { AI_PROVIDERS } from '~/api';
 import { useChat } from '~/hooks/use-chat';
+import { glass } from '~/utils';
 
 import { FeedMessage } from './lib/feed-message';
-import { glass } from '~/utils';
 
 export const Feed = () => {
 	const { messages, isResponseStreaming, error, responseStream } = useChat();

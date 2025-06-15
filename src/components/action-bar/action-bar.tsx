@@ -4,8 +4,8 @@ import { parseAsString, useQueryState } from 'nuqs';
 import { useMemo, useState } from 'react';
 
 import { AI_PROVIDERS } from '~/api';
-import { useChat, useChatHistory } from '~/hooks/use-chat';
 import { Button, Input, ToggleButton } from '~/components';
+import { useChat, useChatHistory } from '~/hooks/use-chat';
 import { glass } from '~/utils';
 
 export const ActionBar = () => {

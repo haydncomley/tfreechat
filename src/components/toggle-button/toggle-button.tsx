@@ -1,10 +1,10 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-
 import cn from 'classnames';
-import { glass } from '~/utils';
 import { icons } from 'lucide-react';
+import * as React from 'react';
+
 import type { IconName } from '~/components';
+import { glass } from '~/utils';
 
 const toggleButtonVariants = cva(
 	'px-3.5 py-2 rounded-full inline-flex justify-center items-center gap-1 overflow-hidden transition-all cursor-pointer transition-all',
@@ -26,7 +26,10 @@ const toggleButtonVariants = cva(
 );
 
 export interface ToggleButtonProps
-	extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'>,
+	extends Omit<
+			React.ButtonHTMLAttributes<HTMLButtonElement>,
+			'onClick' | 'onToggle'
+		>,
 		VariantProps<typeof toggleButtonVariants> {
 	active?: boolean;
 	onToggle?: (active: boolean) => void;
@@ -39,7 +42,7 @@ const ToggleButton = React.forwardRef<HTMLButtonElement, ToggleButtonProps>(
 		{ className, variant, active = false, onToggle, children, icon, ...props },
 		ref,
 	) => {
-		const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+		const handleClick = () => {
 			onToggle?.(!active);
 		};
 

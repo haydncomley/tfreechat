@@ -1,9 +1,9 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { icons } from 'lucide-react';
-import type { IconName } from '~/components';
-
 import classNames from 'classnames';
+import { icons } from 'lucide-react';
+import * as React from 'react';
+
+import type { IconName } from '~/components';
 import { glass } from '~/utils';
 
 const buttonVariants = cva(

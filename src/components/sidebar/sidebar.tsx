@@ -1,9 +1,9 @@
 'use client';
 
+import { Button, ConversationItem } from '~/components';
 import { useAuth } from '~/hooks/use-auth';
 import { useChatHistory } from '~/hooks/use-chat';
 import { FormatDateSince, glass } from '~/utils';
-import { Button, ConversationItem } from '~/components';
 
 export const Sidebar = () => {
 	const { user, signIn, signOut } = useAuth();

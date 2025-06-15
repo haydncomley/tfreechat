@@ -1,7 +1,7 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-
 import classNames from 'classnames';
+import * as React from 'react';
+
 import { glass } from '~/utils';
 
 const conversationItemVariants = cva(
@@ -47,7 +47,7 @@ const ConversationItem = React.forwardRef<
 		},
 		ref,
 	) => {
-		const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+		const handleClick = () => {
 			onChatSelect?.(chatId);
 		};
 
