@@ -13,7 +13,8 @@
   --color-accent-secondary: #1B98E0;
   --color-accent-tertiary: #088531;
   --color-accent-quaternary: #DDA684;
-	--color-accent-foreground: #ffffff;
+	--color-accent-foreground: #FAFAFA;
+  --color-accent-foreground-secondary: #CEC9C9;
 	--color-background-glass: rgba(250, 250, 250, 0.1);
 	
 	/* Shadows */

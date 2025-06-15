@@ -2,6 +2,7 @@ import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 import { icons } from "lucide-react"
+import type { IconName } from "~/components"
 
 import classNames from "classnames"
 import { glass } from "~/utils"
@@ -25,8 +26,6 @@ const buttonVariants = cva(
     },
   }
 )
-
-export type IconName = keyof typeof icons
 
 type BaseButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & 
   VariantProps<typeof buttonVariants> & {

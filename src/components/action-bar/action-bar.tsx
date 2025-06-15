@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react';
 
 import { AI_PROVIDERS } from '~/api';
 import { useChat, useChatHistory } from '~/hooks/use-chat';
-import { Button, Input } from '~/components';
+import { Button, Input, ToggleButton } from '~/components';
 import { glass } from '~/utils';
 
 export const ActionBar = () => {
@@ -18,6 +18,8 @@ export const ActionBar = () => {
 		process.env.NEXT_PUBLIC_DEFAULT_KEY || '',
 	);
 	const [useOpenRouter, setUseOpenRouter] = useState(false);
+	const [webSearchActive, setWebSearchActive] = useState(false);
+	const [imageSearchActive, setImageSearchActive] = useState(false);
 
 	// Query State
 	const [model, setModel] = useQueryState(
@@ -120,24 +122,45 @@ export const ActionBar = () => {
 				</select>
 			</div>
 
-			<div className="flex flex-1 items-center gap-2 p-4">
-				<Input
-					className="flex-1 self-center"
-					placeholder="Ask me something..."
-					value={prompt}
-					onChange={(e) => setPrompt(e.target.value)}
-					onKeyDown={(e) => {
-						if (e.key === 'Enter' && !e.shiftKey) {
-							e.preventDefault();
-							handleSendMessage();
-						}
-					}}
-				/>
-				<Button
-					size="icon"
-					icon="SendHorizontal"
-					onClick={handleSendMessage}
-				/>
+			<div className="flex flex-1 flex-col gap-2 p-4">
+				{/* Toggle buttons row */}
+				<div className="flex items-center gap-2">
+					<ToggleButton
+						active={webSearchActive}
+						onToggle={setWebSearchActive}
+						icon="Globe"
+					>
+						Web Search
+					</ToggleButton>
+					<ToggleButton
+						active={imageSearchActive}
+						onToggle={setImageSearchActive}
+						icon="Image"
+					>
+						Create Image
+					</ToggleButton>
+				</div>
+				
+				{/* Input and send button row */}
+				<div className="flex items-center gap-2">
+					<Input
+						className="flex-1 self-center"
+						placeholder="Ask me something..."
+						value={prompt}
+						onChange={(e) => setPrompt(e.target.value)}
+						onKeyDown={(e) => {
+							if (e.key === 'Enter' && !e.shiftKey) {
+								e.preventDefault();
+								handleSendMessage();
+							}
+						}}
+					/>
+					<Button
+						size="icon"
+						icon="SendHorizontal"
+						onClick={handleSendMessage}
+					/>
+				</div>
 			</div>
 		</div>
 	);
