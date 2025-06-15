@@ -19,7 +19,7 @@ export const ActionBar = () => {
 	);
 	const [useOpenRouter, setUseOpenRouter] = useState(false);
 	const [webSearchActive, setWebSearchActive] = useState(false);
-	const [imageSearchActive, setImageSearchActive] = useState(false);
+	const [createImageActive, setCreateImageActive] = useState(false);
 
 	// Query State
 	const [model, setModel] = useQueryState(
@@ -133,8 +133,8 @@ export const ActionBar = () => {
 						Web Search
 					</ToggleButton>
 					<ToggleButton
-						active={imageSearchActive}
-						onToggle={setImageSearchActive}
+						active={createImageActive}
+						onToggle={setCreateImageActive}
 						icon="Image"
 					>
 						Create Image
