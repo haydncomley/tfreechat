@@ -3,7 +3,7 @@ import classNames from 'classnames';
 
 // Define base glass container styles
 const baseStyles =
-	'relative overflow-hidden outline outline-1 outline-offset-[-1px] outline-foreground/10 transition-all duration-200';
+	'relative outline outline-1 outline-offset-[-1px] outline-foreground/10 transition-all duration-200';
 
 // Define glass effect styles
 const glassStyles = {

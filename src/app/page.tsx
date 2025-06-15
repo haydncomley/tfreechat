@@ -9,9 +9,8 @@ export default function Home() {
 			style={{ backgroundImage: 'url(/background.png)' }}
 		>
 			<Sidebar />
-			<main className="flex h-full w-full flex-col gap-4">
+			<main className="flex h-full w-full flex-col md:pr-4">
 				<Feed />
-
 				<ActionBar />
 			</main>
 		</div>

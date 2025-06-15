@@ -4,7 +4,7 @@ import * as React from 'react';
 
 import { glass } from '~/utils';
 
-const conversationItemVariants = cva(
+export const conversationItemVariants = cva(
 	classNames('rounded-2xl py-2.5 px-3 flex flex-col cursor-pointer'),
 	{
 		variants: {
@@ -28,60 +28,48 @@ export interface ConversationItemProps
 	chatId: string;
 	selected?: boolean;
 	onChatSelect?: (chatId: string) => void;
+	ref?: React.RefObject<HTMLDivElement>;
 }
 
-const ConversationItem = React.forwardRef<
-	HTMLDivElement,
-	ConversationItemProps
->(
-	(
-		{
-			className,
-			content,
-			time,
-			branches,
-			chatId,
-			selected,
-			onChatSelect,
-			...props
-		},
-		ref,
-	) => {
-		const handleClick = () => {
-			onChatSelect?.(chatId);
-		};
+export const ConversationItem = ({
+	className,
+	content,
+	time,
+	branches,
+	chatId,
+	selected,
+	onChatSelect,
+	ref,
+	...props
+}: ConversationItemProps) => {
+	const handleClick = () => {
+		onChatSelect?.(chatId);
+	};
 
-		return (
-			<div
-				className={classNames(
-					conversationItemVariants({ selected, className }),
-				)}
-				onClick={handleClick}
-				ref={ref}
-				{...props}
-			>
-				{/* Main content */}
-				<div className="text-foreground text-md leading-relaxed font-medium">
-					{content}
-				</div>
-
-				{/* Time and branches info */}
-				<div className="text-foreground/60 flex items-center gap-2 text-xs">
-					<span>{time}</span>
-					{branches !== undefined && branches > 0 && (
-						<>
-							<span>•</span>
-							<span>
-								{branches} {branches === 1 ? 'branch' : 'branches'}
-							</span>
-						</>
-					)}
-				</div>
+	return (
+		<div
+			className={classNames(conversationItemVariants({ selected, className }))}
+			onClick={handleClick}
+			ref={ref}
+			{...props}
+		>
+			{/* Main content */}
+			<div className="text-foreground text-md leading-relaxed font-medium">
+				{content}
 			</div>
-		);
-	},
-);
 
-ConversationItem.displayName = 'ConversationItem';
-
-export { ConversationItem, conversationItemVariants };
+			{/* Time and branches info */}
+			<div className="text-foreground/60 flex items-center gap-2 text-xs">
+				<span>{time}</span>
+				{branches !== undefined && branches > 0 && (
+					<>
+						<span>•</span>
+						<span>
+							{branches} {branches === 1 ? 'branch' : 'branches'}
+						</span>
+					</>
+				)}
+			</div>
+		</div>
+	);
+};

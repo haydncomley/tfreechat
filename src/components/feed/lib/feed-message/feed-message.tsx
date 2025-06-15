@@ -5,9 +5,8 @@ import React, { useMemo } from 'react';
 import Markdown from 'react-markdown';
 import { PrismAsync } from 'react-syntax-highlighter';
 // TODO: Choose a theme for the code blocks?
-import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
-import { glass } from '~/utils';
 import { FormatDateSince } from '~/utils/formatting.utils';
 
 export interface FeedMessageProps {
@@ -73,49 +72,49 @@ export const FeedMessage = ({
 							<PrismAsync
 								// Delay the syntax highlighting until the message is fully rendered as this blocks UI rendering
 								language={isDynamic ? undefined : match[1]}
-								style={oneLight}
+								style={oneDark}
 								showLineNumbers
 							>
 								{String(children).replace(/\n$/, '')}
 							</PrismAsync>
 						) : (
-							<code className="bg-background text-foreground mx-0.5 rounded-md px-1.5 py-0.5">
+							<code className="bg-background/10 mx-0.5 rounded-md px-1.5 py-0.5">
 								{children}
 							</code>
 						);
 					},
 				}}
 			>
-				{text}
+				{text || 'No Response'}
 			</Markdown>
 		);
 	}, [text, image, error, isDynamic, isImage, hasImageLoaded]);
 
 	return (
 		<div
-			className={classNames('flex w-full flex-col gap-2 p-4', {
+			className={classNames('flex w-full flex-col gap-2', {
 				'items-end': sender === 'user',
 				'items-start': sender === 'ai',
 			})}
 		>
 			<div
 				className={classNames(
-					'flex max-w-2/3 flex-col gap-2 overflow-hidden rounded-2xl shadow-sm',
+					'flex flex-col gap-2 overflow-hidden rounded-2xl shadow-sm md:max-w-2/3',
 					{
 						'px-4 py-2.5': !isImage || error,
 						'min-h-[10rem] min-w-[10rem]': isImage && !error,
-						[glass('fill')]: sender === 'user',
-						'rounded-br-sm': sender === 'user',
-						'bg-background text-foreground rounded-bl-sm': sender === 'ai',
+						'bg-glass !rounded-br-sm': sender === 'user',
+						'bg-foreground text-background rounded-bl-sm': sender === 'ai',
 						'!bg-red-500 text-white': !!error,
 						'!bg-transparent': hasImageLoaded,
+						'text-background/50': !isImage && !text,
 					},
 				)}
 			>
 				{renderContent}
 			</div>
 
-			<div className="text-accent-foreground flex gap-2 text-sm">
+			<div className="font-slab text-foreground/75 flex gap-1.5 text-xs">
 				{messageDetails?.map((value, index) => {
 					return (
 						<React.Fragment key={value}>

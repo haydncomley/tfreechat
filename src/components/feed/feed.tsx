@@ -4,7 +4,6 @@ import { useEffect, useRef } from 'react';
 
 import { AI_PROVIDERS } from '~/api';
 import { useChat } from '~/hooks/use-chat';
-import { glass } from '~/utils';
 
 import { FeedMessage } from './lib/feed-message';
 
@@ -34,7 +33,7 @@ export const Feed = () => {
 
 	return (
 		<div
-			className={`mx-auto flex w-full grow-1 flex-col gap-2 overflow-auto ${glass()} rounded-bl-2xl`}
+			className="mx-auto flex w-full grow-1 flex-col gap-4 overflow-auto px-4 py-4"
 			ref={feedRef}
 		>
 			{messages.map((message, index) => {
@@ -45,7 +44,7 @@ export const Feed = () => {
 				return (
 					<div
 						key={message.id}
-						className="flex w-full flex-col gap-2 p-2"
+						className="flex w-full flex-col gap-4"
 					>
 						<FeedMessage
 							sender="user"

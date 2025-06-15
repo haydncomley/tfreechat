@@ -1,7 +1,8 @@
 import { orderBy } from 'firebase/firestore';
 import { useQueryState } from 'nuqs';
 
-import { Chat } from '../../../firebase/functions/src/lib/types';
+import { Chat } from '~/api';
+
 import { useAuth } from '../use-auth';
 import { useCollectionSnapshot } from '../use-snapshot';
 

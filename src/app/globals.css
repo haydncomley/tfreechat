@@ -7,8 +7,8 @@
 
 @theme {
 	/* Colors */
-	--color-background: #fafafa;
-	--color-foreground: #171717;
+	--color-background: #171717;
+	--color-foreground: #fafafa;
 	--color-accent: #78bcf7;
 	--color-accent-secondary: #1b98e0;
 	--color-accent-tertiary: #088531;
@@ -16,6 +16,8 @@
 	--color-accent-foreground: #fafafa;
 	--color-accent-foreground-secondary: #cec9c9;
 	--color-background-glass: rgba(250, 250, 250, 0.1);
+	--color-outline: rgba(250, 250, 250, 0.3);
+	--font-slab: 'Roboto Slab', serif;
 
 	/* Shadows */
 	--shadow-glass-light: inset 0.125rem 0.125rem 0.125rem 0px
@@ -28,23 +30,35 @@
 		rgba(0, 0, 0, 0.08);
 }
 
-html,
-body {
-	width: 100%;
-	height: 100%;
+@layer utilities {
+	.bg-glass {
+		@apply bg-background-glass rounded-2xl border shadow-md shadow-black/5 backdrop-blur-2xl;
+	}
 }
 
-body {
-	@apply bg-background text-foreground;
-	font-family: var(--font-roboto-flex), Helvetica, sans-serif;
-}
+@layer base {
+	* {
+		@apply border-[var(--color-outline)];
+	}
 
-pre,
-code {
-	font-family: var(--font-roboto-mono), Helvetica, sans-serif;
-	@apply text-sm;
-}
+	html,
+	body {
+		width: 100%;
+		height: 100%;
+	}
 
-pre {
-	@apply rounded-md text-sm;
+	body {
+		@apply bg-background text-foreground;
+		font-family: var(--font-roboto-flex), Helvetica, sans-serif;
+	}
+
+	pre,
+	code {
+		font-family: var(--font-roboto-mono), Helvetica, sans-serif;
+		@apply text-sm;
+	}
+
+	pre {
+		@apply rounded-md text-sm;
+	}
 }
