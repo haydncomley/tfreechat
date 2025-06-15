@@ -1,6 +1,6 @@
 import { AnthropicProvider } from '@ai-sdk/anthropic';
-import type { OpenAIProvider } from '@ai-sdk/openai';
 import type { GoogleGenerativeAIProvider } from '@ai-sdk/google';
+import type { OpenAIProvider } from '@ai-sdk/openai';
 import { Timestamp } from 'firebase/firestore';
 
 type OpenAiModels = Exclude<Parameters<OpenAIProvider>[0], object>;
@@ -19,7 +19,8 @@ export interface Model {
 	label: string;
 	capabilities?: {
 		imageGeneration?: boolean;
-	}
+		webSearch?: boolean;
+	};
 }
 
 export interface Agent {
@@ -27,6 +28,7 @@ export interface Agent {
 	isOpenRouter?: boolean;
 	model: string;
 	provider: string;
+	capabilities?: Model['capabilities'];
 }
 
 export interface Chat {
@@ -56,4 +58,8 @@ export interface ChatReply {
 	text?: string;
 	image?: string;
 	error?: string | null;
+	capabilitiesUsed?: {
+		webSearch?: boolean;
+		imageGeneration?: boolean;
+	};
 }

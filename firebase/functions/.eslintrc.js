@@ -1,4 +1,5 @@
 module.exports = {
+	extends: ['../../.eslintrc.config.js'],
 	root: true,
 	env: {
 		es6: true,
