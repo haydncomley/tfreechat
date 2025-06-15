@@ -1,27 +1,31 @@
 @import 'tailwindcss';
 
 :root {
-	--background: #FAFAFA;
+	--background: #fafafa;
 	--foreground: #171717;
 }
 
 @theme {
-  /* Colors */
-	--color-background: #FAFAFA;
+	/* Colors */
+	--color-background: #fafafa;
 	--color-foreground: #171717;
 	--color-accent: #78bcf7;
-  --color-accent-secondary: #1B98E0;
-  --color-accent-tertiary: #088531;
-  --color-accent-quaternary: #DDA684;
-	--color-accent-foreground: #FAFAFA;
-  --color-accent-foreground-secondary: #CEC9C9;
+	--color-accent-secondary: #1b98e0;
+	--color-accent-tertiary: #088531;
+	--color-accent-quaternary: #dda684;
+	--color-accent-foreground: #fafafa;
+	--color-accent-foreground-secondary: #cec9c9;
 	--color-background-glass: rgba(250, 250, 250, 0.1);
-	
+
 	/* Shadows */
-	--shadow-glass-light: inset 0.125rem 0.125rem 0.125rem 0px rgba(255, 255, 255, 0.12);
-	--shadow-glass-dark: inset -0.125rem -0.125rem 0.125rem 0px rgba(0, 0, 0, 0.08);
-	--shadow-glass-light-lg: inset 0.25rem 0.25rem 0.25rem 0px rgba(255, 255, 255, 0.12);
-	--shadow-glass-dark-lg: inset -0.25rem -0.25rem 0.25rem 0px rgba(0, 0, 0, 0.08);
+	--shadow-glass-light: inset 0.125rem 0.125rem 0.125rem 0px
+		rgba(255, 255, 255, 0.12);
+	--shadow-glass-dark: inset -0.125rem -0.125rem 0.125rem 0px
+		rgba(0, 0, 0, 0.08);
+	--shadow-glass-light-lg: inset 0.25rem 0.25rem 0.25rem 0px
+		rgba(255, 255, 255, 0.12);
+	--shadow-glass-dark-lg: inset -0.25rem -0.25rem 0.25rem 0px
+		rgba(0, 0, 0, 0.08);
 }
 
 html,

@@ -44,7 +44,13 @@ export const textGeneration = (
 		}),
 		...(messageHistory?.length
 			? {
-					messages: messageHistory,
+					messages: [
+						...messageHistory,
+						{
+							role: 'user',
+							content: config.text,
+						},
+					],
 				}
 			: {
 					prompt: config.text,

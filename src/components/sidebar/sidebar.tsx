@@ -11,7 +11,7 @@ export const Sidebar = () => {
 
 	return (
 		<aside className={`flex h-full w-xs flex-col ${glass()}`}>
-			<div className="flex grow-1 flex-col overflow-auto p-2 gap-2">
+			<div className="flex grow-1 flex-col gap-2 overflow-auto p-2">
 				{chats.map((chat) => (
 					<ConversationItem
 						key={chat.id}

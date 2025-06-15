@@ -104,7 +104,7 @@ export const FeedMessage = ({
 					{
 						'px-4 py-2.5': !isImage || error,
 						'min-h-[10rem] min-w-[10rem]': isImage && !error,
-						[glass("fill")]: sender === 'user',
+						[glass('fill')]: sender === 'user',
 						'rounded-br-sm': sender === 'user',
 						'bg-background text-foreground rounded-bl-sm': sender === 'ai',
 						'!bg-red-500 text-white': !!error,
@@ -115,7 +115,7 @@ export const FeedMessage = ({
 				{renderContent}
 			</div>
 
-			<div className="flex gap-2 text-sm text-accent-foreground">
+			<div className="text-accent-foreground flex gap-2 text-sm">
 				{messageDetails?.map((value, index) => {
 					return (
 						<React.Fragment key={value}>

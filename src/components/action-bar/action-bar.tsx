@@ -140,7 +140,7 @@ export const ActionBar = () => {
 						Create Image
 					</ToggleButton>
 				</div>
-				
+
 				{/* Input and send button row */}
 				<div className="flex items-center gap-2">
 					<Input
