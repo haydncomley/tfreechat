@@ -43,6 +43,7 @@ const ToggleButton = React.forwardRef<HTMLButtonElement, ToggleButtonProps>(
     return (
       <button
         aria-pressed={active}
+        type="button"
         className={cn(toggleButtonVariants({ 
           variant, 
           state: active ? "active" : "inactive",
