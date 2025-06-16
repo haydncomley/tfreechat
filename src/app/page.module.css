@@ -34,6 +34,64 @@
 	}
 }
 
+@keyframes gridLineShootH {
+	0% {
+		transform: scaleX(0);
+		opacity: 0;
+	}
+	50% {
+		opacity: 1;
+	}
+	100% {
+		transform: scaleX(1);
+		opacity: 1;
+	}
+}
+
+@keyframes gridLineShootV {
+	0% {
+		transform: scaleY(0);
+		opacity: 0;
+	}
+	50% {
+		opacity: 1;
+	}
+	100% {
+		transform: scaleY(1);
+		opacity: 1;
+	}
+}
+
+@keyframes gridFadeIn {
+	0% {
+		opacity: 0;
+	}
+	70% {
+		opacity: 0.15;
+	}
+	85% {
+		opacity: 0.2;
+	}
+	100% {
+		opacity: 0.12;
+	}
+}
+
+@keyframes gridFadeInDark {
+	0% {
+		opacity: 0;
+	}
+	70% {
+		opacity: 0.04;
+	}
+	85% {
+		opacity: 0.06;
+	}
+	100% {
+		opacity: 0.03;
+	}
+}
+
 .page {
 	position: relative;
 	background-image: url('/background.webp');
@@ -48,7 +106,7 @@
 		height: 100%;
 		transform: scale(2.2) rotate(-12deg) translate(0, 0);
 		mix-blend-mode: color-dodge;
-		opacity: 0.1;
+		opacity: 0;
 		background-image:
 			repeating-linear-gradient(
 				to right,
@@ -64,8 +122,12 @@
 				transparent 0.1rem,
 				transparent 0.5rem
 			);
+	}
 
-		animation: moveGrid 180s ease-in-out infinite;
+	&.gridAnimating::before {
+		animation: 
+			gridFadeIn 1.2s ease-out forwards,
+			moveGrid 180s ease-in-out infinite 1.5s;
 	}
 
 	&::after {
@@ -87,7 +149,30 @@
 
 	[data-theme='dark'] & {
 		&::before {
-			opacity: 0.025;
+			opacity: 0;
 		}
+		
+		&.gridAnimating::before {
+			animation: 
+				gridFadeInDark 1.2s ease-out forwards,
+				moveGrid 180s ease-in-out infinite 1.5s;
+		}
+	}
+}
+
+.componentsEnter {
+	& > * {
+		animation: slideUpFadeIn 0.8s ease-out forwards;
+	}
+}
+
+@keyframes slideUpFadeIn {
+	0% {
+		opacity: 0;
+		transform: translateY(2rem);
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0);
 	}
 }

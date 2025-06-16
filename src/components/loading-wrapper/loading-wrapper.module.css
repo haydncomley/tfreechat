@@ -1,0 +1,56 @@
+.loadingWrapper {
+	/* Initially hide all components */
+	& > * {
+		opacity: 0;
+	}
+
+	/* Sidebar starts from left */
+	& > aside {
+		transform: translateX(-2rem);
+	}
+
+	/* Main content (Feed + ActionBar) starts from bottom */
+	& > main {
+		transform: translateY(2rem);
+	}
+}
+
+.gridAnimating {
+	/* This class will be applied to trigger grid animation */
+}
+
+.componentsEnter {
+	/* Sidebar animates in horizontally first */
+	& > aside {
+		animation: slideInFromLeft 0.6s ease-out forwards;
+		animation-delay: 0.05s;
+	}
+
+	/* Main content animates in vertically after sidebar */
+	& > main {
+		animation: slideUpFadeIn 0.7s ease-out forwards;
+		animation-delay: 0.2s;
+	}
+}
+
+@keyframes slideInFromLeft {
+	0% {
+		opacity: 0;
+		transform: translateX(-2rem);
+	}
+	100% {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes slideUpFadeIn {
+	0% {
+		opacity: 0;
+		transform: translateY(2rem);
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+} 

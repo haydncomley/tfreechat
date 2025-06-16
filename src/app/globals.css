@@ -41,6 +41,18 @@
 			transform: translateY(0);
 		}
 	}
+
+	--animate-slideInMessage: slideInMessage 0.5s ease-out;
+	@keyframes slideInMessage {
+		0% {
+			opacity: 0;
+			transform: translateY(1rem) scale(0.95);
+		}
+		100% {
+			opacity: 1;
+			transform: translateY(0) scale(1);
+		}
+	}
 }
 
 @variant dark {
@@ -59,6 +71,11 @@
 
 	.bg-glass-pane {
 		@apply bg-background-glass shadow-black/5 backdrop-blur-2xl;
+	}
+
+	.animate-slideInMessage {
+		animation: var(--animate-slideInMessage);
+		animation-fill-mode: backwards;
 	}
 
 	.no-scrollbar::-webkit-scrollbar {
