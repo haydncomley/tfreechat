@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { AI_PROVIDERS } from '~/api';
 import { useChat, useChatHistory } from '~/hooks/use-chat';
+import { useLoading } from '~/hooks/use-loading';
 
 import { ToggleButton } from '../toggle-button';
 import { FeedMessage } from './lib/feed-message';
@@ -12,13 +13,14 @@ import { FeedMessage } from './lib/feed-message';
 export const Feed = () => {
 	const { messages, responseStream, reasoningStream } = useChat();
 	const { currentChatId } = useChatHistory();
+	const { showComponents } = useLoading();
 	const feedRef = useRef<HTMLDivElement>(null);
 	const [autoScroll, setAutoScroll] = useState(false);
 	const [lastChatId, setLastChatId] = useState<string | null>(null);
 
 	const scrollToBottom = () => {
 		feedRef.current?.scrollTo({
-			top: feedRef.current.scrollHeight,
+			top: 0,
 		});
 	};
 
@@ -39,65 +41,71 @@ export const Feed = () => {
 	return (
 		<div className="relative mx-auto flex w-full grow-1 flex-col items-center overflow-hidden">
 			<div
-				className="relative mx-auto flex w-full grow-1 flex-col gap-4 overflow-auto px-4 py-4"
+				className="relative mx-auto flex w-full grow-1 flex-col-reverse gap-4 overflow-auto px-4 py-4"
 				ref={feedRef}
 				onScroll={(e) => {
-					const scrollAmount =
-						e.currentTarget.scrollHeight -
-						(e.currentTarget.scrollTop + e.currentTarget.clientHeight);
-					setAutoScroll(scrollAmount < 150);
+					// With flex-col-reverse, we're at the bottom when scrollTop is close to 0
+					setAutoScroll(Math.abs(e.currentTarget.scrollTop) < 150);
 				}}
 			>
-				{messages.map((message, index) => {
-					const model = AI_PROVIDERS.find(
-						(p) => p.id === message.ai.provider,
-					)?.models.find((m) => m.id === message.ai.model);
+				{messages
+					.slice()
+					.reverse()
+					.map((message, index) => {
+						const model = AI_PROVIDERS.find(
+							(p) => p.id === message.ai.provider,
+						)?.models.find((m) => m.id === message.ai.model);
 
-					return (
-						<div
-							key={message.id}
-							className="animate-fadeIn flex w-full flex-col gap-4"
-							style={{
-								animationFillMode: 'backwards',
-								animationDelay: `${(messages.length - index) * 0.05}s`,
-							}}
-						>
-							<FeedMessage
-								sender="user"
-								text={message.prompt}
-								date={message.createdAt.toDate()}
-							/>
-
-							{message.reply ? (
+						return (
+							<div
+								key={message.id}
+								className={classNames('flex w-full flex-col gap-4', {
+									'animate-fadeIn': !showComponents, // Existing messages fade in normally
+									'animate-slideInMessage': showComponents, // New messages during loading get special animation
+								})}
+								style={{
+									animationFillMode: 'backwards',
+									animationDelay: showComponents
+										? `${0.4 + (messages.length - 1 - index) * 0.08}s` // Messages start after main content, oldest first
+										: `${index * 0.05}s`, // Original timing for existing messages, now reversed
+								}}
+							>
 								<FeedMessage
-									sender="ai"
-									text={
-										message.reply?.image ? message.prompt : message.reply.text
-									}
-									image={message.reply?.image}
-									date={message.reply?.createdAt?.toDate()}
-									error={message.reply?.error ?? undefined}
-									meta={model?.label ? [model?.label] : undefined}
+									sender="user"
+									text={message.prompt}
+									date={message.createdAt.toDate()}
 								/>
-							) : null}
 
-							{index === messages.length - 1 && !message.reply ? (
-								<FeedMessage
-									isDynamic
-									text={responseStream || reasoningStream || 'Thinking...'}
-									sender="ai"
-									meta={
-										!!responseStream
-											? ['Streaming...']
-											: !!reasoningStream
-												? ['Reasoning...']
-												: undefined
-									}
-								/>
-							) : null}
-						</div>
-					);
-				})}
+								{message.reply ? (
+									<FeedMessage
+										sender="ai"
+										text={
+											message.reply?.image ? message.prompt : message.reply.text
+										}
+										image={message.reply?.image}
+										date={message.reply?.createdAt?.toDate()}
+										error={message.reply?.error ?? undefined}
+										meta={model?.label ? [model?.label] : undefined}
+									/>
+								) : null}
+
+								{index === 0 && !message.reply ? (
+									<FeedMessage
+										isDynamic
+										text={responseStream || reasoningStream || 'Thinking...'}
+										sender="ai"
+										meta={
+											!!responseStream
+												? ['Streaming...']
+												: !!reasoningStream
+													? ['Reasoning...']
+													: undefined
+										}
+									/>
+								) : null}
+							</div>
+						);
+					})}
 			</div>
 
 			<div
@@ -112,7 +120,7 @@ export const Feed = () => {
 					active
 					onToggle={() => {
 						feedRef.current?.scrollTo({
-							top: feedRef.current.scrollHeight,
+							top: 0,
 						});
 					}}
 					icon="ChevronDown"

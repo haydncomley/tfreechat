@@ -9,6 +9,7 @@ import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import remarkGfm from 'remark-gfm';
 
 import { FormatDateSince } from '~/utils/formatting.utils';
+import { glass } from '~/utils/glass';
 
 export interface FeedMessageProps {
 	sender?: 'user' | 'ai';
@@ -243,12 +244,12 @@ export const FeedMessage = ({
 						'min-h-[10rem] min-w-[10rem]': isImage && !error,
 						'bg-accent-secondary text-accent-foreground rounded-3xl rounded-br-sm':
 							sender === 'user',
-						'bg-foreground text-background rounded-3xl rounded-bl-sm':
-							sender === 'ai',
+						'text-foreground rounded-3xl rounded-bl-sm': sender === 'ai',
 						'!bg-red-500 text-white': !!error,
 						'!bg-transparent': hasImageLoaded,
 						'text-background/50': !isImage && !text,
 					},
+					sender === 'ai' && !error && !hasImageLoaded ? glass('fill') : '',
 				)}
 			>
 				{renderContent}
