@@ -65,7 +65,7 @@
 				transparent 0.5rem
 			);
 
-		animation: moveGrid 120s ease-in-out infinite;
+		animation: moveGrid 240s ease-in-out infinite;
 	}
 
 	&::after {
