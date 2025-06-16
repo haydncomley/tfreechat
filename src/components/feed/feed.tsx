@@ -1,38 +1,40 @@
 'use client';
 
 import classNames from 'classnames';
-import { ChevronDown } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import { AI_PROVIDERS } from '~/api';
-import { useChat } from '~/hooks/use-chat';
+import { useChat, useChatHistory } from '~/hooks/use-chat';
 
+import { ToggleButton } from '../toggle-button';
 import { FeedMessage } from './lib/feed-message';
 
 export const Feed = () => {
-	const { messages, isResponseStreaming, responseStream } = useChat();
+	const { messages, responseStream, reasoningStream } = useChat();
+	const { currentChatId } = useChatHistory();
 	const feedRef = useRef<HTMLDivElement>(null);
-	const [autoScroll, setAutoScroll] = useState(true);
+	const [autoScroll, setAutoScroll] = useState(false);
+	const [lastChatId, setLastChatId] = useState<string | null>(null);
+
+	const scrollToBottom = () => {
+		feedRef.current?.scrollTo({
+			top: feedRef.current.scrollHeight,
+		});
+	};
 
 	useEffect(() => {
-		if (!feedRef.current) return;
+		if (!feedRef.current || !autoScroll) return;
+		requestAnimationFrame(scrollToBottom);
+	}, [autoScroll, responseStream]);
 
-		const mutationObserver = new MutationObserver((mutations) => {
-			mutations.forEach(() => {
-				feedRef.current?.scrollTo({
-					top: feedRef.current.scrollHeight,
-				});
-			});
-		});
-
-		mutationObserver.observe(feedRef.current, {
-			childList: true,
-			characterData: true,
-			subtree: true,
-		});
-
-		return () => mutationObserver.disconnect();
-	}, [autoScroll]);
+	useEffect(() => {
+		if (currentChatId !== lastChatId && messages.length > 0) {
+			setLastChatId(currentChatId);
+			setTimeout(() => {
+				scrollToBottom();
+			}, 150);
+		}
+	}, [currentChatId, messages.length, lastChatId]);
 
 	return (
 		<div className="relative mx-auto flex w-full grow-1 flex-col items-center overflow-hidden">
@@ -43,7 +45,7 @@ export const Feed = () => {
 					const scrollAmount =
 						e.currentTarget.scrollHeight -
 						(e.currentTarget.scrollTop + e.currentTarget.clientHeight);
-					setAutoScroll(scrollAmount > 50);
+					setAutoScroll(scrollAmount < 150);
 				}}
 			>
 				{messages.map((message, index) => {
@@ -54,7 +56,11 @@ export const Feed = () => {
 					return (
 						<div
 							key={message.id}
-							className="flex w-full flex-col gap-4"
+							className="animate-fadeIn flex w-full flex-col gap-4"
+							style={{
+								animationFillMode: 'backwards',
+								animationDelay: `${(messages.length - index) * 0.05}s`,
+							}}
 						>
 							<FeedMessage
 								sender="user"
@@ -75,14 +81,18 @@ export const Feed = () => {
 								/>
 							) : null}
 
-							{index === messages.length - 1 &&
-							isResponseStreaming &&
-							!message.reply ? (
+							{index === messages.length - 1 && !message.reply ? (
 								<FeedMessage
 									isDynamic
-									text={responseStream || 'Thinking...'}
+									text={responseStream || reasoningStream || 'Thinking...'}
 									sender="ai"
-									meta={!!responseStream ? ['Streaming...'] : undefined}
+									meta={
+										!!responseStream
+											? ['Streaming...']
+											: !!reasoningStream
+												? ['Reasoning...']
+												: undefined
+									}
 								/>
 							) : null}
 						</div>
@@ -90,23 +100,24 @@ export const Feed = () => {
 				})}
 			</div>
 
-			<button
+			<div
 				className={classNames(
-					'bg-glass absolute right-2 bottom-2 flex cursor-pointer items-center gap-2 border border-b-0 p-2 px-3 text-sm transition-all duration-75 hover:opacity-75 md:right-0',
+					'absolute right-2 bottom-2 transition-all duration-75 hover:opacity-75',
 					{
-						'pointer-events-none !opacity-0': !autoScroll,
+						'pointer-events-none !opacity-0': autoScroll,
 					},
 				)}
-				onClick={() => {
-					feedRef.current?.scrollTo({
-						top: feedRef.current.scrollHeight,
-					});
-				}}
 			>
-				<ChevronDown className="h-4 w-4" />
-				Scroll Down
-				<ChevronDown className="h-4 w-4" />
-			</button>
+				<ToggleButton
+					active
+					onToggle={() => {
+						feedRef.current?.scrollTo({
+							top: feedRef.current.scrollHeight,
+						});
+					}}
+					icon="ChevronDown"
+				/>
+			</div>
 		</div>
 	);
 };

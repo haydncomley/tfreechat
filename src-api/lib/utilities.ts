@@ -2,6 +2,7 @@ import { createAnthropic } from '@ai-sdk/anthropic';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createOpenAI } from '@ai-sdk/openai';
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
+import { ToolSet } from 'ai';
 import { HttpsError } from 'firebase-functions/https';
 import { ZodSchema } from 'zod';
 
@@ -19,16 +20,18 @@ export const isValidModel = (details: {
 	const wantedModel = wantedProvider.models.find((m) => m.id === details.model);
 	if (!wantedModel) return false;
 
-	if (details.capabilities) {
-		const hasCapability = Object.entries(details.capabilities).some(
-			([key, value]) => {
-				return (
-					wantedModel.capabilities?.[
-						key as keyof typeof wantedModel.capabilities
-					] === value
-				);
-			},
-		);
+	const wantedCapabilities = Object.entries(details.capabilities ?? {}).filter(
+		([, value]) => value,
+	);
+
+	if (wantedCapabilities.length) {
+		const hasCapability = wantedCapabilities.some(([key, value]) => {
+			return (
+				wantedModel.capabilities?.[
+					key as keyof typeof wantedModel.capabilities
+				] === value
+			);
+		});
 
 		if (!hasCapability) return false;
 	}
@@ -66,16 +69,56 @@ export const createAgent = (details: {
 
 	switch (details.provider) {
 		case 'openai':
-			return createOpenAI({ apiKey: details.key })(model.id);
+			return createOpenAI({ apiKey: details.key }).responses(model.id);
 		case 'anthropic':
 			return createAnthropic({ apiKey: details.key })(model.id);
 		case 'google':
-			return createGoogleGenerativeAI({ apiKey: details.key })(model.id, {
-				useSearchGrounding: details.capabilities?.webSearch ? true : undefined,
-			});
+			return createGoogleGenerativeAI({ apiKey: details.key })(
+				model.id,
+				details.capabilities?.webSearch
+					? {
+							useSearchGrounding: true,
+						}
+					: undefined,
+			);
 		default:
 			throw new HttpsError('invalid-argument', 'Invalid provider');
 	}
+};
+
+export const createAgentExtras = (details: {
+	key: string;
+	provider: string;
+	model: string;
+	isOpenRouter?: boolean;
+	capabilities?: Model['capabilities'];
+}) => {
+	const model = isValidModel(details);
+
+	if (!model) {
+		throw new HttpsError('invalid-argument', 'Invalid model');
+	}
+
+	const extras: {
+		tools?: ToolSet;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		providerOptions?: Record<string, any>;
+	} = {};
+
+	switch (details.provider) {
+		case 'openai':
+			if (details.capabilities?.webSearch) {
+				extras.tools = {};
+				extras.tools.web_search_preview = createOpenAI({
+					apiKey: details.key,
+				}).tools.webSearchPreview();
+			}
+			break;
+		default:
+			break;
+	}
+
+	return extras;
 };
 
 export const createImageAgent = (details: {

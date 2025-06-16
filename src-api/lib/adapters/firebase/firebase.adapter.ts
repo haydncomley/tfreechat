@@ -110,34 +110,52 @@ export const aiText = onRequest(async (req, res) => {
 		res.setHeader('Cache-Control', 'no-cache');
 		res.setHeader('Connection', 'keep-alive');
 
-		const { stream } = textGeneration(
+		let fullText = '';
+
+		await textGeneration(
 			{
 				...req.body,
 				chatId,
 			},
 			messages,
-		);
+			{
+				onChunk: async ({ chunk: part }) => {
+					console.log('part', part.type);
+					if (part.type === 'text-delta') {
+						fullText += part.textDelta;
+						res.write(`data: ${JSON.stringify({ text: part.textDelta })}\n\n`);
+					}
 
-		let fullText = '';
-
-		for await (const textPart of stream) {
-			fullText += textPart;
-			res.write(`data: ${JSON.stringify({ text: textPart })}\n\n`);
-		}
-
-		res.write('data: [DONE]\n\n');
-
-		await newMessageRef.update({
-			reply: {
-				id: newMessageRef.id,
-				createdAt: FieldValue.serverTimestamp(),
-				text: fullText,
-				capabilitiesUsed: {
-					webSearch: !!req.body.capabilities?.webSearch,
+					if (part.type === 'reasoning') {
+						res.write(
+							`data: ${JSON.stringify({ reasoning: part.textDelta })}\n\n`,
+						);
+					}
+				},
+				onFinish: async () => {
+					console.log('onFinish');
+					await newMessageRef.update({
+						reply: {
+							id: newMessageRef.id,
+							createdAt: FieldValue.serverTimestamp(),
+							text: fullText,
+							capabilitiesUsed: {
+								webSearch: !!req.body.capabilities?.webSearch,
+							},
+						},
+					});
+				},
+				onError: async (error) => {
+					console.log('onError');
+					console.error('Error streaming response', error);
+					await newMessageRef.update({
+						'reply.error': 'Something went wrong...',
+					});
 				},
 			},
-		});
+		);
 
+		res.write('data: [DONE]\n\n');
 		res.end();
 	} catch (err) {
 		console.error(err);

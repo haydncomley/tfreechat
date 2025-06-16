@@ -3,17 +3,22 @@
 import classNames from 'classnames';
 import { LogIn, LogOut, Plus, User } from 'lucide-react';
 import Link from 'next/link';
-import React from 'react';
+import React, { useState } from 'react';
 import { useMemo } from 'react';
 
-import { Chat } from '~/api';
+import { AI_PROVIDERS, Chat } from '~/api';
 import { useAuth } from '~/hooks/use-auth';
 import { useChatHistory } from '~/hooks/use-chat';
+import { useDarkMode } from '~/hooks/use-darkmode';
 import { FormatChatDate, FormatDateSince } from '~/utils';
+
+import { ToggleButton } from '../toggle-button';
+import styles from './sidebar.module.css';
 
 export const Sidebar = () => {
 	const { user, signIn, signOut } = useAuth();
 	const { chats, currentChat, setCurrentChat } = useChatHistory();
+	const { toggleDarkMode, isDarkMode } = useDarkMode();
 
 	const chatsGroupedByDate = useMemo(() => {
 		return chats.reduce(
@@ -28,100 +33,203 @@ export const Sidebar = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [chats.map((chat) => chat.createdAt.toDate()).join(',')]);
 
+	const [showKeyInput, setShowKeyInput] = useState(false);
+
+	const apiKeys = useMemo(() => {
+		if (typeof window === 'undefined') return {};
+
+		const keys: Record<string, string | null> = {
+			openrouter: localStorage.getItem('openrouter-key'),
+		};
+
+		AI_PROVIDERS.forEach((p) => {
+			const providerKey = localStorage.getItem(`${p.id}-key`);
+			keys[p.id] = providerKey;
+		});
+
+		return keys;
+	}, []);
+
 	return (
-		<aside
-			className={classNames(
-				'absolute top-4 right-4 left-4 z-10 shrink-0 flex-col md:relative md:top-0 md:right-0 md:left-0 md:flex md:h-full md:w-xs md:p-4 md:pr-0',
-			)}
-		>
-			<div className="bg-glass flex flex-col overflow-auto px-3 py-4">
-				{Object.entries(chatsGroupedByDate).map(([date, chats]) => (
-					<React.Fragment key={date}>
-						<span className="mb-2 px-4 text-xs font-black tracking-wider uppercase not-first:mt-2">
-							{date}
-						</span>
-						{chats.map((chat) => (
-							<Link
-								key={chat.id}
-								href={`/?chat=${chat.id}`}
-								onClick={(e) => {
-									e.preventDefault();
-									setCurrentChat(chat);
-								}}
-								className={classNames(
-									'flex flex-col !rounded-lg border px-4 py-2.5 transition-all duration-75',
-									{
-										'border-outline/0 hover:opacity-75':
-											currentChat?.id !== chat.id,
-										'bg-glass': currentChat?.id === chat.id,
-									},
-								)}
-							>
-								<span>{chat.prompt}</span>
-								<span className="font-slab -mt-0.5 text-xs opacity-75">
-									{FormatDateSince(chat.createdAt.toDate())}
-								</span>
-							</Link>
-						))}
-					</React.Fragment>
-				))}
-				{!chats.length ? (
-					<div className="font-slab text-bold text-center text-sm">
-						No Chats
-					</div>
-				) : null}
-			</div>
-
-			<div className="flex items-center justify-center">
-				<Link
-					href="/"
-					className="flex items-center gap-1 p-4 text-xs font-black tracking-wider transition-all duration-75 hover:opacity-75"
-				>
-					NEW
-					<Plus className="h-4 w-4" />
-				</Link>
-			</div>
-
-			<div
+		<>
+			<aside
 				className={classNames(
-					'bg-glass mt-auto flex items-center justify-between p-2',
-					{
-						'hidden md:flex': user,
-					},
+					'absolute top-4 right-4 left-4 z-10 hidden shrink-0 flex-col md:relative md:top-0 md:right-0 md:left-0 md:flex md:h-full md:w-xs md:p-4 md:pr-0',
 				)}
 			>
-				<div className="flex items-center gap-2">
-					<div className="bg-background-glass h-10 w-10 !rounded-full border">
-						<div className="flex h-full w-full items-center justify-center">
-							<User className="h-4 w-4" />
+				<div
+					className={classNames(
+						'bg-glass flex flex-col overflow-auto px-3 py-4',
+						styles.sidebarChats,
+					)}
+				>
+					{Object.entries(chatsGroupedByDate).map(([date, chats]) => (
+						<React.Fragment key={date}>
+							<span className="mb-2 px-4 text-xs font-black tracking-wider uppercase not-first:mt-2">
+								{date}
+							</span>
+							{chats.map((chat) => (
+								<Link
+									key={chat.id}
+									href={`/?chat=${chat.id}`}
+									onClick={(e) => {
+										e.preventDefault();
+										setCurrentChat(chat);
+									}}
+									className={classNames(
+										'flex flex-col !rounded-lg border px-4 py-2.5 transition-all duration-75',
+										{
+											'border-outline/0 hover:opacity-75':
+												currentChat?.id !== chat.id,
+											'bg-glass': currentChat?.id === chat.id,
+										},
+									)}
+								>
+									<span>{chat.prompt}</span>
+									<span className="font-slab -mt-0.5 text-xs opacity-75">
+										{FormatDateSince(chat.createdAt.toDate())}
+									</span>
+								</Link>
+							))}
+						</React.Fragment>
+					))}
+					{!chats.length ? (
+						<div className="font-slab text-bold text-center text-sm">
+							No Chats
 						</div>
-					</div>
-					<div>
-						<p>{user?.displayName ?? 'Not logged in'}</p>
-						{user ? (
-							<p className="font-slab text-foreground/75 -mt-0.5 text-xs">
-								{user?.email ?? 'No email'}
-							</p>
-						) : null}
-					</div>
+					) : null}
 				</div>
 
-				{user ? (
-					<button
-						className="hover:bg-background-glass cursor-pointer rounded-full border p-2"
-						onClick={() => signOut()}
+				<div className="flex items-center justify-center">
+					<Link
+						href="/"
+						className="flex items-center gap-1 p-4 text-xs font-black tracking-wider transition-all duration-75 hover:opacity-75"
 					>
-						<LogOut className="h-4 w-4" />
-					</button>
-				) : (
-					<button
-						className="hover:bg-background-glass cursor-pointer rounded-full border p-2"
-						onClick={() => signIn()}
+						NEW
+						<Plus className="h-4 w-4" />
+					</Link>
+				</div>
+
+				<div className="mt-auto flex flex-col gap-2">
+					<div className="flex justify-end gap-2">
+						<ToggleButton
+							active={isDarkMode}
+							onToggle={() => toggleDarkMode()}
+							icon={isDarkMode ? 'Moon' : 'Sun'}
+						/>
+
+						<ToggleButton
+							active={showKeyInput}
+							onToggle={setShowKeyInput}
+							icon="KeyRound"
+						></ToggleButton>
+					</div>
+
+					<div
+						className={classNames(
+							'bg-glass flex items-center justify-between p-2',
+							{
+								'hidden md:flex': user,
+							},
+						)}
 					>
-						<LogIn className="h-4 w-4" />
-					</button>
-				)}
-			</div>
-		</aside>
+						<div className="flex items-center gap-2">
+							<div className="bg-background-glass h-10 w-10 !rounded-full border">
+								<div className="flex h-full w-full items-center justify-center">
+									<User className="h-4 w-4" />
+								</div>
+							</div>
+							<div>
+								<p>{user?.displayName ?? 'Not logged in'}</p>
+								{user ? (
+									<p className="font-slab text-foreground/75 -mt-0.5 text-xs">
+										{user?.email ?? 'No email'}
+									</p>
+								) : null}
+							</div>
+						</div>
+
+						{user ? (
+							<button
+								className="hover:bg-background-glass cursor-pointer rounded-full border p-2"
+								onClick={() => signOut()}
+							>
+								<LogOut className="h-4 w-4" />
+							</button>
+						) : (
+							<button
+								className="hover:bg-background-glass cursor-pointer rounded-full border p-2"
+								onClick={() => signIn()}
+							>
+								<LogIn className="h-4 w-4" />
+							</button>
+						)}
+					</div>
+				</div>
+			</aside>
+
+			<dialog
+				onClose={() => setShowKeyInput(false)}
+				open={showKeyInput}
+				className="!z-50"
+			>
+				<div className="bg-background/25 fixed top-0 left-0 flex h-full w-full flex-col items-center justify-center backdrop-blur-2xl">
+					<div className="bg-glass text-foreground flex w-md flex-col gap-4 p-4">
+						<div className="flex flex-col">
+							<h4 className="font-slab text-lg font-bold">
+								Bring your own key
+							</h4>
+							<p className="text-foreground/75 text-sm">
+								API keys are stored within localStorage - they are only sent to
+								the provider of choice on request.
+							</p>
+						</div>
+
+						<div>
+							<h2 className="text-xs font-black tracking-wider uppercase">
+								Open Router{' '}
+								<span className="text-foreground/75 font-normal">
+									- text only
+								</span>
+							</h2>
+							<input
+								className="w-full outline-0"
+								type="text"
+								placeholder="API Key"
+								defaultValue={apiKeys.openrouter ?? ''}
+								onChange={(e) => {
+									localStorage.setItem('openrouter-key', e.target.value);
+								}}
+							/>
+						</div>
+
+						{AI_PROVIDERS.map((provider) => (
+							<div key={provider.id}>
+								<h2 className="text-xs font-black tracking-wider uppercase">
+									{provider.label}
+								</h2>
+								<input
+									className="w-full outline-0"
+									type="text"
+									placeholder="API Key"
+									defaultValue={apiKeys[provider.id] ?? ''}
+									onChange={(e) => {
+										localStorage.setItem(`${provider.id}-key`, e.target.value);
+									}}
+								/>
+							</div>
+						))}
+
+						<div className="flex justify-end">
+							<ToggleButton
+								active={showKeyInput}
+								onToggle={setShowKeyInput}
+								icon="X"
+							></ToggleButton>
+						</div>
+					</div>
+				</div>
+			</dialog>
+		</>
 	);
 };

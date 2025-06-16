@@ -20,6 +20,7 @@ export interface Model {
 	capabilities?: {
 		imageGeneration?: boolean;
 		webSearch?: boolean;
+		reasoning?: boolean;
 	};
 }
 

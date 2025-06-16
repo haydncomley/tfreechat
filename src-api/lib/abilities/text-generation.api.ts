@@ -1,7 +1,7 @@
 import { CoreMessage, streamText } from 'ai';
 import z from 'zod';
 
-import { createAgent, isValidModel } from '../utilities';
+import { createAgent, createAgentExtras, isValidModel } from '../utilities';
 
 export const textGenerationSchema = z.object({
 	text: z.string(),
@@ -17,12 +17,15 @@ export const textGenerationSchema = z.object({
 		.optional(),
 });
 
-export const textGeneration = (
+export const textGeneration = async (
 	config: z.infer<typeof textGenerationSchema>,
 	messageHistory?: CoreMessage[],
-): {
-	stream: ReturnType<typeof streamText>['textStream'];
-} => {
+	callbacks?: {
+		onChunk?: Parameters<typeof streamText>[0]['onChunk'];
+		onFinish?: () => void;
+		onError?: Parameters<typeof streamText>[0]['onError'];
+	},
+): Promise<void> => {
 	if (
 		!isValidModel({
 			provider: config.provider,
@@ -34,14 +37,25 @@ export const textGeneration = (
 		throw new Error('Invalid model');
 	}
 
-	const { textStream } = streamText({
-		model: createAgent({
-			key: config.secret,
-			provider: config.provider,
-			model: config.model,
-			isOpenRouter: !!config.isOpenRouter,
-			capabilities: config.capabilities,
-		}),
+	const model = createAgent({
+		key: config.secret,
+		provider: config.provider,
+		model: config.model,
+		isOpenRouter: !!config.isOpenRouter,
+		capabilities: config.capabilities,
+	});
+
+	const extras = createAgentExtras({
+		key: config.secret,
+		provider: config.provider,
+		model: config.model,
+		isOpenRouter: !!config.isOpenRouter,
+		capabilities: config.capabilities,
+	});
+
+	const { fullStream, providerMetadata } = streamText({
+		model,
+		...extras,
 		...(messageHistory?.length
 			? {
 					messages: [
@@ -57,7 +71,23 @@ export const textGeneration = (
 				}),
 	});
 
-	return {
-		stream: textStream,
-	};
+	for await (const part of fullStream) {
+		if (part.type === 'reasoning') {
+			callbacks?.onChunk?.({ chunk: part });
+		}
+
+		if (part.type === 'text-delta') {
+			callbacks?.onChunk?.({ chunk: part });
+		}
+
+		if (part.type === 'finish') {
+			callbacks?.onFinish?.();
+		}
+
+		if (part.type === 'error') {
+			callbacks?.onError?.({ error: part.error });
+		}
+	}
+
+	console.log('Meta', await providerMetadata);
 };

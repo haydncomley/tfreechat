@@ -1,0 +1,69 @@
+@keyframes moveGrid {
+	0% {
+		transform: scale(1.1) rotate(-2deg);
+	}
+	50% {
+		transform: scale(1.2) rotate(1deg);
+	}
+	100% {
+		transform: scale(1.1) rotate(-2deg);
+	}
+}
+
+.page {
+	position: relative;
+	background-image: url('/background.webp');
+	overflow: hidden;
+
+	&::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		transform: scale(1.1) rotate(-2deg);
+		mix-blend-mode: color-dodge;
+		opacity: 0.1;
+		background-image:
+			repeating-linear-gradient(
+				to right,
+				#ccc 0,
+				#ccc 0.1rem,
+				transparent 0.1rem,
+				transparent 1rem
+			),
+			repeating-linear-gradient(
+				to bottom,
+				#ccc 0,
+				#ccc 0.1rem,
+				transparent 0.1rem,
+				transparent 1rem
+			);
+
+		animation: moveGrid 120s linear infinite;
+	}
+
+	&::after {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		opacity: 1;
+		background-image: url(/noise.svg);
+		mix-blend-mode: color-burn;
+		opacity: 1;
+	}
+
+	& > * {
+		z-index: 1;
+	}
+
+	[data-theme='dark'] & {
+		&::before {
+			opacity: 0.025;
+		}
+	}
+}

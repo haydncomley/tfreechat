@@ -1,15 +1,21 @@
 'use client';
 
+import classNames from 'classnames';
+
 import { ActionBar, Feed, Sidebar } from '~/components';
 import { useAuth } from '~/hooks/use-auth';
+
+import styles from './page.module.css';
 
 export default function Home() {
 	const { user } = useAuth();
 
 	return (
 		<div
-			className="flex h-full w-full justify-center gap-4 bg-cover bg-center bg-no-repeat"
-			style={{ backgroundImage: 'url(/background.png)' }}
+			className={classNames(
+				'flex h-full w-full justify-center gap-4 bg-cover bg-center bg-no-repeat',
+				styles.page,
+			)}
 		>
 			<Sidebar />
 			{user ? (

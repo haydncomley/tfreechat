@@ -3,6 +3,7 @@ import { Roboto_Flex, Roboto_Mono, Roboto_Slab } from 'next/font/google';
 import { Suspense } from 'react';
 
 import { Providers } from '~/components';
+import { isDarkMode } from '~/utils';
 import './globals.css';
 
 const robotoFlex = Roboto_Flex({
@@ -26,13 +27,20 @@ export const metadata: Metadata = {
 		'An open-source, bring-your-own-key, AI platform for interfacing with multiple different models.',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
+	const darkMode = await isDarkMode();
+
 	return (
-		<html lang="en">
+		<html
+			lang="en"
+			data-theme={
+				darkMode !== undefined ? (darkMode ? 'dark' : 'light') : undefined
+			}
+		>
 			<body
 				className={`${robotoFlex.variable} ${robotoMono.variable} ${robotoSlab.variable} antialiased`}
 			>

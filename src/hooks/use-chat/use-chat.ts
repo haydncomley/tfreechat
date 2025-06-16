@@ -26,8 +26,18 @@ export const useChat = (id?: string | null) => {
 		queryFn: () => '',
 	});
 
+	const { data: reasoningStream } = useQuery({
+		queryKey: ['reasoningStream'],
+		queryFn: () => '',
+	});
+
 	const { data: isResponseStreaming } = useQuery({
 		queryKey: ['responseStreamIsLoading'],
+		queryFn: () => false,
+	});
+
+	const { data: isReasoningStreaming } = useQuery({
+		queryKey: ['reasoningStreamIsLoading'],
 		queryFn: () => false,
 	});
 
@@ -61,6 +71,7 @@ export const useChat = (id?: string | null) => {
 			try {
 				if (!user) throw new Error('User not authenticated');
 				queryClient.setQueryData(['responseStreamIsLoading'], true);
+				queryClient.setQueryData(['reasoningStreamIsLoading'], true);
 
 				const token = await user.getIdToken();
 				const functionsUrl = `https://us-central1-${process.env.NEXT_PUBLIC_FB_PROJECT_ID}.cloudfunctions.net`;
@@ -94,6 +105,7 @@ export const useChat = (id?: string | null) => {
 
 				let buffer = '';
 				let accumulatedText = '';
+				let accumulatedReasoning = '';
 
 				while (true) {
 					const { done, value } = await reader.read();
@@ -118,6 +130,14 @@ export const useChat = (id?: string | null) => {
 								if (parsed.text) {
 									accumulatedText += parsed.text;
 									queryClient.setQueryData(['responseStream'], accumulatedText);
+									queryClient.setQueryData(['reasoningStreamIsLoading'], false);
+								}
+								if (parsed.reasoning) {
+									accumulatedReasoning += parsed.reasoning;
+									queryClient.setQueryData(
+										['reasoningStream'],
+										accumulatedReasoning,
+									);
 								}
 							} catch (e) {
 								console.error('Failed to parse SSE data:', e);
@@ -138,6 +158,7 @@ export const useChat = (id?: string | null) => {
 		},
 		onMutate: () => {
 			queryClient.setQueryData(['responseStream'], '');
+			queryClient.setQueryData(['reasoningStream'], '');
 		},
 	});
 
@@ -211,6 +232,8 @@ export const useChat = (id?: string | null) => {
 		isLoading: isSendingMessage || isCreatingImage,
 		responseStream,
 		isResponseStreaming,
+		reasoningStream,
+		isReasoningStreaming,
 		messages: wantedChatId ? messages : [],
 		error: textError ?? imageError,
 		prompt,

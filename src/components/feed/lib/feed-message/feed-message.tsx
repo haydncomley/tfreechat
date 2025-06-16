@@ -1,11 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
 import classNames from 'classnames';
-import { Loader2 } from 'lucide-react';
+import { ExternalLink, Loader2 } from 'lucide-react';
+import Link from 'next/link';
 import React, { useMemo } from 'react';
 import Markdown from 'react-markdown';
 import { PrismAsync } from 'react-syntax-highlighter';
-// TODO: Choose a theme for the code blocks?
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import remarkGfm from 'remark-gfm';
 
 import { FormatDateSince } from '~/utils/formatting.utils';
 
@@ -17,6 +18,7 @@ export interface FeedMessageProps {
 	image?: string;
 	error?: string;
 	isDynamic?: boolean;
+	className?: string;
 }
 
 export const FeedMessage = ({
@@ -27,6 +29,7 @@ export const FeedMessage = ({
 	image,
 	error,
 	isDynamic,
+	className,
 }: FeedMessageProps) => {
 	const isImage = typeof image === 'string';
 	const hasImageLoaded = isImage && image.length > 0;
@@ -53,18 +56,13 @@ export const FeedMessage = ({
 					) : (
 						<Loader2 className="h-4 w-4 animate-spin" />
 					)}
-
-					{text ? (
-						<p className="bg-background text-foreground absolute bottom-2 left-2 z-10 rounded-md p-1 px-2.5 text-xs">
-							{text}
-						</p>
-					) : null}
 				</div>
 			);
 		}
 
 		return (
 			<Markdown
+				remarkPlugins={[remarkGfm]}
 				components={{
 					code: (props) => {
 						const { children, className } = props;
@@ -80,9 +78,143 @@ export const FeedMessage = ({
 								{String(children).replace(/\n$/, '')}
 							</PrismAsync>
 						) : (
-							<code className="bg-background/10 mx-0.5 rounded-md px-1.5 py-0.5">
+							<code className="bg-background/10 mx-0.5 rounded-md px-1.5 py-0.5 whitespace-normal">
 								{children}
 							</code>
+						);
+					},
+					h1: ({ children, className }) => {
+						return (
+							<h1
+								className={classNames(
+									className,
+									'font-slab text-2xl font-black',
+								)}
+							>
+								{children}
+							</h1>
+						);
+					},
+					h2: ({ children, className }) => {
+						return (
+							<h2
+								className={classNames(
+									className,
+									'font-slab text-lg font-black',
+								)}
+							>
+								{children}
+							</h2>
+						);
+					},
+					h3: ({ children, className }) => {
+						return (
+							<h3
+								className={classNames(
+									className,
+									'font-slab text-lg font-semibold',
+								)}
+							>
+								{children}
+							</h3>
+						);
+					},
+					strong: ({ children, className }) => {
+						return (
+							<strong className={classNames(className, 'font-bold')}>
+								{children}
+							</strong>
+						);
+					},
+					a: ({ children, className, href }) => {
+						return (
+							<Link
+								href={href ?? '#'}
+								target="_blank"
+								className={classNames(
+									className,
+									'text-accent inline-flex items-center gap-1 hover:opacity-75',
+								)}
+							>
+								{children}
+								<ExternalLink className="h-4 w-4" />
+							</Link>
+						);
+					},
+					ul: ({ children, className }) => {
+						return (
+							<ul
+								className={classNames(
+									className,
+									'marker:text-background/75 ml-4 list-disc',
+								)}
+							>
+								{children}
+							</ul>
+						);
+					},
+					ol: ({ children, className }) => {
+						return (
+							<ol
+								className={classNames(
+									className,
+									'marker:text-background/75 marker:font-slab ml-4 list-decimal marker:font-semibold',
+								)}
+							>
+								{children}
+							</ol>
+						);
+					},
+					blockquote: ({ children, className }) => {
+						return (
+							<blockquote
+								className={classNames(
+									className,
+									'border-accent font-slab border-l-4 pl-4',
+								)}
+							>
+								{children}
+							</blockquote>
+						);
+					},
+					table: ({ children, className }) => {
+						return (
+							<div className="shadow-background/5 overflow-auto rounded-md border shadow-md">
+								<table className={classNames(className, 'w-full table-auto')}>
+									{children}
+								</table>
+							</div>
+						);
+					},
+					th: ({ children, className }) => {
+						return (
+							<th
+								className={classNames(
+									className,
+									'bg-background text-foreground font-slab px-2 py-1',
+								)}
+							>
+								{children}
+							</th>
+						);
+					},
+					td: ({ children, className }) => {
+						return (
+							<td
+								className={classNames(
+									className,
+									'px-2 py-1 not-first:border-l',
+								)}
+							>
+								{children}
+							</td>
+						);
+					},
+					tr: ({ children, className }) => {
+						return (
+							<tr className={classNames(className, 'even:bg-background/15')}>
+								{children}
+							</tr>
 						);
 					},
 				}}
@@ -94,10 +226,14 @@ export const FeedMessage = ({
 
 	return (
 		<div
-			className={classNames('flex w-full flex-col gap-2', {
-				'items-end': sender === 'user',
-				'items-start': sender === 'ai',
-			})}
+			className={classNames(
+				'flex w-full flex-col gap-2',
+				{
+					'items-end': sender === 'user',
+					'items-start': sender === 'ai',
+				},
+				className,
+			)}
 		>
 			<div
 				className={classNames(
@@ -105,7 +241,8 @@ export const FeedMessage = ({
 					{
 						'px-4 py-2.5': !isImage || error,
 						'min-h-[10rem] min-w-[10rem]': isImage && !error,
-						'bg-glass !rounded-3xl !rounded-br-sm': sender === 'user',
+						'bg-accent text-accent-foreground rounded-3xl rounded-br-sm':
+							sender === 'user',
 						'bg-foreground text-background rounded-3xl rounded-bl-sm':
 							sender === 'ai',
 						'!bg-red-500 text-white': !!error,
