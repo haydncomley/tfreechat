@@ -6,6 +6,7 @@
 	/* Colors */
 	--color-background: #fafafa;
 	--color-foreground: #171717;
+	--color-foreground-secondary: #9e9999;
 	--color-outline: #ffffff45;
 	--color-background-glass: #ffffff40;
 
@@ -45,6 +46,7 @@
 @variant dark {
 	--color-background: #171717;
 	--color-foreground: #fafafa;
+	--color-foreground-secondary: #9e9999;
 	--color-outline: #c8c8c842;
 	--color-background-glass: #ffffff0f;
 	color-scheme: dark;

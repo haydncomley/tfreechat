@@ -19,7 +19,7 @@ export default function Home() {
 		>
 			<Sidebar />
 			{user ? (
-				<main className="flex h-full w-full max-w-[50rem] flex-col overflow-hidden transition-all duration-200 md:pr-4">
+				<main className="flex h-full w-full max-w-[64rem] flex-col overflow-hidden transition-all duration-200 md:pr-4">
 					<Feed />
 					<ActionBar />
 				</main>
