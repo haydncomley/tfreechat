@@ -54,9 +54,11 @@ export const FeedMessage = ({
 						<Loader2 className="h-4 w-4 animate-spin" />
 					)}
 
-					<p className="bg-background text-foreground absolute bottom-2 left-2 z-10 rounded-md p-1 px-2.5 text-xs">
-						{text}
-					</p>
+					{text ? (
+						<p className="bg-background text-foreground absolute bottom-2 left-2 z-10 rounded-md p-1 px-2.5 text-xs">
+							{text}
+						</p>
+					) : null}
 				</div>
 			);
 		}
@@ -99,12 +101,13 @@ export const FeedMessage = ({
 		>
 			<div
 				className={classNames(
-					'flex flex-col gap-2 overflow-hidden rounded-2xl shadow-sm md:max-w-2/3',
+					'flex max-w-full flex-col gap-2 overflow-hidden shadow-sm md:max-w-2/3',
 					{
 						'px-4 py-2.5': !isImage || error,
 						'min-h-[10rem] min-w-[10rem]': isImage && !error,
-						'bg-glass !rounded-br-sm': sender === 'user',
-						'bg-foreground text-background rounded-bl-sm': sender === 'ai',
+						'bg-glass !rounded-3xl !rounded-br-sm': sender === 'user',
+						'bg-foreground text-background rounded-3xl rounded-bl-sm':
+							sender === 'ai',
 						'!bg-red-500 text-white': !!error,
 						'!bg-transparent': hasImageLoaded,
 						'text-background/50': !isImage && !text,

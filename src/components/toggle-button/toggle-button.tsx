@@ -1,82 +1,52 @@
-import { cva, type VariantProps } from 'class-variance-authority';
-import cn from 'classnames';
+import classNames from 'classnames';
 import { icons } from 'lucide-react';
 import * as React from 'react';
 
 import type { IconName } from '~/components';
-import { glass } from '~/utils';
 
-const toggleButtonVariants = cva(
-	'px-3.5 py-2 rounded-full inline-flex justify-center items-center gap-1 overflow-hidden transition-all cursor-pointer transition-all',
-	{
-		variants: {
-			variant: {
-				default: '',
-			},
-			state: {
-				inactive: glass('default'),
-				active: cn(glass('accent'), 'text-accent-foreground'),
-			},
-		},
-		defaultVariants: {
-			variant: 'default',
-			state: 'inactive',
-		},
-	},
-);
-
-export interface ToggleButtonProps
-	extends Omit<
-			React.ButtonHTMLAttributes<HTMLButtonElement>,
-			'onClick' | 'onToggle'
-		>,
-		VariantProps<typeof toggleButtonVariants> {
+export interface ToggleButtonProps {
 	active?: boolean;
 	onToggle?: (active: boolean) => void;
+	disabled?: boolean;
 	children?: React.ReactNode;
 	icon?: IconName;
 }
 
-const ToggleButton = React.forwardRef<HTMLButtonElement, ToggleButtonProps>(
-	(
-		{ className, variant, active = false, onToggle, children, icon, ...props },
-		ref,
-	) => {
-		const handleClick = () => {
-			onToggle?.(!active);
-		};
+export const ToggleButton = ({
+	active = false,
+	onToggle,
+	children,
+	icon,
+	disabled = false,
+}: ToggleButtonProps) => {
+	const renderIcon = React.useMemo(() => {
+		if (icon) {
+			const LucideIcon = icons[icon];
+			return <LucideIcon className="h-4 w-4" />;
+		}
+		return null;
+	}, [icon]);
 
-		return (
-			<button
-				aria-pressed={active}
-				type="button"
-				className={cn(
-					toggleButtonVariants({
-						variant,
-						state: active ? 'active' : 'inactive',
-						className,
-					}),
-				)}
-				onClick={handleClick}
-				ref={ref}
-				{...props}
-			>
-				{icon
-					? (() => {
-							const LucideIcon = icons[icon];
-							return <LucideIcon size={16} />;
-						})()
-					: null}
-				{children && (
-					<div className="font-roboto-slab text-center text-[12px] font-normal">
-						{children}
-					</div>
-				)}
-			</button>
-		);
-	},
-);
-
-ToggleButton.displayName = 'ToggleButton';
-
-export { ToggleButton, toggleButtonVariants };
+	return (
+		<button
+			aria-pressed={active}
+			type="button"
+			disabled={disabled}
+			className={classNames(
+				'bg-glass flex cursor-pointer gap-2 rounded-full p-2 px-3',
+				{
+					'!bg-foreground !text-background': active,
+					'pointer-events-none opacity-50': disabled,
+				},
+			)}
+			onClick={() => onToggle?.(!active)}
+		>
+			{renderIcon}
+			{children && (
+				<div className="font-roboto-slab font-slab text-center text-xs">
+					{children}
+				</div>
+			)}
+		</button>
+	);
+};

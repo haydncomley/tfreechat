@@ -58,7 +58,7 @@ export const AI_PROVIDERS: Provider[] = [
 		models: [
 			{
 				id: 'gemini-1.5-flash',
-				openRouterId: 'google/gemini-1.5-flash',
+				openRouterId: 'google/gemini-flash-1.5',
 				label: 'Gemini 1.5 Flash',
 				capabilities: { webSearch: true },
 			},

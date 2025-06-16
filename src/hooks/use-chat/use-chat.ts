@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { orderBy } from 'firebase/firestore';
 import { useQueryState } from 'nuqs';
 
-import { Agent, ChatMessage } from '~/api';
+import { Agent, AI_PROVIDERS, ChatMessage } from '~/api';
 
 import { useAuth } from '../use-auth';
 import { useCollectionSnapshot } from '../use-snapshot';
@@ -16,6 +16,11 @@ export const useChat = (id?: string | null) => {
 	const [chatId] = useQueryState('chat');
 	const wantedChatId = id ?? chatId;
 
+	const { data: prompt } = useQuery({
+		queryKey: ['sendingPrompt'],
+		queryFn: () => '',
+	});
+
 	const { data: responseStream } = useQuery({
 		queryKey: ['responseStream'],
 		queryFn: () => '',
@@ -25,6 +30,21 @@ export const useChat = (id?: string | null) => {
 		queryKey: ['responseStreamIsLoading'],
 		queryFn: () => false,
 	});
+
+	const getApiKey = (provider: string, model: string) => {
+		const modelDetails = AI_PROVIDERS.find(
+			(p) => p.id === provider,
+		)?.models.find((m) => m.id === model);
+
+		const openKey = modelDetails?.openRouterId
+			? localStorage.getItem('openrouter-key')
+			: null;
+
+		return {
+			secret: openKey || localStorage.getItem(`${provider}-key`),
+			isOpenRouter: !!modelDetails?.openRouterId && !!openKey,
+		};
+	};
 
 	const {
 		mutateAsync: sendMessage,
@@ -45,6 +65,8 @@ export const useChat = (id?: string | null) => {
 				const token = await user.getIdToken();
 				const functionsUrl = `https://us-central1-${process.env.NEXT_PUBLIC_FB_PROJECT_ID}.cloudfunctions.net`;
 
+				queryClient.setQueryData(['sendingPrompt'], options.text);
+
 				const response = await fetch(`${functionsUrl}/aiText`, {
 					method: 'POST',
 					headers: {
@@ -52,9 +74,8 @@ export const useChat = (id?: string | null) => {
 						Authorization: `Bearer ${token}`,
 					},
 					body: JSON.stringify({
-						text: options.text,
 						...options.ai,
-						isOpenRouter: options.isOpenRouter,
+						text: options.text,
 						chatId: chatId === null ? undefined : (chatId ?? wantedChatId),
 					}),
 				});
@@ -112,6 +133,7 @@ export const useChat = (id?: string | null) => {
 				);
 			} finally {
 				queryClient.setQueryData(['responseStreamIsLoading'], false);
+				queryClient.setQueryData(['sendingPrompt'], '');
 			}
 		},
 		onMutate: () => {
@@ -138,6 +160,9 @@ export const useChat = (id?: string | null) => {
 				const token = await user.getIdToken();
 				const functionsUrl = `https://us-central1-${process.env.NEXT_PUBLIC_FB_PROJECT_ID}.cloudfunctions.net`;
 
+				queryClient.setQueryData(['sendingPrompt'], options.text);
+				queryClient.setQueryData(['responseStreamIsLoading'], false);
+
 				const response = await fetch(`${functionsUrl}/aiImage`, {
 					method: 'POST',
 					headers: {
@@ -145,9 +170,8 @@ export const useChat = (id?: string | null) => {
 						Authorization: `Bearer ${token}`,
 					},
 					body: JSON.stringify({
-						text: options.text,
 						...options.ai,
-						isOpenRouter: options.isOpenRouter,
+						text: options.text,
 						chatId: chatId === null ? undefined : (chatId ?? wantedChatId),
 					}),
 				});
@@ -158,15 +182,13 @@ export const useChat = (id?: string | null) => {
 					}
 					throw new Error(`HTTP error! status: ${response.status}`);
 				}
-
-				const data = await response.json();
-				console.log(data);
 			} catch (err) {
 				throw new Error(
 					err instanceof Error ? err.message : 'An error occurred',
 				);
 			} finally {
 				queryClient.setQueryData(['responseStreamIsLoading'], false);
+				queryClient.setQueryData(['sendingPrompt'], '');
 			}
 		},
 		onMutate: () => {
@@ -186,9 +208,12 @@ export const useChat = (id?: string | null) => {
 		isSendingMessage,
 		createImage,
 		isCreatingImage,
+		isLoading: isSendingMessage || isCreatingImage,
 		responseStream,
 		isResponseStreaming,
 		messages: wantedChatId ? messages : [],
 		error: textError ?? imageError,
+		prompt,
+		getApiKey,
 	};
 };

@@ -2,6 +2,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import classNames from 'classnames';
 import { icons } from 'lucide-react';
 import * as React from 'react';
+import { useMemo } from 'react';
 
 import type { IconName } from '~/components';
 import { glass } from '~/utils';
@@ -51,34 +52,38 @@ type IconButtonProps = BaseButtonProps & {
 
 export type ButtonProps = DefaultButtonProps | IconButtonProps;
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-	(
-		{ className, variant, size, icon, iconPosition, children, ...props },
-		ref,
-	) => {
-		return (
-			<button
-				className={classNames(buttonVariants({ variant, size, className }))}
-				ref={ref}
-				{...props}
-			>
-				{size === 'icon' || (iconPosition === 'left' && icon)
-					? (() => {
-							const LucideIcon = icons[icon];
-							return <LucideIcon size={16} />;
-						})()
-					: null}
-				{children}
-				{size !== 'icon' && iconPosition === 'right' && icon
-					? (() => {
-							const LucideIcon = icons[icon];
-							return <LucideIcon size={16} />;
-						})()
-					: null}
-			</button>
-		);
-	},
-);
-Button.displayName = 'Button';
+const Button = ({
+	className,
+	variant,
+	size,
+	icon,
+	iconPosition,
+	children,
+	...props
+}: ButtonProps) => {
+	const renderIcon = useMemo(() => {
+		if (size === 'icon' || (iconPosition === 'left' && icon)) {
+			const LucideIcon = icons[icon];
+			return <LucideIcon size={16} />;
+		}
+		return null;
+	}, [size, iconPosition, icon]);
+
+	return (
+		<button
+			className={classNames(buttonVariants({ variant, size, className }))}
+			{...props}
+		>
+			{size === 'icon' || (iconPosition === 'left' && icon)
+				? (() => {
+						const LucideIcon = icons[icon];
+						return <LucideIcon size={16} />;
+					})()
+				: null}
+			{children}
+			{size !== 'icon' && iconPosition === 'right' && icon ? renderIcon : null}
+		</button>
+	);
+};
 
 export { Button, buttonVariants };
