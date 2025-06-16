@@ -3,7 +3,6 @@ export * from './providers';
 
 // Components
 export * from './button';
-export * from './conversation-item';
 export * from './dialog';
 export * from './message-dialog';
 export * from './toggle-button';
