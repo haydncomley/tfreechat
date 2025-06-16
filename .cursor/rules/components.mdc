@@ -11,45 +11,22 @@ src/components/
 └── index.ts                 # Global component exports
 
 # Component File Structure (component-name.tsx)
-## 1. Imports (in this order):
+## 1. Imports (in this order and only if relevant):
 import * as React from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
 import cn from 'classnames';
 // Other specific imports...
-## 2. Variant Definitions using CVA:
-const componentVariants = cva(
-  "base-classes-here", // Base styles
-  {
-    variants: {
-      variant: {
-        default: "default-variant-classes",
-        primary: "primary-variant-classes",
-        secondary: "secondary-variant-classes",
-      },
-      size: {
-        default: "default-size-classes",
-        sm: "small-size-classes",
-        lg: "large-size-classes",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
-  }
-);
-## 3. TypeScript Interface:
+## 2. TypeScript Interface:
 export interface ComponentNameProps
   extends React.HTMLAttributes<HTMLDivElement>, // or appropriate HTML element
     VariantProps<typeof componentVariants> {
   // Additional custom props here
 }
-## 4. Component Implementation:
+## 3. Component Implementation:
 const ComponentName = React.forwardRef<HTMLDivElement, ComponentNameProps>(
   ({ className, variant, size, ...props }, ref) => {
     return (
       <div
-        className={classNames(componentVariants({ variant, size, className }))}
+        className={className}
         ref={ref}
         {...props}
       >
