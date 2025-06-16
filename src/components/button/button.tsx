@@ -12,7 +12,7 @@ const buttonVariants = cva(
 	{
 		variants: {
 			variant: {
-				primary: 'bg-foreground text-background hover:bg-accent-quaternary/90',
+				primary: 'bg-foreground text-background hover:bg-accent-secondary',
 				secondary: classNames(
 					glass('default'),
 					'text-accent-foreground hover:bg-background-glass/80',

@@ -4,6 +4,11 @@
 		opacity: 0;
 	}
 
+	/* Keep fixed positioned elements visible (like mobile menu button) */
+	& [class*="fixed"] {
+		opacity: 1 !important;
+	}
+
 	/* Sidebar starts from left */
 	& > aside {
 		transform: translateX(-2rem);

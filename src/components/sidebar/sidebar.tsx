@@ -12,7 +12,7 @@ import { useChatHistory } from '~/hooks/use-chat';
 import { useDarkMode } from '~/hooks/use-darkmode';
 import { FormatChatDate, FormatDateSince } from '~/utils';
 
-import { MessageDialog, ToggleButton } from '../';
+import { Button, MessageDialog, ToggleButton } from '../';
 import styles from './sidebar.module.css';
 
 export const Sidebar = () => {
@@ -55,12 +55,14 @@ export const Sidebar = () => {
 
 	return (
 		<>
-			<div className="fixed top-4 left-4 !z-20 md:hidden">
-				<ToggleButton
-					active
-					icon="Menu"
-					onToggle={() => setShowMobileMenu(!showMobileMenu)}
-				></ToggleButton>
+			{/* Mobile menu button - always visible */}
+			<div className="fixed top-4 left-4 z-50 md:hidden">
+				<Button
+					size="icon"
+					variant="primary"
+					icon={showMobileMenu ? 'X' : 'Menu'}
+					onClick={() => setShowMobileMenu(!showMobileMenu)}
+				/>
 			</div>
 
 			<aside
@@ -70,6 +72,8 @@ export const Sidebar = () => {
 						'-translate-x-full md:translate-x-0': !showMenu,
 						'translate-x-0': showMenu,
 						[styles.sidebarMenuShown]: showMenu,
+						'bg-background/20 backdrop-blur-md md:bg-transparent md:backdrop-blur-none':
+							showMenu,
 					},
 				)}
 			>
