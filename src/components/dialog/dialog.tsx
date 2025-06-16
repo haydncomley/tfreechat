@@ -37,8 +37,10 @@ const Dialog = React.forwardRef<HTMLDialogElement, DialogProps>(
 				className="!z-50"
 			>
 				<div
-					className={`bg-background/25 fixed top-0 left-0 flex h-full w-full flex-col items-center justify-center backdrop-blur-2xl transition-all duration-200 ${
-						isAnimating ? 'opacity-100' : 'opacity-0'
+					className={`bg-background/25 fixed top-0 left-0 flex h-full w-full flex-col items-center justify-center transition-all duration-200 ${
+						isAnimating
+							? 'opacity-100 backdrop-blur-2xl'
+							: 'opacity-0 backdrop-blur-none'
 					}`}
 				>
 					<div
