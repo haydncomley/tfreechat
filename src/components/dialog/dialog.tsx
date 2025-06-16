@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 
 import { ToggleButton } from '~/components';
 import { glass } from '~/utils';
@@ -29,7 +30,7 @@ const Dialog = React.forwardRef<HTMLDialogElement, DialogProps>(
 
 		if (!open && !isAnimating) return null;
 
-		return (
+		const dialogContent = (
 			<dialog
 				ref={ref}
 				onClose={handleClose}
@@ -37,7 +38,7 @@ const Dialog = React.forwardRef<HTMLDialogElement, DialogProps>(
 				className="!z-50"
 			>
 				<div
-					className={`bg-background/25 fixed top-0 left-0 flex h-full w-full flex-col items-center justify-center transition-all duration-200 ${
+					className={`bg-background/25 fixed inset-0 flex h-full w-full flex-col items-center justify-center transition-all duration-200 ${
 						isAnimating
 							? 'opacity-100 backdrop-blur-2xl'
 							: 'opacity-0 backdrop-blur-none'
@@ -63,6 +64,11 @@ const Dialog = React.forwardRef<HTMLDialogElement, DialogProps>(
 				</div>
 			</dialog>
 		);
+
+		// Use portal to render at document body level to ensure it covers the entire screen
+		return typeof window !== 'undefined'
+			? createPortal(dialogContent, document.body)
+			: dialogContent;
 	},
 );
 
