@@ -12,18 +12,15 @@ const buttonVariants = cva(
 	{
 		variants: {
 			variant: {
-				primary: classNames(
-					glass('accent'),
-					'text-accent-foreground hover:bg-accent-quaternary/90',
-				),
+				primary: 'bg-foreground text-background hover:bg-accent-quaternary/90',
 				secondary: classNames(
 					glass('default'),
 					'text-accent-foreground hover:bg-background-glass/80',
 				),
 			},
 			size: {
-				default: 'h-[2.75rem] px-4 py-2',
-				icon: 'w-[2.75rem] h-[2.75rem]',
+				default: 'h-[2.75rem] px-4 py-2 min-w-[2.75rem]',
+				icon: 'w-[2.75rem] h-[2.75rem] min-w-[2.75rem]',
 			},
 		},
 		defaultVariants: {

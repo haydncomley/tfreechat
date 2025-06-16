@@ -241,7 +241,7 @@ export const FeedMessage = ({
 					{
 						'px-4 py-2.5': !isImage || error,
 						'min-h-[10rem] min-w-[10rem]': isImage && !error,
-						'bg-accent text-accent-foreground rounded-3xl rounded-br-sm':
+						'bg-accent-secondary text-accent-foreground rounded-3xl rounded-br-sm':
 							sender === 'user',
 						'bg-foreground text-background rounded-3xl rounded-bl-sm':
 							sender === 'ai',

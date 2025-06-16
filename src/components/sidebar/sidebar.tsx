@@ -12,7 +12,7 @@ import { useChatHistory } from '~/hooks/use-chat';
 import { useDarkMode } from '~/hooks/use-darkmode';
 import { FormatChatDate, FormatDateSince } from '~/utils';
 
-import { ToggleButton } from '../toggle-button';
+import { MessageDialog, ToggleButton } from '../';
 import styles from './sidebar.module.css';
 
 export const Sidebar = () => {
@@ -75,7 +75,7 @@ export const Sidebar = () => {
 			>
 				<div
 					className={classNames(
-						'bg-glass flex flex-col overflow-auto px-3 py-4',
+						'bg-glass flex flex-col gap-1 overflow-auto px-3 pt-4 pb-2',
 						styles.sidebarChats,
 					)}
 				>
@@ -114,16 +114,16 @@ export const Sidebar = () => {
 							No Chats
 						</div>
 					) : null}
-				</div>
 
-				<div className="flex items-center justify-center">
-					<Link
-						href="/"
-						className="flex items-center gap-1 p-4 text-xs font-black tracking-wider transition-all duration-75 hover:opacity-75"
-					>
-						NEW
-						<Plus className="h-4 w-4" />
-					</Link>
+					<div className="flex items-center justify-center">
+						<Link
+							href="/"
+							className="text-foreground-secondary flex items-center gap-1 p-4 text-xs font-black tracking-wider transition-all duration-75 hover:opacity-75"
+						>
+							NEW
+							<Plus className="h-4 w-4" />
+						</Link>
+					</div>
 				</div>
 
 				<div className="mt-auto flex flex-col gap-2">
@@ -181,68 +181,45 @@ export const Sidebar = () => {
 				</div>
 			</aside>
 
-			<dialog
-				onClose={() => setShowKeyInput(false)}
+			<MessageDialog
 				open={showKeyInput}
-				className="!z-50"
+				onClose={() => setShowKeyInput(false)}
+				title="Bring your own key"
+				description="API keys are stored within localStorage - they are only sent to the provider of choice on request."
 			>
-				<div className="bg-background/25 fixed top-0 left-0 flex h-full w-full flex-col items-center justify-center backdrop-blur-2xl">
-					<div className="bg-glass text-foreground flex w-md max-w-5/6 flex-col gap-4 p-4">
-						<div className="flex flex-col">
-							<h4 className="font-slab text-lg font-bold">
-								Bring your own key
-							</h4>
-							<p className="text-foreground/75 text-sm">
-								API keys are stored within localStorage - they are only sent to
-								the provider of choice on request.
-							</p>
-						</div>
-
-						<div>
-							<h2 className="text-xs font-black tracking-wider uppercase">
-								Open Router{' '}
-								<span className="text-foreground/75 font-normal">
-									- text only
-								</span>
-							</h2>
-							<input
-								className="w-full outline-0"
-								type="text"
-								placeholder="API Key"
-								defaultValue={apiKeys.openrouter ?? ''}
-								onChange={(e) => {
-									localStorage.setItem('openrouter-key', e.target.value);
-								}}
-							/>
-						</div>
-
-						{AI_PROVIDERS.map((provider) => (
-							<div key={provider.id}>
-								<h2 className="text-xs font-black tracking-wider uppercase">
-									{provider.label}
-								</h2>
-								<input
-									className="w-full outline-0"
-									type="text"
-									placeholder="API Key"
-									defaultValue={apiKeys[provider.id] ?? ''}
-									onChange={(e) => {
-										localStorage.setItem(`${provider.id}-key`, e.target.value);
-									}}
-								/>
-							</div>
-						))}
-
-						<div className="flex justify-end">
-							<ToggleButton
-								active={showKeyInput}
-								onToggle={setShowKeyInput}
-								icon="X"
-							></ToggleButton>
-						</div>
-					</div>
+				<div>
+					<h2 className="text-xs font-black tracking-wider uppercase">
+						Open Router{' '}
+						<span className="text-foreground/75 font-normal">- text only</span>
+					</h2>
+					<input
+						className="w-full outline-0"
+						type="text"
+						placeholder="API Key"
+						defaultValue={apiKeys.openrouter ?? ''}
+						onChange={(e) => {
+							localStorage.setItem('openrouter-key', e.target.value);
+						}}
+					/>
 				</div>
-			</dialog>
+
+				{AI_PROVIDERS.map((provider) => (
+					<div key={provider.id}>
+						<h2 className="text-xs font-black tracking-wider uppercase">
+							{provider.label}
+						</h2>
+						<input
+							className="w-full outline-0"
+							type="text"
+							placeholder="API Key"
+							defaultValue={apiKeys[provider.id] ?? ''}
+							onChange={(e) => {
+								localStorage.setItem(`${provider.id}-key`, e.target.value);
+							}}
+						/>
+					</div>
+				))}
+			</MessageDialog>
 		</>
 	);
 };
