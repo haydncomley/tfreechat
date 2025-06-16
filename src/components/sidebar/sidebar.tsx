@@ -29,7 +29,11 @@ export const Sidebar = () => {
 	}, [chats.map((chat) => chat.createdAt.toDate()).join(',')]);
 
 	return (
-		<aside className="hidden h-full w-xs shrink-0 flex-col p-4 pr-0 md:flex">
+		<aside
+			className={classNames(
+				'absolute top-4 right-4 left-4 z-10 shrink-0 flex-col md:relative md:top-0 md:right-0 md:left-0 md:flex md:h-full md:w-xs md:p-4 md:pr-0',
+			)}
+		>
 			<div className="bg-glass flex flex-col overflow-auto px-3 py-4">
 				{Object.entries(chatsGroupedByDate).map(([date, chats]) => (
 					<React.Fragment key={date}>
@@ -78,7 +82,14 @@ export const Sidebar = () => {
 				</Link>
 			</div>
 
-			<div className="bg-glass mt-auto flex items-center justify-between p-2">
+			<div
+				className={classNames(
+					'bg-glass mt-auto flex items-center justify-between p-2',
+					{
+						'hidden md:flex': user,
+					},
+				)}
+			>
 				<div className="flex items-center gap-2">
 					<div className="bg-background-glass h-10 w-10 !rounded-full border">
 						<div className="flex h-full w-full items-center justify-center">
