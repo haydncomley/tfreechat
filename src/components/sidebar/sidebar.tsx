@@ -19,6 +19,9 @@ export const Sidebar = () => {
 	const { user, signIn, signOut } = useAuth();
 	const { chats, currentChat, setCurrentChat } = useChatHistory();
 	const { toggleDarkMode, isDarkMode } = useDarkMode();
+	const [showMobileMenu, setShowMobileMenu] = useState(false);
+
+	const showMenu = showMobileMenu || !user;
 
 	const chatsGroupedByDate = useMemo(() => {
 		return chats.reduce(
@@ -52,9 +55,22 @@ export const Sidebar = () => {
 
 	return (
 		<>
+			<div className="fixed top-4 left-4 !z-20 md:hidden">
+				<ToggleButton
+					active
+					icon="Menu"
+					onToggle={() => setShowMobileMenu(!showMobileMenu)}
+				></ToggleButton>
+			</div>
+
 			<aside
 				className={classNames(
-					'absolute top-4 right-4 left-4 z-10 hidden shrink-0 flex-col md:relative md:top-0 md:right-0 md:left-0 md:flex md:h-full md:w-xs md:p-4 md:pr-0',
+					'absolute top-0 right-0 bottom-0 left-0 !z-10 flex shrink-0 flex-col p-4 pt-16 transition-all duration-200 md:relative md:!z-1 md:h-full md:w-xs md:p-4 md:pr-0',
+					{
+						'-translate-x-full md:translate-x-0': !showMenu,
+						'translate-x-0': showMenu,
+						[styles.sidebarMenuShown]: showMenu,
+					},
 				)}
 			>
 				<div
@@ -128,9 +144,6 @@ export const Sidebar = () => {
 					<div
 						className={classNames(
 							'bg-glass flex items-center justify-between p-2',
-							{
-								'hidden md:flex': user,
-							},
 						)}
 					>
 						<div className="flex items-center gap-2">
@@ -174,7 +187,7 @@ export const Sidebar = () => {
 				className="!z-50"
 			>
 				<div className="bg-background/25 fixed top-0 left-0 flex h-full w-full flex-col items-center justify-center backdrop-blur-2xl">
-					<div className="bg-glass text-foreground flex w-md flex-col gap-4 p-4">
+					<div className="bg-glass text-foreground flex w-md max-w-5/6 flex-col gap-4 p-4">
 						<div className="flex flex-col">
 							<h4 className="font-slab text-lg font-bold">
 								Bring your own key
