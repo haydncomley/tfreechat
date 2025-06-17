@@ -6,18 +6,13 @@
 	/* Colors */
 	--color-background: #fafafa;
 	--color-foreground: #171717;
-	--color-foreground-secondary: #9e9999;
 	--color-outline: #ffffff45;
 	--color-background-glass: #ffffff40;
 
-	--color-accent: #3badef;
+	--color-accent: #ff6378;
 	--color-accent-foreground: #fafafa;
 
-	--color-accent-secondary: #ff6378;
-
-	--color-accent-tertiary: #088531;
-	--color-accent-quaternary: #dda684;
-	--color-accent-foreground-secondary: #cec9c9;
+	/* Fonts */
 	--font-slab: 'Roboto Slab', serif;
 
 	/* Shadows */
@@ -42,8 +37,8 @@
 		}
 	}
 
-	--animate-slideInMessage: slideInMessage 0.5s ease-out;
-	@keyframes slideInMessage {
+	--animate-message-in: message-in 0.25s ease backwards;
+	@keyframes message-in {
 		0% {
 			opacity: 0;
 			transform: translateY(1rem) scale(0.95);
@@ -58,7 +53,6 @@
 @variant dark {
 	--color-background: #171717;
 	--color-foreground: #fafafa;
-	--color-foreground-secondary: #9e9999;
 	--color-outline: #c8c8c842;
 	--color-background-glass: #ffffff0f;
 	color-scheme: dark;
@@ -66,16 +60,11 @@
 
 @layer utilities {
 	.bg-glass {
-		@apply bg-background-glass rounded-2xl border shadow-lg shadow-black/5 backdrop-blur-2xl;
+		@apply bg-background-glass rounded-2xl border shadow-lg shadow-black/5 backdrop-blur-[.2rem];
 	}
 
 	.bg-glass-pane {
-		@apply bg-background-glass shadow-black/5 backdrop-blur-2xl;
-	}
-
-	.animate-slideInMessage {
-		animation: var(--animate-slideInMessage);
-		animation-fill-mode: backwards;
+		@apply bg-background-glass shadow-black/5 backdrop-blur-[.2rem];
 	}
 
 	.no-scrollbar::-webkit-scrollbar {
@@ -94,7 +83,7 @@
 	}
 
 	::selection {
-		@apply text-accent bg-background;
+		@apply text-accent bg-[#171717];
 	}
 
 	html,

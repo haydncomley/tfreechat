@@ -1,3 +1,4 @@
+import { useMutation } from '@tanstack/react-query';
 import { orderBy } from 'firebase/firestore';
 import { useQueryState } from 'nuqs';
 
@@ -9,6 +10,55 @@ import { useCollectionSnapshot } from '../use-snapshot';
 export const useChatHistory = () => {
 	const { user } = useAuth();
 	const [currentChatId, setCurrentChatId] = useQueryState('chat');
+
+	const { mutateAsync: deleteChat, isPending: isDeletingChat } = useMutation({
+		mutationKey: ['deleteChat'],
+		mutationFn: async (options: { chatId: string }) => {
+			const token = await user?.getIdToken();
+			const functionsUrl = `https://us-central1-${process.env.NEXT_PUBLIC_FB_PROJECT_ID}.cloudfunctions.net`;
+
+			const response = await fetch(`${functionsUrl}/chatDelete`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${token}`,
+				},
+				body: JSON.stringify({ chatId: options.chatId }),
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to delete chat');
+			}
+
+			return response.json();
+		},
+	});
+
+	const { mutateAsync: shareChat, isPending: isSharingChat } = useMutation({
+		mutationKey: ['shareChat'],
+		mutationFn: async (options: { chatId: string; shouldShare: boolean }) => {
+			const token = await user?.getIdToken();
+			const functionsUrl = `https://us-central1-${process.env.NEXT_PUBLIC_FB_PROJECT_ID}.cloudfunctions.net`;
+
+			const response = await fetch(`${functionsUrl}/chatShare`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${token}`,
+				},
+				body: JSON.stringify({
+					chatId: options.chatId,
+					shouldShare: options.shouldShare,
+				}),
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to share chat');
+			}
+
+			return response.json();
+		},
+	});
 
 	const chats = useCollectionSnapshot<Chat>(
 		user?.uid ? `users/${user.uid}/chats` : undefined,
@@ -30,5 +80,9 @@ export const useChatHistory = () => {
 		currentChatId,
 		currentChat: chats.find((chat) => chat.id === currentChatId) ?? null,
 		setCurrentChat,
+		deleteChat,
+		isDeletingChat,
+		shareChat,
+		isSharingChat,
 	};
 };

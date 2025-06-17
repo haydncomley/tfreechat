@@ -1,6 +1,7 @@
 import classNames from 'classnames';
 import { icons } from 'lucide-react';
 import * as React from 'react';
+import { useMemo } from 'react';
 
 import type { IconName } from '~/components';
 
@@ -19,7 +20,7 @@ export const ToggleButton = ({
 	icon,
 	disabled = false,
 }: ToggleButtonProps) => {
-	const renderIcon = React.useMemo(() => {
+	const renderIcon = useMemo(() => {
 		if (icon) {
 			const LucideIcon = icons[icon];
 			return <LucideIcon className="h-4 w-4" />;
@@ -33,8 +34,9 @@ export const ToggleButton = ({
 			type="button"
 			disabled={disabled}
 			className={classNames(
-				'bg-glass flex cursor-pointer gap-2 rounded-full p-2 px-3',
+				'bg-glass flex gap-2 rounded-full p-2 px-3 transition-all duration-75',
 				{
+					'cursor-pointer hover:scale-105 hover:opacity-80': onToggle,
 					'!bg-foreground !text-background': active,
 					'pointer-events-none opacity-50': disabled,
 				},

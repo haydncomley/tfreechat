@@ -9,7 +9,6 @@ import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import remarkGfm from 'remark-gfm';
 
 import { FormatDateSince } from '~/utils/formatting.utils';
-import { glass } from '~/utils/glass';
 
 export interface FeedMessageProps {
 	sender?: 'user' | 'ai';
@@ -79,7 +78,7 @@ export const FeedMessage = ({
 								{String(children).replace(/\n$/, '')}
 							</PrismAsync>
 						) : (
-							<code className="bg-background/10 mx-0.5 rounded-md px-1.5 py-0.5 whitespace-normal">
+							<code className="bg-background mx-0.5 rounded-md px-1.5 py-0.5 whitespace-normal">
 								{children}
 							</code>
 						);
@@ -147,7 +146,7 @@ export const FeedMessage = ({
 							<ul
 								className={classNames(
 									className,
-									'marker:text-background/75 ml-4 list-disc',
+									'marker:text-foreground/75 ml-4 list-disc',
 								)}
 							>
 								{children}
@@ -159,7 +158,7 @@ export const FeedMessage = ({
 							<ol
 								className={classNames(
 									className,
-									'marker:text-background/75 marker:font-slab ml-4 list-decimal marker:font-semibold',
+									'marker:text-foreground/75 marker:font-slab ml-4 list-decimal marker:font-semibold',
 								)}
 							>
 								{children}
@@ -242,14 +241,13 @@ export const FeedMessage = ({
 					{
 						'px-4 py-2.5': !isImage || error,
 						'min-h-[10rem] min-w-[10rem]': isImage && !error,
-						'bg-accent-secondary text-accent-foreground rounded-3xl rounded-br-sm':
+						'bg-accent text-accent-foreground rounded-3xl rounded-br-sm':
 							sender === 'user',
-						'text-foreground rounded-3xl rounded-bl-sm': sender === 'ai',
+						'text-foreground bg-glass !rounded-bl-sm': sender === 'ai',
 						'!bg-red-500 text-white': !!error,
 						'!bg-transparent': hasImageLoaded,
-						'text-background/50': !isImage && !text,
+						'text-foreground/50': !isImage && !text,
 					},
-					sender === 'ai' && !error && !hasImageLoaded ? glass('fill') : '',
 				)}
 			>
 				{renderContent}

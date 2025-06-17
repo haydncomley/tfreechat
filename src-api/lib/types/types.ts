@@ -35,9 +35,11 @@ export interface Agent {
 export interface Chat {
 	id: string;
 	createdAt: Timestamp;
+	updatedAt: Timestamp;
 	prompt: string;
 	summary?: string;
 	lastMessageId?: string;
+	public?: boolean;
 }
 
 export interface ChatMessage {

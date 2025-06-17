@@ -8,16 +8,18 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { AI_PROVIDERS } from '~/api';
 import { Button, MessageDialog, ToggleButton } from '~/components';
 import { useChat, useChatHistory } from '~/hooks/use-chat';
+import { FormatDateSince } from '~/utils';
 
 export const ActionBar = () => {
-	const { sendMessage, createImage, isLoading, getApiKey, error } = useChat();
-	const { currentChat } = useChatHistory();
+	const { sendMessage, createImage, isLoading, getApiKey } = useChat();
+	const { currentChat, chats, setCurrentChat, currentChatId } =
+		useChatHistory();
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
 	// State
 	const [prompt, setPrompt] = useState('');
 	const [webSearchActive] = useState(false);
-	const [createImageActive, setCreateImageActive] = useState(false);
+	const [createImageActive] = useState(false);
 	const [showErrorDialog, setShowErrorDialog] = useState(false);
 	const [errorDetails, setErrorDetails] = useState<{
 		title: string;
@@ -64,116 +66,6 @@ export const ActionBar = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [isLoading]);
 
-	// Show error dialog when error occurs
-	useEffect(() => {
-		if (error) {
-			const errorMessage = error.message.toLowerCase();
-
-			if (
-				errorMessage.includes('authentication') ||
-				errorMessage.includes('unauthorized')
-			) {
-				setErrorDetails({
-					title: 'Authentication Failed',
-					message:
-						'Your session has expired or you are not properly authenticated.',
-					solutions: [
-						'Sign out and sign back in',
-						'Refresh the page and try again',
-						'Check if you are still connected to the internet',
-					],
-				});
-			} else if (
-				errorMessage.includes('api key') ||
-				errorMessage.includes('invalid key')
-			) {
-				setErrorDetails({
-					title: 'Invalid API Key',
-					message: 'The API key for this provider is missing or invalid.',
-					solutions: [
-						'Check your API key in the settings',
-						'Verify the API key is correct and active',
-						'Ensure the API key has sufficient credits',
-						'Try using a different AI provider',
-					],
-				});
-			} else if (
-				errorMessage.includes('network') ||
-				errorMessage.includes('fetch') ||
-				errorMessage.includes('connection')
-			) {
-				setErrorDetails({
-					title: 'Connection Error',
-					message:
-						'Unable to connect to the AI service. Please check your internet connection.',
-					solutions: [
-						'Check your internet connection',
-						'Try refreshing the page',
-						'Wait a moment and try again',
-						'Check if the AI service is experiencing downtime',
-					],
-				});
-			} else if (
-				errorMessage.includes('rate limit') ||
-				errorMessage.includes('quota') ||
-				errorMessage.includes('limit exceeded')
-			) {
-				setErrorDetails({
-					title: 'Rate Limit Exceeded',
-					message:
-						'You have exceeded the rate limit or quota for this AI service.',
-					solutions: [
-						'Wait a few minutes before trying again',
-						'Check your API usage and limits',
-						'Consider upgrading your API plan',
-						'Try using a different AI provider',
-					],
-				});
-			} else if (errorMessage.includes('timeout')) {
-				setErrorDetails({
-					title: 'Request Timeout',
-					message: 'The request took too long to complete and timed out.',
-					solutions: [
-						'Try sending a shorter message',
-						'Check your internet connection speed',
-						'Wait a moment and try again',
-						'Try using a different AI model',
-					],
-				});
-			} else if (
-				errorMessage.includes('server error') ||
-				errorMessage.includes('500') ||
-				errorMessage.includes('503')
-			) {
-				setErrorDetails({
-					title: 'Server Error',
-					message: 'The AI service is experiencing technical difficulties.',
-					solutions: [
-						'Wait a few minutes and try again',
-						'Try using a different AI provider',
-						'Check the service status page',
-						'Contact support if the issue persists',
-					],
-				});
-			} else {
-				setErrorDetails({
-					title: 'Message Failed to Send',
-					message:
-						error.message ||
-						'An unexpected error occurred while sending your message.',
-					solutions: [
-						'Try sending the message again',
-						'Check your internet connection',
-						'Refresh the page and try again',
-						'Try using a different AI model or provider',
-					],
-				});
-			}
-
-			setShowErrorDialog(true);
-		}
-	}, [error]);
-
 	// Auto-resize textarea
 	useEffect(() => {
 		const textarea = textareaRef.current;
@@ -182,6 +74,20 @@ export const ActionBar = () => {
 			textarea.style.height = `${textarea.scrollHeight}px`;
 		}
 	}, [prompt]);
+
+	useEffect(() => {
+		if (currentChatId || !isLoading) return;
+		const lastChatIsNew = chats.find((chat) => chat.prompt === prompt);
+		const isRecent = lastChatIsNew
+			? FormatDateSince(lastChatIsNew.createdAt.toDate()) ===
+				FormatDateSince(new Date())
+			: false;
+
+		if (lastChatIsNew && isRecent) {
+			setCurrentChat(lastChatIsNew.id);
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [chats.length, isLoading, currentChatId]);
 
 	const handleSendMessage = async () => {
 		if (!prompt) return;
@@ -302,7 +208,7 @@ export const ActionBar = () => {
 					>
 						<textarea
 							ref={textareaRef}
-							className="placeholder:text-foreground-secondary w-full resize-none bg-transparent p-3 px-4 text-base text-inherit outline-0"
+							className="w-full resize-none bg-transparent p-3 px-4 text-base text-inherit outline-0 placeholder:text-inherit"
 							placeholder={`Ask ${modelDetails?.label ?? 'something'}...`}
 							value={prompt}
 							rows={1}
@@ -378,7 +284,6 @@ export const ActionBar = () => {
 						active={
 							createImageActive || modelDetails?.capabilities?.imageGeneration
 						}
-						onToggle={setCreateImageActive}
 						icon="Image"
 					>
 						Create Image

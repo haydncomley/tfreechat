@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from 'react';
 
 import { AI_PROVIDERS } from '~/api';
 import { useChat, useChatHistory } from '~/hooks/use-chat';
-import { useLoading } from '~/hooks/use-loading';
 
 import { ToggleButton } from '../toggle-button';
 import { FeedMessage } from './lib/feed-message';
@@ -13,9 +12,8 @@ import { FeedMessage } from './lib/feed-message';
 export const Feed = () => {
 	const { messages, responseStream, reasoningStream } = useChat();
 	const { currentChatId } = useChatHistory();
-	const { showComponents } = useLoading();
 	const feedRef = useRef<HTMLDivElement>(null);
-	const [autoScroll, setAutoScroll] = useState(false);
+	const [autoScroll, setAutoScroll] = useState(true);
 	const [lastChatId, setLastChatId] = useState<string | null>(null);
 
 	const scrollToBottom = () => {
@@ -27,7 +25,8 @@ export const Feed = () => {
 	useEffect(() => {
 		if (!feedRef.current || !autoScroll) return;
 		requestAnimationFrame(scrollToBottom);
-	}, [autoScroll, responseStream]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [responseStream]);
 
 	useEffect(() => {
 		if (currentChatId !== lastChatId && messages.length > 0) {
@@ -59,15 +58,12 @@ export const Feed = () => {
 						return (
 							<div
 								key={message.id}
-								className={classNames('flex w-full flex-col gap-4', {
-									'animate-fadeIn': !showComponents, // Existing messages fade in normally
-									'animate-slideInMessage': showComponents, // New messages during loading get special animation
-								})}
+								className={classNames(
+									'animate-message-in flex w-full origin-bottom flex-col gap-4',
+								)}
 								style={{
 									animationFillMode: 'backwards',
-									animationDelay: showComponents
-										? `${0.4 + (messages.length - 1 - index) * 0.08}s` // Messages start after main content, oldest first
-										: `${index * 0.05}s`, // Original timing for existing messages, now reversed
+									animationDelay: `${index * 0.08}s`, // Messages start after main content, oldest first
 								}}
 							>
 								<FeedMessage
@@ -106,6 +102,12 @@ export const Feed = () => {
 							</div>
 						);
 					})}
+
+				{!messages.length && !currentChatId ? (
+					<p className="font-slab text-foreground/75 text-center text-sm">
+						Get started by typing something below...
+					</p>
+				) : null}
 			</div>
 
 			<div

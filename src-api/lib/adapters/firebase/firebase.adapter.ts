@@ -6,6 +6,7 @@ import {
 } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
 import { onRequest } from 'firebase-functions/v2/https';
+import z from 'zod';
 
 import { isAuthenticated } from './utilities';
 import {
@@ -59,6 +60,7 @@ export const aiText = onRequest(async (req, res) => {
 				{
 					id: chatRef.id,
 					createdAt: FieldValue.serverTimestamp(),
+					updatedAt: FieldValue.serverTimestamp(),
 					prompt: req.body.text,
 				},
 				{ merge: true },
@@ -120,7 +122,6 @@ export const aiText = onRequest(async (req, res) => {
 			messages,
 			{
 				onChunk: async ({ chunk: part }) => {
-					console.log('part', part.type);
 					if (part.type === 'text-delta') {
 						fullText += part.textDelta;
 						res.write(`data: ${JSON.stringify({ text: part.textDelta })}\n\n`);
@@ -133,8 +134,8 @@ export const aiText = onRequest(async (req, res) => {
 					}
 				},
 				onFinish: async () => {
-					console.log('onFinish');
 					await newMessageRef.update({
+						updatedAt: FieldValue.serverTimestamp(),
 						reply: {
 							id: newMessageRef.id,
 							createdAt: FieldValue.serverTimestamp(),
@@ -146,7 +147,6 @@ export const aiText = onRequest(async (req, res) => {
 					});
 				},
 				onError: async (error) => {
-					console.log('onError');
 					console.error('Error streaming response', error);
 					await newMessageRef.update({
 						'reply.error': 'Something went wrong...',
@@ -159,7 +159,6 @@ export const aiText = onRequest(async (req, res) => {
 		res.end();
 	} catch (err) {
 		console.error(err);
-
 		if (messageId && chatId) {
 			const messageRef = firestore
 				.collection('users')
@@ -170,6 +169,7 @@ export const aiText = onRequest(async (req, res) => {
 				.doc(messageId);
 
 			await messageRef.update({
+				updatedAt: FieldValue.serverTimestamp(),
 				'reply.error': 'Error streaming response',
 			});
 		}
@@ -216,6 +216,7 @@ export const aiImage = onRequest(async (req, res) => {
 				{
 					id: chatRef.id,
 					createdAt: FieldValue.serverTimestamp(),
+					updatedAt: FieldValue.serverTimestamp(),
 					prompt: req.body.text,
 				},
 				{ merge: true },
@@ -267,6 +268,7 @@ export const aiImage = onRequest(async (req, res) => {
 		});
 
 		await newMessageRef.update({
+			updatedAt: FieldValue.serverTimestamp(),
 			'reply.image': file.publicUrl(),
 		});
 
@@ -284,10 +286,93 @@ export const aiImage = onRequest(async (req, res) => {
 				.doc(messageId);
 
 			await messageRef.update({
+				updatedAt: FieldValue.serverTimestamp(),
 				'reply.error': 'Error generating image',
 			});
 		}
 
 		res.status(500).json({ error: 'Error generating image' });
 	}
+});
+
+export const chatDelete = onRequest(async (req, res) => {
+	res.set('Access-Control-Allow-Origin', '*');
+	res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+	res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+	if (req.method === 'OPTIONS') {
+		res.status(204).send('');
+		return;
+	}
+
+	const user = await isAuthenticated(req.headers);
+
+	if (!user) {
+		res.status(401).json({ error: 'Unauthorized' });
+		return;
+	}
+
+	const { uid } = user;
+
+	if (!validateBody(z.object({ chatId: z.string() }), req.body)) {
+		res.status(400).json({ error: 'Invalid body' });
+		return;
+	}
+
+	const chatRef = firestore
+		.collection('users')
+		.doc(uid)
+		.collection('chats')
+		.doc(req.body.chatId);
+	await chatRef.delete();
+
+	res.status(200).json({ message: 'Chat deleted' });
+});
+
+export const chatShare = onRequest(async (req, res) => {
+	res.set('Access-Control-Allow-Origin', '*');
+	res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+	res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+	if (req.method === 'OPTIONS') {
+		res.status(204).send('');
+		return;
+	}
+
+	const user = await isAuthenticated(req.headers);
+
+	if (!user) {
+		res.status(401).json({ error: 'Unauthorized' });
+		return;
+	}
+
+	const { uid } = user;
+
+	if (
+		!validateBody(
+			z.object({ chatId: z.string(), shouldShare: z.boolean() }),
+			req.body,
+		)
+	) {
+		res.status(400).json({ error: 'Invalid body' });
+		return;
+	}
+
+	const chatRef = firestore
+		.collection('users')
+		.doc(uid)
+		.collection('chats')
+		.doc(req.body.chatId);
+	const chatData = await chatRef.get();
+
+	if (!chatData.exists) {
+		res.status(404).json({ error: 'Chat not found' });
+		return;
+	}
+
+	await chatRef.update({
+		public: req.body.shouldShare,
+	});
+
+	res.status(200).json({ message: 'Chat shared' });
 });

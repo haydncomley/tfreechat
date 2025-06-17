@@ -1,9 +1,10 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import classNames from 'classnames';
-import { LogIn, LogOut, Plus, User } from 'lucide-react';
+import { Loader2, LogOut, Plus, User, X } from 'lucide-react';
 import Link from 'next/link';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useMemo } from 'react';
 
 import { AI_PROVIDERS, Chat } from '~/api';
@@ -16,12 +17,13 @@ import { Button, MessageDialog, ToggleButton } from '../';
 import styles from './sidebar.module.css';
 
 export const Sidebar = () => {
-	const { user, signIn, signOut } = useAuth();
-	const { chats, currentChat, setCurrentChat } = useChatHistory();
+	const { user, signOut, loading } = useAuth();
+	const { chats, currentChat, setCurrentChat, deleteChat, isDeletingChat } =
+		useChatHistory();
 	const { toggleDarkMode, isDarkMode } = useDarkMode();
 	const [showMobileMenu, setShowMobileMenu] = useState(false);
 
-	const showMenu = showMobileMenu || !user;
+	const showMenu = showMobileMenu || (!user && loading);
 
 	const chatsGroupedByDate = useMemo(() => {
 		return chats.reduce(
@@ -53,6 +55,14 @@ export const Sidebar = () => {
 		return keys;
 	}, []);
 
+	useEffect(() => {
+		const hasAnyKeys = Object.values(apiKeys).some((key) => !!key);
+		if (!hasAnyKeys) {
+			setShowKeyInput(true);
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [JSON.stringify(chats)]);
+
 	return (
 		<>
 			{/* Mobile menu button - always visible */}
@@ -67,19 +77,19 @@ export const Sidebar = () => {
 
 			<aside
 				className={classNames(
-					'absolute top-0 right-0 bottom-0 left-0 !z-10 flex shrink-0 flex-col p-4 pt-16 transition-all duration-200 md:relative md:!z-1 md:h-full md:w-xs md:p-4 md:pr-0',
+					'absolute top-0 right-0 bottom-0 left-0 !z-10 flex shrink-0 flex-col p-4 pt-20 transition-all duration-200 md:relative md:!z-1 md:h-full md:w-xs md:p-4 md:pr-0',
 					{
 						'-translate-x-full md:translate-x-0': !showMenu,
 						'translate-x-0': showMenu,
 						[styles.sidebarMenuShown]: showMenu,
-						'bg-background/20 backdrop-blur-md md:bg-transparent md:backdrop-blur-none':
+						'bg-background-glass backdrop-blur-md md:bg-transparent md:backdrop-blur-none':
 							showMenu,
 					},
 				)}
 			>
 				<div
 					className={classNames(
-						'bg-glass flex flex-col gap-1 overflow-auto px-3 pt-4 pb-2',
+						'bg-glass flex flex-col gap-1 overflow-auto px-3 pt-4 pb-3',
 						styles.sidebarChats,
 					)}
 				>
@@ -95,20 +105,48 @@ export const Sidebar = () => {
 									onClick={(e) => {
 										e.preventDefault();
 										setCurrentChat(chat);
+										setShowMobileMenu(false);
 									}}
 									className={classNames(
-										'flex flex-col !rounded-lg border px-4 py-2.5 transition-all duration-75',
+										'group flex items-center justify-between gap-2 !rounded-lg border px-4 py-2.5 transition-all duration-75',
 										{
 											'border-outline/0 hover:opacity-75':
 												currentChat?.id !== chat.id,
-											'bg-glass': currentChat?.id === chat.id,
+											'bg-foreground text-background rounded-2xl':
+												currentChat?.id === chat.id,
 										},
 									)}
 								>
-									<span>{chat.prompt}</span>
-									<span className="font-slab -mt-0.5 text-xs opacity-75">
-										{FormatDateSince(chat.createdAt.toDate())}
-									</span>
+									<div className="flex flex-col truncate">
+										<span className="truncate whitespace-nowrap">
+											{chat.prompt}
+										</span>
+										<span className="font-slab -mt-0.5 text-xs opacity-75">
+											{FormatDateSince(chat.createdAt.toDate())}
+										</span>
+									</div>
+
+									<button
+										onClick={(e) => {
+											e.preventDefault();
+											e.stopPropagation();
+											deleteChat({ chatId: chat.id }).then(() => {
+												setCurrentChat(null);
+											});
+										}}
+										className={classNames(
+											'shrink-0 cursor-pointer transition-all duration-75 group-hover:opacity-100 hover:scale-110 hover:opacity-50',
+											{
+												'opacity-0': currentChat?.id !== chat.id,
+											},
+										)}
+									>
+										{isDeletingChat ? (
+											<Loader2 className="h-5 w-5 animate-spin" />
+										) : (
+											<X className="h-5 w-5" />
+										)}
+									</button>
 								</Link>
 							))}
 						</React.Fragment>
@@ -118,16 +156,16 @@ export const Sidebar = () => {
 							No Chats
 						</div>
 					) : null}
+				</div>
 
-					<div className="flex items-center justify-center">
-						<Link
-							href="/"
-							className="text-foreground-secondary flex items-center gap-1 p-4 text-xs font-black tracking-wider transition-all duration-75 hover:opacity-75"
-						>
-							NEW
-							<Plus className="h-4 w-4" />
-						</Link>
-					</div>
+				<div className="flex items-center justify-center">
+					<Link
+						href="/"
+						className="text-foreground/75 flex items-center gap-1 p-4 text-xs font-black tracking-wider transition-all duration-75 hover:opacity-75"
+					>
+						NEW
+						<Plus className="h-4 w-4" />
+					</Link>
 				</div>
 
 				<div className="mt-auto flex flex-col gap-2">
@@ -154,6 +192,13 @@ export const Sidebar = () => {
 							<div className="bg-background-glass h-10 w-10 !rounded-full border">
 								<div className="flex h-full w-full items-center justify-center">
 									<User className="h-4 w-4" />
+									{user?.photoURL ? (
+										<img
+											src={user.photoURL}
+											alt="Profile picture"
+											className="h-full w-full rounded-full"
+										/>
+									) : null}
 								</div>
 							</div>
 							<div>
@@ -166,21 +211,12 @@ export const Sidebar = () => {
 							</div>
 						</div>
 
-						{user ? (
-							<button
-								className="hover:bg-background-glass cursor-pointer rounded-full border p-2"
-								onClick={() => signOut()}
-							>
-								<LogOut className="h-4 w-4" />
-							</button>
-						) : (
-							<button
-								className="hover:bg-background-glass cursor-pointer rounded-full border p-2"
-								onClick={() => signIn()}
-							>
-								<LogIn className="h-4 w-4" />
-							</button>
-						)}
+						<button
+							className="hover:bg-background-glass cursor-pointer rounded-full border p-2"
+							onClick={() => signOut()}
+						>
+							<LogOut className="h-4 w-4" />
+						</button>
 					</div>
 				</div>
 			</aside>

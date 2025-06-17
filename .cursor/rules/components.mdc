@@ -22,8 +22,7 @@ export interface ComponentNameProps
   // Additional custom props here
 }
 ## 3. Component Implementation:
-const ComponentName = React.forwardRef<HTMLDivElement, ComponentNameProps>(
-  ({ className, variant, size, ...props }, ref) => {
+export const ComponentName = ({ className, variant, size }: ComponentNameProps) => {
     return (
       <div
         className={className}
@@ -33,10 +32,7 @@ const ComponentName = React.forwardRef<HTMLDivElement, ComponentNameProps>(
         {/* Component content */}
       </div>
     );
-  }
-);
-
-ComponentName.displayName = "ComponentName";
+};
 
 # Index File (index.ts)
 export * from './component-name';
@@ -49,7 +45,5 @@ export * from './component-name';
 Use Theme Variables - Leverage CSS custom properties from @theme in globals.css
 Glass Morphism Support - Include glass effect variants using theme shadow/backdrop variables
 Accessibility - Include proper ARIA attributes and focus states
-Variant System - Use CVA for type-safe variant management
-Ref Forwarding - Always use React.forwardRef for component composition
 Consistent Naming - Use PascalCase for components, camelCase for variants
 Class Merging - Always use classNames() utility for className composition

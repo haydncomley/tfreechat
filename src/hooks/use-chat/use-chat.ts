@@ -224,6 +224,7 @@ export const useChat = (id?: string | null) => {
 		orderBy('createdAt', 'asc'),
 	);
 
+	// TODO: This hook could do with some refactoring to split logic out, but it works for now.
 	return {
 		sendMessage,
 		isSendingMessage,

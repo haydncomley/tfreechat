@@ -7,13 +7,14 @@ import {
 	onAuthStateChanged,
 	User,
 	GoogleAuthProvider,
+	GithubAuthProvider,
 } from 'firebase/auth';
 import { useState, useEffect } from 'react';
 
 import { auth } from '~/utils/firebase.utils';
 
 export const useAuth = () => {
-	const [user, setUser] = useState<User | null>(null);
+	const [user, setUser] = useState<User | null | undefined>(undefined);
 	const [loading, setLoading] = useState(false);
 
 	useEffect(() => {
@@ -26,8 +27,11 @@ export const useAuth = () => {
 	}, []);
 
 	const { mutate: signIn } = useMutation({
-		mutationFn: async () => {
-			const provider = new GoogleAuthProvider();
+		mutationFn: async (vendor: 'google' | 'github') => {
+			const provider =
+				vendor === 'google'
+					? new GoogleAuthProvider()
+					: new GithubAuthProvider();
 			await signInWithPopup(auth, provider);
 		},
 	});

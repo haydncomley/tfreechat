@@ -4,7 +4,6 @@ export * from './providers';
 // Components
 export * from './button';
 export * from './dialog';
-export * from './loading-wrapper';
 export * from './message-dialog';
 export * from './toggle-button';
 export * from './sidebar';
