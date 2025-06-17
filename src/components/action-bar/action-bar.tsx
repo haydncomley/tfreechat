@@ -3,14 +3,25 @@
 import classNames from 'classnames';
 import { ChevronsUpDown } from 'lucide-react';
 import { parseAsString, useQueryState } from 'nuqs';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+	forwardRef,
+	useImperativeHandle,
+} from 'react';
 
 import { AI_PROVIDERS } from '~/api';
 import { Button, MessageDialog, ToggleButton } from '~/components';
 import { useChat, useChatHistory } from '~/hooks/use-chat';
 import { FormatDateSince } from '~/utils';
 
-export const ActionBar = () => {
+export interface ActionBarRef {
+	focusInput: () => void;
+}
+
+export const ActionBar = forwardRef<ActionBarRef>((props, ref) => {
 	const { sendMessage, createImage, isLoading, getApiKey } = useChat();
 	const { currentChat, chats, setCurrentChat, currentChatId } =
 		useChatHistory();
@@ -88,6 +99,13 @@ export const ActionBar = () => {
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [chats.length, isLoading, currentChatId]);
+
+	// Expose the focus method through the ref
+	useImperativeHandle(ref, () => ({
+		focusInput: () => {
+			textareaRef.current?.focus();
+		},
+	}));
 
 	const handleSendMessage = async () => {
 		if (!prompt) return;
@@ -311,4 +329,6 @@ export const ActionBar = () => {
 			</MessageDialog>
 		</>
 	);
-};
+});
+
+ActionBar.displayName = 'ActionBar';

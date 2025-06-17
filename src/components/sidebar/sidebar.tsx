@@ -12,6 +12,7 @@ import { useAuth } from '~/hooks/use-auth';
 import { useChatHistory } from '~/hooks/use-chat';
 import { useDarkMode } from '~/hooks/use-darkmode';
 import { FormatChatDate, FormatDateSince } from '~/utils';
+import { useActionBar } from '~/app/page';
 
 import { Button, MessageDialog, ToggleButton } from '../';
 import styles from './sidebar.module.css';
@@ -22,6 +23,7 @@ export const Sidebar = () => {
 		useChatHistory();
 	const { toggleDarkMode, isDarkMode } = useDarkMode();
 	const [showMobileMenu, setShowMobileMenu] = useState(false);
+	const actionBar = useActionBar();
 
 	const showMenu = showMobileMenu || (!user && loading);
 
@@ -159,13 +161,20 @@ export const Sidebar = () => {
 				</div>
 
 				<div className="flex items-center justify-center">
-					<Link
-						href="/"
-						className="text-foreground/75 flex items-center gap-1 p-4 text-xs font-black tracking-wider transition-all duration-75 hover:opacity-75"
+					<button
+						onClick={() => {
+							setCurrentChat(null);
+							setShowMobileMenu(false);
+							// Focus the input after a short delay to ensure the context is available
+							setTimeout(() => {
+								actionBar?.focusInput();
+							}, 100);
+						}}
+						className="text-foreground/75 flex cursor-pointer items-center gap-1 p-4 text-xs font-black tracking-wider transition-all duration-75 hover:opacity-75"
 					>
 						NEW
 						<Plus className="h-4 w-4" />
-					</Link>
+					</button>
 				</div>
 
 				<div className="mt-auto flex flex-col gap-2">
