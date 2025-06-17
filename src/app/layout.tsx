@@ -22,7 +22,7 @@ const robotoSlab = Roboto_Slab({
 });
 
 export const metadata: Metadata = {
-	title: 'tfreechat - Cloneathon 2025',
+	title: 'tfree.chat - Cloneathon 2025',
 	description:
 		'An open-source, bring-your-own-key, AI platform for interfacing with multiple different models.',
 };
