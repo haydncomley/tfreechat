@@ -9,12 +9,15 @@ import {
 	useRef,
 	useState,
 	useImperativeHandle,
+	createContext,
 } from 'react';
 
 import { AI_PROVIDERS } from '~/api';
 import { Button, MessageDialog, ToggleButton } from '~/components';
 import { useChat, useChatHistory } from '~/hooks/use-chat';
 import { FormatDateSince } from '~/utils';
+
+export const ActionBarContext = createContext<ActionBarRef | null>(null);
 
 export interface ActionBarRef {
 	focusInput: () => void;

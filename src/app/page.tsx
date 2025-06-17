@@ -2,10 +2,11 @@
 
 import classNames from 'classnames';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, createContext } from 'react';
+import { useEffect, useRef } from 'react';
 
 import {
 	ActionBar,
+	ActionBarContext,
 	ActionBarRef,
 	Feed,
 	Sidebar,
@@ -15,8 +16,6 @@ import { useAuth } from '~/hooks/use-auth';
 import { useChat, useChatHistory } from '~/hooks/use-chat';
 
 import styles from './page.module.css';
-
-export const ActionBarContext = createContext<ActionBarRef | null>(null);
 
 export default function Home() {
 	const { replace } = useRouter();

@@ -8,13 +8,12 @@ import React, { use, useEffect, useState } from 'react';
 import { useMemo } from 'react';
 
 import { AI_PROVIDERS, Chat } from '~/api';
-import { ActionBarContext } from '~/app/page';
 import { useAuth } from '~/hooks/use-auth';
 import { useChatHistory } from '~/hooks/use-chat';
 import { useDarkMode } from '~/hooks/use-darkmode';
 import { FormatChatDate, FormatDateSince } from '~/utils';
 
-import { Button, MessageDialog, ToggleButton } from '../';
+import { ActionBarContext, Button, MessageDialog, ToggleButton } from '../';
 import styles from './sidebar.module.css';
 
 export const Sidebar = () => {

@@ -1,7 +1,7 @@
 'use client';
 
-import Xarrow from 'react-xarrows';
 import classNames from 'classnames';
+import Xarrow from 'react-xarrows';
 
 interface WelcomeScreenProps {
 	show: boolean;
