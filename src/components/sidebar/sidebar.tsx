@@ -109,7 +109,7 @@ export const Sidebar = () => {
 										setShowMobileMenu(false);
 									}}
 									className={classNames(
-										'group flex items-center justify-between gap-2 !rounded-lg border px-4 py-2.5 transition-all duration-75',
+										'group flex items-center justify-between gap-2 !rounded-2xl border px-4 py-2.5 transition-all duration-75',
 										{
 											'border-outline/0 hover:opacity-75':
 												currentChat?.id !== chat.id,

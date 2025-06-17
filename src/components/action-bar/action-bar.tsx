@@ -233,7 +233,7 @@ export const ActionBar = ({
 
 	return (
 		<>
-			<div className="bg-glass-pane flex w-full flex-col-reverse gap-3 rounded-t-md border border-b-0 p-4 shadow-md md:flex-col md:gap-2.5 md:rounded-t-2xl">
+			<div className="bg-glass-pane flex w-full flex-col-reverse gap-3 rounded-t-md border border-b-0 p-4 shadow-md md:flex-col md:gap-2.5 md:rounded-t-3xl">
 				<div className="flex w-full items-end gap-2">
 					<div
 						className={classNames(

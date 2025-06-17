@@ -78,7 +78,7 @@ export const WelcomeScreen = ({ show, className }: WelcomeScreenProps) => {
 
 			{/* Main welcome message */}
 			<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-				<div className="bg-glass-pane font-slab rounded-xl border p-6 text-center shadow-lg backdrop-blur-md">
+				<div className="bg-glass-pane font-slab rounded-3xl border p-6 text-center shadow-lg backdrop-blur-md">
 					<div className="mb-2 text-3xl font-bold">tfree.chat</div>
 					<div className="text-foreground/75 max-w-sm text-sm">
 						Your AI-powered chat experience starts here. Ask questions, get
