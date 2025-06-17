@@ -10,6 +10,7 @@ export * from './sidebar';
 export * from './feed';
 export * from './action-bar';
 export * from './welcome-screen';
+export * from './conversation-history';
 
 import { icons } from 'lucide-react';
 

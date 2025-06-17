@@ -7,6 +7,7 @@ import { AI_PROVIDERS } from '~/api';
 import { useChat, useChatHistory } from '~/hooks/use-chat';
 
 import { ToggleButton } from '../toggle-button';
+import { ConversationHistory } from '../conversation-history';
 import { FeedMessage } from './lib/feed-message';
 
 export const Feed = () => {
@@ -21,6 +22,16 @@ export const Feed = () => {
 	const feedRef = useRef<HTMLDivElement>(null);
 	const [autoScroll, setAutoScroll] = useState(true);
 	const [lastChatId, setLastChatId] = useState<string | null>(null);
+
+	// Mock conversation data for demonstration
+	const mockConversations = [
+		[{ id: '1', summary: 'Initial AI question', isActive: true }],
+		[
+			{ id: '2', summary: 'Follow-up question', isActive: true },
+			{ id: '3', summary: 'Change my follow-up question', isActive: false },
+		],
+		[{ id: '4', summary: 'Final answer', isActive: true }],
+	];
 
 	const scrollToBottom = () => {
 		feedRef.current?.scrollTo({
@@ -45,6 +56,11 @@ export const Feed = () => {
 
 	return (
 		<div className="relative mx-auto flex w-full grow-1 flex-col items-center overflow-hidden">
+			{/* Conversation History - Responsive positioning */}
+			<div className="absolute top-20 left-4 z-10 md:top-4 md:left-0">
+				<ConversationHistory vertices={mockConversations} />
+			</div>
+
 			<div
 				className="relative mx-auto flex w-full grow-1 flex-col-reverse gap-4 overflow-auto px-4 py-4"
 				ref={feedRef}
