@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Make sure to write code that is as up to date as possible. We are targeting React 19, but if you have to use older implementations then do so.
