@@ -12,7 +12,7 @@
 	--color-accent: #ff6378;
 	--color-accent-foreground: #fafafa;
 
-	--color-tooltip: #fafafa64;
+	--color-tooltip: #171717bf;
 
 	/* Fonts */
 	--font-slab: 'Roboto Slab', serif;
@@ -50,6 +50,16 @@
 			transform: translateY(0) scale(1);
 		}
 	}
+
+	--animate-fade-in: fade-in 0.8s ease 0.5s both;
+	@keyframes fade-in {
+		0% {
+			opacity: 0;
+		}
+		100% {
+			opacity: 1;
+		}
+	}
 }
 
 @variant dark {
@@ -57,6 +67,7 @@
 	--color-foreground: #fafafa;
 	--color-outline: #c8c8c842;
 	--color-background-glass: #ffffff0f;
+	--color-tooltip: #fafafabf;
 	color-scheme: dark;
 }
 

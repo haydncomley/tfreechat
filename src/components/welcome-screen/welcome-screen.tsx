@@ -5,13 +5,19 @@ import classNames from 'classnames';
 
 interface WelcomeScreenProps {
 	show: boolean;
+	className?: string;
 }
 
-export const WelcomeScreen = ({ show }: WelcomeScreenProps) => {
+export const WelcomeScreen = ({ show, className }: WelcomeScreenProps) => {
 	if (!show) return null;
 
 	return (
-		<div className="pointer-events-none absolute inset-0 z-20">
+		<div
+			className={classNames(
+				'animate-fade-in pointer-events-none absolute inset-0 z-20',
+				className,
+			)}
+		>
 			{/* Anchor points for arrows - Small screens */}
 			<div
 				id="mobile-input-target"
@@ -41,7 +47,7 @@ export const WelcomeScreen = ({ show }: WelcomeScreenProps) => {
 				id="input-help-text"
 				className="absolute bottom-64 left-1/2 block -translate-x-1/2 md:hidden"
 			>
-				<div className="text-tooltip font-slab py-4 text-center text-2xl">
+				<div className="text-tooltip font-slab text-md py-4 text-center">
 					<div className="font-semibold">Start Chatting</div>
 					<div className="text-sm">Type your message below</div>
 				</div>
@@ -51,7 +57,7 @@ export const WelcomeScreen = ({ show }: WelcomeScreenProps) => {
 				id="menu-help-text"
 				className="absolute top-16 left-1/2 block md:hidden"
 			>
-				<div className="text-tooltip font-slab px-4 text-left text-2xl">
+				<div className="text-tooltip font-slab text-md px-4 text-left">
 					<div className="font-semibold">Menu</div>
 					<div className="text-sm">Tap here to open</div>
 				</div>
@@ -62,7 +68,7 @@ export const WelcomeScreen = ({ show }: WelcomeScreenProps) => {
 				id="chat-history-text"
 				className="absolute top-50 left-4 hidden md:left-[calc(20rem+2rem)] md:block"
 			>
-				<div className="text-tooltip font-slab px-4 text-3xl">
+				<div className="text-tooltip font-slab px-4 text-xl">
 					<div className="font-semibold">Chat History</div>
 					<div className="text-sm">
 						Your previous conversations will appear here
@@ -73,7 +79,7 @@ export const WelcomeScreen = ({ show }: WelcomeScreenProps) => {
 			{/* Main welcome message */}
 			<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
 				<div className="bg-glass-pane font-slab rounded-xl border p-6 text-center shadow-lg backdrop-blur-md">
-					<div className="mb-2 text-xl font-bold">Welcome to TreeChat! 🌳</div>
+					<div className="mb-2 text-xl font-bold">Welcome to tfree.chat!</div>
 					<div className="text-foreground/75 max-w-sm text-sm">
 						Your AI-powered chat experience starts here. Ask questions, get
 						help, or just have a conversation!
@@ -86,7 +92,7 @@ export const WelcomeScreen = ({ show }: WelcomeScreenProps) => {
 				id="input-text"
 				className="absolute bottom-80 left-7/11 hidden -translate-x-1/2 py-4 md:block"
 			>
-				<div className="text-tooltip font-slab text-center text-3xl">
+				<div className="text-tooltip font-slab text-center text-xl">
 					<div className="font-semibold">Start Here</div>
 					<div className="text-sm">Get started by typing something below</div>
 				</div>
@@ -97,14 +103,14 @@ export const WelcomeScreen = ({ show }: WelcomeScreenProps) => {
 				id="settings-text"
 				className="absolute bottom-64 left-12 hidden md:left-[8rem] md:block"
 			>
-				<div className="text-tooltip font-slab py-4 text-center text-3xl">
+				<div className="text-tooltip font-slab py-4 text-center text-xl">
 					<div className="font-semibold">Settings & Profile</div>
 					<div className="text-sm">API keys, dark mode</div>
 				</div>
 			</div>
 
 			{/* Arrows for small screens */}
-			<div className="block md:hidden">
+			<div className="animate-fade-in block md:hidden">
 				<Xarrow
 					start="input-help-text"
 					end="mobile-input-target"
@@ -135,7 +141,7 @@ export const WelcomeScreen = ({ show }: WelcomeScreenProps) => {
 			</div>
 
 			{/* Arrows for medium+ screens */}
-			<div className="hidden md:block">
+			<div className="animate-fade-in hidden md:block">
 				<Xarrow
 					start="chat-history-text"
 					end="chat-history-target"

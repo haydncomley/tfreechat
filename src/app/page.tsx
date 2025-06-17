@@ -14,10 +14,10 @@ export default function Home() {
 	const { replace } = useRouter();
 	const { user } = useAuth();
 	const { messages } = useChat();
-	const { currentChatId } = useChatHistory();
+	const { currentChatId, chats } = useChatHistory();
 
-	// Show welcome screen for new chats (no messages and no current chat)
-	const showWelcomeScreen = !currentChatId && messages.length === 0;
+	// Show welcome screen only when user has no chats and no messages
+	const showWelcomeScreen = chats.length === 0 && messages.length === 0;
 
 	useEffect(() => {
 		if (user === null) replace('/login');
@@ -31,14 +31,14 @@ export default function Home() {
 				styles.page,
 			)}
 		>
-			<div className="flex h-full w-full max-w-[64rem] justify-center gap-4">
+			<div className="relative flex h-full w-full max-w-[64rem] justify-center gap-4">
+				<WelcomeScreen show={showWelcomeScreen} />
 				<Sidebar />
 				<main className="flex h-full w-full flex-col overflow-hidden transition-all duration-200 md:pr-4">
 					<Feed />
 					<ActionBar />
 				</main>
 			</div>
-			<WelcomeScreen show={showWelcomeScreen} />
 		</div>
 	);
 }
