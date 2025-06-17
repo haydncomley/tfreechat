@@ -9,6 +9,13 @@ export const textGenerationSchema = z.object({
 	model: z.string(),
 	provider: z.string(),
 	chatId: z.string().optional(),
+	previousMessage: z
+		.object({
+			id: z.string(),
+			timestamp: z.string(),
+			path: z.string().optional(),
+		})
+		.optional(),
 	isOpenRouter: z.boolean().optional(),
 	capabilities: z
 		.object({

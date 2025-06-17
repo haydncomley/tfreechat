@@ -11,7 +11,13 @@ import { FeedMessage } from './lib/feed-message';
 
 export const Feed = () => {
 	const { messages, responseStream, reasoningStream } = useChat();
-	const { currentChatId } = useChatHistory();
+	const {
+		currentChatId,
+		branchId,
+		setBranchId,
+		viewBranchId,
+		setViewBranchId,
+	} = useChatHistory();
 	const feedRef = useRef<HTMLDivElement>(null);
 	const [autoScroll, setAutoScroll] = useState(true);
 	const [lastChatId, setLastChatId] = useState<string | null>(null);
@@ -82,7 +88,37 @@ export const Feed = () => {
 										date={message.reply?.createdAt?.toDate()}
 										error={message.reply?.error ?? undefined}
 										meta={model?.label ? [model?.label] : undefined}
+										actions={
+											!message.reply?.error ? (
+												<ToggleButton
+													active={branchId === message.id}
+													onToggle={() => {
+														if (branchId === message.id) {
+															setBranchId(null);
+														} else {
+															setBranchId(message.id);
+														}
+													}}
+													icon="GitBranchPlus"
+												/>
+											) : null
+										}
 									/>
+								) : null}
+
+								{message.path.length > 1 ? (
+									<div className="flex gap-2">
+										{message.path.map((id) => (
+											<ToggleButton
+												key={id}
+												active={viewBranchId === id}
+												onToggle={() => {
+													setViewBranchId(viewBranchId === id ? null : id);
+												}}
+												icon="GitBranch"
+											/>
+										))}
+									</div>
 								) : null}
 
 								{index === 0 && !message.reply ? (
@@ -102,6 +138,12 @@ export const Feed = () => {
 							</div>
 						);
 					})}
+
+				{!messages.length && !currentChatId ? (
+					<p className="font-slab text-foreground/75 text-center text-sm">
+						Get started by typing something below.
+					</p>
+				) : null}
 			</div>
 
 			<div

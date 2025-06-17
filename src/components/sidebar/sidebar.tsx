@@ -4,15 +4,15 @@
 import classNames from 'classnames';
 import { Loader2, LogOut, Plus, User, X } from 'lucide-react';
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import { useMemo } from 'react';
 
 import { AI_PROVIDERS, Chat } from '~/api';
+import { ActionBarContext } from '~/app/page';
 import { useAuth } from '~/hooks/use-auth';
 import { useChatHistory } from '~/hooks/use-chat';
 import { useDarkMode } from '~/hooks/use-darkmode';
 import { FormatChatDate, FormatDateSince } from '~/utils';
-import { useActionBar } from '~/app/page';
 
 import { Button, MessageDialog, ToggleButton } from '../';
 import styles from './sidebar.module.css';
@@ -23,7 +23,7 @@ export const Sidebar = () => {
 		useChatHistory();
 	const { toggleDarkMode, isDarkMode } = useDarkMode();
 	const [showMobileMenu, setShowMobileMenu] = useState(false);
-	const actionBar = useActionBar();
+	const actionBar = use(ActionBarContext);
 
 	const showMenu = showMobileMenu || (!user && loading);
 
@@ -65,6 +65,8 @@ export const Sidebar = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [JSON.stringify(chats)]);
 
+	console.log(user?.uid);
+
 	return (
 		<>
 			{/* Mobile menu button - always visible */}
@@ -84,8 +86,6 @@ export const Sidebar = () => {
 						'-translate-x-full md:translate-x-0': !showMenu,
 						'translate-x-0': showMenu,
 						[styles.sidebarMenuShown]: showMenu,
-						'bg-background-glass backdrop-blur-md md:bg-transparent md:backdrop-blur-none':
-							showMenu,
 					},
 				)}
 			>
@@ -154,8 +154,11 @@ export const Sidebar = () => {
 						</React.Fragment>
 					))}
 					{!chats.length ? (
-						<div className="font-slab text-bold text-center text-sm">
-							No Chats
+						<div className="text-center text-sm font-bold">
+							No chat history
+							<p className="text-foreground/75 font-normal">
+								Start a new chat to get started!
+							</p>
 						</div>
 					) : null}
 				</div>

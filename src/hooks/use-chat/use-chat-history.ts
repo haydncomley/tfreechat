@@ -10,6 +10,8 @@ import { useCollectionSnapshot } from '../use-snapshot';
 export const useChatHistory = () => {
 	const { user } = useAuth();
 	const [currentChatId, setCurrentChatId] = useQueryState('chat');
+	const [branchId, setBranchId] = useQueryState('branch');
+	const [viewBranchId, setViewBranchId] = useQueryState('viewBranch');
 
 	const { mutateAsync: deleteChat, isPending: isDeletingChat } = useMutation({
 		mutationKey: ['deleteChat'],
@@ -84,5 +86,9 @@ export const useChatHistory = () => {
 		isDeletingChat,
 		shareChat,
 		isSharingChat,
+		branchId,
+		setBranchId,
+		viewBranchId,
+		setViewBranchId,
 	};
 };

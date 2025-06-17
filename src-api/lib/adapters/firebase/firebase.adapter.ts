@@ -3,6 +3,7 @@ import {
 	DocumentReference,
 	FieldValue,
 	getFirestore,
+	Timestamp,
 } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
 import { onRequest } from 'firebase-functions/v2/https';
@@ -53,34 +54,62 @@ export const aiText = onRequest(async (req, res) => {
 	try {
 		chatId = req.body.chatId ?? '';
 		const userRef = firestore.collection('users').doc(uid);
+		let messageHistory: ChatMessage[] = [];
+		const batch = firestore.batch();
+
+		const chatRef = chatId
+			? userRef.collection('chats').doc(chatId)
+			: userRef.collection('chats').doc();
+		const messagesRef = chatRef.collection('messages');
+		const newMessageRef = messagesRef.doc();
 
 		if (!chatId) {
-			const chatRef = userRef.collection('chats').doc();
-			await chatRef.set(
-				{
-					id: chatRef.id,
-					createdAt: FieldValue.serverTimestamp(),
-					updatedAt: FieldValue.serverTimestamp(),
-					prompt: req.body.text,
-				},
-				{ merge: true },
-			);
+			batch.set(chatRef, {
+				id: chatRef.id,
+				createdAt: FieldValue.serverTimestamp(),
+				updatedAt: FieldValue.serverTimestamp(),
+				prompt: req.body.text,
+				lastMessageId: newMessageRef.id,
+			});
 			chatId = chatRef.id;
 		}
 
-		const chatRef = userRef.collection('chats').doc(chatId);
-		const messagesRef = chatRef.collection('messages');
-		const messagesDoc = await messagesRef.orderBy('createdAt', 'asc').get();
-		const messagesData =
-			messagesDoc.docs
-				.filter((doc) => doc.exists)
-				.map((doc) => doc.data() as ChatMessage) ?? [];
+		if (req.body.previousMessage) {
+			const messagesDoc = await messagesRef
+				.where('path', 'array-contains', req.body.previousMessage.id)
+				.where(
+					'createdAt',
+					'<=',
+					Timestamp.fromDate(new Date(req.body.previousMessage.timestamp)),
+				)
+				.orderBy('createdAt', 'asc')
+				.get();
+			messageHistory =
+				messagesDoc.docs
+					.filter((doc) => doc.exists)
+					.map((doc) => doc.data() as ChatMessage) ?? [];
+			if (!req.body.previousMessage.path) {
+				messageHistory.forEach((message) => {
+					batch.update(messagesRef.doc(message.id), {
+						path: [...(message.path ?? []), newMessageRef.id],
+					});
+				});
+			}
+		}
 
-		const newMessageRef = messagesRef.doc();
 		messageId = newMessageRef.id;
-		await newMessageRef.set({
+		batch.set(newMessageRef, {
 			id: newMessageRef.id,
-			path: [...messagesData.map((message) => message.id), newMessageRef.id],
+			path: [
+				...(messageHistory.at(-1)?.path
+					? !req.body.previousMessage?.path
+						? []
+						: messageHistory.at(-1)!.path
+					: [newMessageRef.id]),
+				...(messageHistory.length && !req.body.previousMessage?.path
+					? [newMessageRef.id]
+					: []),
+			],
 			createdAt: FieldValue.serverTimestamp(),
 			prompt: req.body.text,
 			ai: {
@@ -89,7 +118,10 @@ export const aiText = onRequest(async (req, res) => {
 			},
 		});
 
-		const messages = messagesData
+		const batchPromise = batch.commit();
+
+		const messages = messageHistory
+			.slice(-5)
 			.map((message) => [
 				{
 					role: 'user' as const,
@@ -134,8 +166,8 @@ export const aiText = onRequest(async (req, res) => {
 					}
 				},
 				onFinish: async () => {
+					await batchPromise;
 					await newMessageRef.update({
-						updatedAt: FieldValue.serverTimestamp(),
 						reply: {
 							id: newMessageRef.id,
 							createdAt: FieldValue.serverTimestamp(),
@@ -147,6 +179,7 @@ export const aiText = onRequest(async (req, res) => {
 					});
 				},
 				onError: async (error) => {
+					await batchPromise;
 					console.error('Error streaming response', error);
 					await newMessageRef.update({
 						'reply.error': 'Something went wrong...',
@@ -169,7 +202,6 @@ export const aiText = onRequest(async (req, res) => {
 				.doc(messageId);
 
 			await messageRef.update({
-				updatedAt: FieldValue.serverTimestamp(),
 				'reply.error': 'Error streaming response',
 			});
 		}
@@ -236,7 +268,7 @@ export const aiImage = onRequest(async (req, res) => {
 		messageId = newMessageRef.id;
 		await newMessageRef.set({
 			id: newMessageRef.id,
-			path: [...messagesData.map((message) => message.id), newMessageRef.id],
+			path: messagesData.at(-1)?.path ?? [],
 			createdAt: FieldValue.serverTimestamp(),
 			prompt: req.body.text,
 			ai: {
@@ -248,6 +280,10 @@ export const aiImage = onRequest(async (req, res) => {
 				createdAt: FieldValue.serverTimestamp(),
 				image: '',
 			},
+		});
+		await chatRef.update({
+			lastMessageId: newMessageRef.id,
+			updatedAt: FieldValue.serverTimestamp(),
 		});
 
 		res.setHeader('Cache-Control', 'no-cache');
@@ -268,7 +304,6 @@ export const aiImage = onRequest(async (req, res) => {
 		});
 
 		await newMessageRef.update({
-			updatedAt: FieldValue.serverTimestamp(),
 			'reply.image': file.publicUrl(),
 		});
 
@@ -286,7 +321,6 @@ export const aiImage = onRequest(async (req, res) => {
 				.doc(messageId);
 
 			await messageRef.update({
-				updatedAt: FieldValue.serverTimestamp(),
 				'reply.error': 'Error generating image',
 			});
 		}

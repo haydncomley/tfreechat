@@ -1,20 +1,20 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { orderBy } from 'firebase/firestore';
-import { useQueryState } from 'nuqs';
+import { orderBy, where } from 'firebase/firestore';
 
 import { Agent, AI_PROVIDERS, ChatMessage } from '~/api';
 
 import { useAuth } from '../use-auth';
 import { useCollectionSnapshot } from '../use-snapshot';
+import { useChatHistory } from './use-chat-history';
 
 export const useChat = (id?: string | null) => {
 	const { user } = useAuth();
 	const queryClient = useQueryClient();
 
-	const [chatId] = useQueryState('chat');
-	const wantedChatId = id ?? chatId;
+	const { currentChatId, viewBranchId } = useChatHistory();
+	const wantedChatId = id ?? currentChatId;
 
 	const { data: prompt } = useQuery({
 		queryKey: ['sendingPrompt'],
@@ -67,6 +67,8 @@ export const useChat = (id?: string | null) => {
 			ai: Agent;
 			chatId?: string | null;
 			isOpenRouter?: boolean;
+			previousMessage?: ChatMessage;
+			isNewBranch?: boolean;
 		}) => {
 			try {
 				if (!user) throw new Error('User not authenticated');
@@ -87,7 +89,23 @@ export const useChat = (id?: string | null) => {
 					body: JSON.stringify({
 						...options.ai,
 						text: options.text,
-						chatId: chatId === null ? undefined : (chatId ?? wantedChatId),
+						chatId:
+							currentChatId === null
+								? undefined
+								: (currentChatId ?? wantedChatId),
+						previousMessage: options.previousMessage
+							? {
+									id: options.isNewBranch
+										? options.previousMessage.id
+										: options.previousMessage.path.at(0),
+									timestamp: new Date(
+										options.previousMessage.createdAt.toMillis() + 1000,
+									).toISOString(),
+									path: options.isNewBranch
+										? undefined
+										: options.previousMessage.path.at(0),
+								}
+							: undefined,
 					}),
 				});
 
@@ -193,7 +211,10 @@ export const useChat = (id?: string | null) => {
 					body: JSON.stringify({
 						...options.ai,
 						text: options.text,
-						chatId: chatId === null ? undefined : (chatId ?? wantedChatId),
+						chatId:
+							currentChatId === null
+								? undefined
+								: (currentChatId ?? wantedChatId),
 					}),
 				});
 
@@ -221,7 +242,10 @@ export const useChat = (id?: string | null) => {
 		user?.uid && wantedChatId
 			? `users/${user.uid}/chats/${wantedChatId}/messages`
 			: undefined,
-		orderBy('createdAt', 'asc'),
+		...[
+			orderBy('createdAt', 'asc'),
+			...(viewBranchId ? [where('path', 'array-contains', viewBranchId)] : []),
+		],
 	);
 
 	// TODO: This hook could do with some refactoring to split logic out, but it works for now.

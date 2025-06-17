@@ -6,9 +6,9 @@ export const FormatDateSince = (date: Date) => {
 	const diffInHours = Math.floor(diffInMinutes / 60);
 	const diffInDays = Math.floor(diffInHours / 24);
 
-	if (diffInDays === 0) {
-		if (diffInHours === 0) {
-			if (diffInMinutes === 0) {
+	if (diffInDays <= 0) {
+		if (diffInHours <= 0) {
+			if (diffInMinutes <= 0) {
 				return 'Just now';
 			}
 			return `${diffInMinutes} minutes ago`;
@@ -31,19 +31,19 @@ export const FormatChatDate = (date: Date) => {
 	const diffInHours = Math.floor(diffInMinutes / 60);
 	const diffInDays = Math.floor(diffInHours / 24);
 
-	if (diffInDays === 0) {
+	if (diffInDays <= 0) {
 		return 'Today';
 	}
 
-	if (diffInDays === 1) {
+	if (diffInDays <= 1) {
 		return 'Yesterday';
 	}
 
-	if (diffInDays < 7) {
+	if (diffInDays <= 7) {
 		return 'Last week';
 	}
 
-	if (diffInDays < 30) {
+	if (diffInDays <= 28) {
 		return 'Last month';
 	}
 

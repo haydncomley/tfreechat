@@ -19,6 +19,7 @@ export interface FeedMessageProps {
 	error?: string;
 	isDynamic?: boolean;
 	className?: string;
+	actions?: React.ReactNode | React.ReactNode[];
 }
 
 export const FeedMessage = ({
@@ -30,6 +31,7 @@ export const FeedMessage = ({
 	error,
 	isDynamic,
 	className,
+	actions,
 }: FeedMessageProps) => {
 	const isImage = typeof image === 'string';
 	const hasImageLoaded = isImage && image.length > 0;
@@ -237,7 +239,7 @@ export const FeedMessage = ({
 		>
 			<div
 				className={classNames(
-					'flex max-w-full flex-col gap-2 overflow-hidden shadow-sm md:max-w-2/3',
+					'relative flex max-w-5/6 flex-col gap-2 shadow-sm md:max-w-2/3',
 					{
 						'px-4 py-2.5': !isImage || error,
 						'min-h-[10rem] min-w-[10rem]': isImage && !error,
@@ -251,6 +253,12 @@ export const FeedMessage = ({
 				)}
 			>
 				{renderContent}
+
+				{actions ? (
+					<div className="absolute bottom-0 left-full z-10 flex translate-x-2 gap-1.5">
+						{actions}
+					</div>
+				) : null}
 			</div>
 
 			<div className="font-slab text-foreground/75 flex gap-1.5 text-xs">

@@ -45,7 +45,7 @@ export const useCollectionSnapshot = <T>(
 			}
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [path]);
+	}, [path, JSON.stringify(queryConstraints)]);
 
 	return data as T[];
 };

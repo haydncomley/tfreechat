@@ -8,7 +8,6 @@ import {
 	useMemo,
 	useRef,
 	useState,
-	forwardRef,
 	useImperativeHandle,
 } from 'react';
 
@@ -21,10 +20,21 @@ export interface ActionBarRef {
 	focusInput: () => void;
 }
 
-export const ActionBar = forwardRef<ActionBarRef>((props, ref) => {
-	const { sendMessage, createImage, isLoading, getApiKey } = useChat();
-	const { currentChat, chats, setCurrentChat, currentChatId } =
-		useChatHistory();
+export const ActionBar = ({
+	ref,
+}: {
+	ref: React.RefObject<ActionBarRef | null>;
+}) => {
+	const { sendMessage, createImage, isLoading, getApiKey, messages } =
+		useChat();
+	const {
+		currentChat,
+		chats,
+		setCurrentChat,
+		currentChatId,
+		branchId,
+		setBranchId,
+	} = useChatHistory();
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
 	// State
@@ -126,6 +136,10 @@ export const ActionBar = forwardRef<ActionBarRef>((props, ref) => {
 			return;
 		}
 
+		const prevMessage = branchId
+			? messages.find((m) => m.id === branchId)
+			: messages.at(-1);
+
 		try {
 			switch (actionType) {
 				case 'image':
@@ -153,6 +167,8 @@ export const ActionBar = forwardRef<ActionBarRef>((props, ref) => {
 							},
 						},
 						chatId: currentChat?.id,
+						previousMessage: prevMessage,
+						isNewBranch: !!branchId,
 					});
 					break;
 			}
@@ -207,12 +223,14 @@ export const ActionBar = forwardRef<ActionBarRef>((props, ref) => {
 			}
 
 			setShowErrorDialog(true);
+		} finally {
+			setBranchId(null);
 		}
 	};
 
 	return (
 		<>
-			<div className="bg-glass-pane flex w-full flex-col-reverse gap-3 border-t p-4 md:flex-col md:gap-2.5 md:rounded-t-2xl md:border-x md:shadow-md">
+			<div className="bg-glass-pane flex w-full flex-col-reverse gap-3 rounded-t-md border border-b-0 p-4 shadow-md md:flex-col md:gap-2.5 md:rounded-t-2xl">
 				<div className="flex w-full items-end gap-2">
 					<div
 						className={classNames(
@@ -329,6 +347,4 @@ export const ActionBar = forwardRef<ActionBarRef>((props, ref) => {
 			</MessageDialog>
 		</>
 	);
-});
-
-ActionBar.displayName = 'ActionBar';
+};
