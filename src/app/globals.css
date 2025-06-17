@@ -12,6 +12,8 @@
 	--color-accent: #ff6378;
 	--color-accent-foreground: #fafafa;
 
+	--color-tooltip: #fafafa64;
+
 	/* Fonts */
 	--font-slab: 'Roboto Slab', serif;
 

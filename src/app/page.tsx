@@ -4,14 +4,20 @@ import classNames from 'classnames';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-import { ActionBar, Feed, Sidebar } from '~/components';
+import { ActionBar, Feed, Sidebar, WelcomeScreen } from '~/components';
 import { useAuth } from '~/hooks/use-auth';
+import { useChat, useChatHistory } from '~/hooks/use-chat';
 
 import styles from './page.module.css';
 
 export default function Home() {
 	const { replace } = useRouter();
 	const { user } = useAuth();
+	const { messages } = useChat();
+	const { currentChatId } = useChatHistory();
+
+	// Show welcome screen for new chats (no messages and no current chat)
+	const showWelcomeScreen = !currentChatId && messages.length === 0;
 
 	useEffect(() => {
 		if (user === null) replace('/login');
@@ -21,7 +27,7 @@ export default function Home() {
 	return (
 		<div
 			className={classNames(
-				'flex h-full w-full justify-center gap-4 bg-cover bg-center bg-no-repeat',
+				'relative flex h-full w-full justify-center gap-4 bg-cover bg-center bg-no-repeat',
 				styles.page,
 			)}
 		>
@@ -32,6 +38,7 @@ export default function Home() {
 					<ActionBar />
 				</main>
 			</div>
+			<WelcomeScreen show={showWelcomeScreen} />
 		</div>
 	);
 }

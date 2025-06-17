@@ -103,11 +103,11 @@ export const Feed = () => {
 						);
 					})}
 
-				{!messages.length && !currentChatId ? (
+				{/* {!messages.length && !currentChatId ? (
 					<p className="font-slab text-foreground/75 text-center text-sm">
 						Get started by typing something below...
 					</p>
-				) : null}
+				) : null} */}
 			</div>
 
 			<div

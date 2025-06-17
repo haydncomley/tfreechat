@@ -33,7 +33,9 @@
 		"react-dom": "^19.0.0",
 		"react-markdown": "^10.1.0",
 		"react-syntax-highlighter": "^15.6.1",
+		"react-xarrows": "^1.1.1",
 		"remark-gfm": "^4.0.1",
+		"roughjs": "^4.6.6",
 		"zod": "^3.25.64"
 	},
 	"devDependencies": {

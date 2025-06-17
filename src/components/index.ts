@@ -9,6 +9,7 @@ export * from './toggle-button';
 export * from './sidebar';
 export * from './feed';
 export * from './action-bar';
+export * from './welcome-screen';
 
 import { icons } from 'lucide-react';
 
