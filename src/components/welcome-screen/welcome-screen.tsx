@@ -101,7 +101,7 @@ export const WelcomeScreen = ({ show, className }: WelcomeScreenProps) => {
 			{/* Settings annotation */}
 			<div
 				id="settings-text"
-				className="absolute bottom-64 left-12 hidden md:left-[8rem] md:block"
+				className="absolute bottom-64 left-12 hidden md:left-[12rem] md:block"
 			>
 				<div className="text-tooltip font-slab py-4 text-center text-xl">
 					<div className="font-semibold">Settings & Profile</div>
