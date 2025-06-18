@@ -13,7 +13,6 @@ export default function Home() {
 	const { replace } = useRouter();
 	const { signIn, user } = useAuth();
 
-	console.log(user);
 	useEffect(() => {
 		if (user) replace('/');
 		// eslint-disable-next-line react-hooks/exhaustive-deps

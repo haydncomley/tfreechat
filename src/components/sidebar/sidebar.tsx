@@ -163,8 +163,6 @@ export const Sidebar = ({
 		return keys;
 	}, []);
 
-	console.log(currentChat);
-
 	return (
 		<>
 			{/* Mobile menu button - always visible */}
@@ -185,21 +183,16 @@ export const Sidebar = ({
 						icon="Share2"
 						disabled={isSharingChat}
 						onClick={() => {
+							const url = `${window.location.origin}/share/${user?.uid}/${currentChat.id}`;
 							if (currentChat.public) {
-								window.open(
-									`${window.location.origin}/share/${currentChat.id}`,
-									'_blank',
-								);
+								window.open(url, '_blank');
 							} else {
 								shareChat({
 									chatId: currentChat.id,
 									shouldShare: true,
 								}).then(() => {
 									if (!currentChat.public) {
-										window.open(
-											`${window.location.origin}/share/${currentChat.id}`,
-											'_blank',
-										);
+										window.open(url, '_blank');
 									}
 								});
 							}

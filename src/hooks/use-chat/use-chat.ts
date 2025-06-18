@@ -9,12 +9,13 @@ import { useAuth } from '../use-auth';
 import { useCollectionSnapshot } from '../use-snapshot';
 import { useChatHistory } from './use-chat-history';
 
-export const useChat = (id?: string | null) => {
+export const useChat = (view?: { userId: string; chatId: string } | null) => {
 	const { user } = useAuth();
 	const queryClient = useQueryClient();
 
 	const { currentChatId, viewBranchId, currentChat } = useChatHistory();
-	const wantedChatId = id ?? currentChatId;
+	const wantedChatId = view?.chatId ?? currentChatId;
+	const wantedUserId = view?.userId ?? user?.uid;
 
 	const { data: prompt } = useQuery({
 		queryKey: ['sendingPrompt'],
@@ -347,8 +348,8 @@ export const useChat = (id?: string | null) => {
 	});
 
 	const messages = useCollectionSnapshot<ChatMessage>(
-		user?.uid && wantedChatId
-			? `users/${user.uid}/chats/${wantedChatId}/messages`
+		wantedUserId && wantedChatId
+			? `users/${wantedUserId}/chats/${wantedChatId}/messages`
 			: undefined,
 		{
 			filters: [
@@ -361,7 +362,7 @@ export const useChat = (id?: string | null) => {
 			],
 			retainDataBetweenQueries: !!currentChat,
 		},
-		[viewBranchId, currentChat?.lastMessageId],
+		[viewBranchId, currentChat?.lastMessageId, wantedUserId, wantedChatId],
 	);
 
 	// TODO: This hook could do with some refactoring to split logic out, but it works for now.

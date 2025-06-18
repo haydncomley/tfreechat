@@ -13,8 +13,8 @@ import { ActionBarContext } from '../action-bar';
 import { ToggleButton } from '../toggle-button';
 import { FeedMessage } from './lib/feed-message';
 
-export const Feed = ({ id }: { id?: string | null }) => {
-	const { messages, responseStream, reasoningStream } = useChat(id);
+export const Feed = ({ view }: { view?: Parameters<typeof useChat>[0] }) => {
+	const { messages, responseStream, reasoningStream } = useChat(view);
 	const {
 		currentChatId,
 		branchId,
@@ -66,8 +66,6 @@ export const Feed = ({ id }: { id?: string | null }) => {
 		}
 	}, [currentChatId, messages.length, lastChatId]);
 
-	console.log(messages);
-
 	return (
 		<div className="relative mx-auto flex w-full grow-1 flex-col items-center overflow-hidden">
 			{/* Conversation History - Responsive positioning */}
@@ -79,7 +77,7 @@ export const Feed = ({ id }: { id?: string | null }) => {
 				className={classNames(
 					'relative mx-auto flex w-full grow-1 flex-col-reverse gap-4 overflow-auto px-4 py-4',
 					{
-						'my-auto !grow-0': !!id,
+						'my-auto !grow-0': !!view,
 					},
 				)}
 				ref={feedRef}
@@ -125,7 +123,7 @@ export const Feed = ({ id }: { id?: string | null }) => {
 									error={message.reply?.error ?? undefined}
 									meta={model?.label ? [model?.label] : undefined}
 									actions={
-										!message.reply?.error && index !== 0 ? (
+										!message.reply?.error && index !== 0 && !view ? (
 											<ToggleButton
 												active={branchId === message.id}
 												onToggle={() => {
@@ -199,7 +197,7 @@ export const Feed = ({ id }: { id?: string | null }) => {
 				})}
 			</div>
 
-			{id && !messages.length ? (
+			{view && !messages.length ? (
 				<div className="flex h-full w-full flex-col items-center justify-center gap-3">
 					<SearchX className="h-10 w-10" />
 					<p className="font-slab text-lg font-bold">There is nothing here</p>

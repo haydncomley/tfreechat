@@ -5,10 +5,14 @@ import { useParams } from 'next/navigation';
 
 import { Feed } from '~/components';
 
-import styles from '../../page.module.css';
+import styles from '../../../page.module.css';
 
 export default function Page() {
-	const { id } = useParams();
+	const { chatId, userId } = useParams();
+	const view = {
+		userId: userId as string,
+		chatId: chatId as string,
+	};
 
 	return (
 		<div
@@ -19,7 +23,7 @@ export default function Page() {
 		>
 			<div className="relative flex h-full w-full max-w-[50rem] justify-center gap-4">
 				<main className="flex h-full w-full flex-col overflow-hidden transition-all duration-200 md:pr-4">
-					<Feed id={id ? id[0] : null} />
+					<Feed view={view} />
 				</main>
 			</div>
 		</div>
