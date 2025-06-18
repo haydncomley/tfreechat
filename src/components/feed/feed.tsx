@@ -41,7 +41,7 @@ export const Feed = () => {
 		});
 	};
 
-	console.log(messages);
+	console.log(currentChat);
 
 	useEffect(() => {
 		if (!feedRef.current || !autoScroll) return;
@@ -135,21 +135,36 @@ export const Feed = () => {
 								/>
 							) : null}
 
-							{message.path.length > 1 ? (
+							{currentChat?.branches?.[message.id]?.length ? (
 								<div className="flex gap-2">
-									{message.path.map((id) => (
-										<ToggleButton
-											key={id}
-											active={
-												viewBranchId === id ||
-												(!viewBranchId && id === currentChat?.lastMessageId)
-											}
-											onToggle={() => {
-												setViewBranchId(viewBranchId === id ? null : id);
-											}}
-											icon="GitBranch"
-										/>
-									))}
+									<ToggleButton
+										active={viewBranchId === message.path.at(0)}
+										onToggle={() => {
+											setViewBranchId(message.path.at(0) ?? null);
+										}}
+										icon="GitCommitVertical"
+									/>
+									{Object.values(currentChat.branches[message.id]).map(
+										(branch) => (
+											<ToggleButton
+												key={branch.id}
+												active={
+													branch.id === viewBranchId ||
+													!!messages.find(
+														(message) => message.path.at(0) === branch.id,
+													)
+												}
+												onToggle={() => {
+													setViewBranchId(branch.id);
+												}}
+												icon="GitMerge"
+											>
+												<div className="capitalize">
+													{branch.prompt?.slice(0, 10)}...
+												</div>
+											</ToggleButton>
+										),
+									)}
 								</div>
 							) : null}
 

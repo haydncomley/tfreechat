@@ -70,7 +70,7 @@ export const aiText = onRequest(async (req, res) => {
 
 		if (req.body.previousMessage) {
 			const messagesDoc = await messagesRef
-				.where('path', 'array-contains', req.body.previousMessage.id)
+				.where('path', 'array-contains', req.body.previousMessage.path)
 				.where(
 					'createdAt',
 					'<=',
@@ -78,11 +78,13 @@ export const aiText = onRequest(async (req, res) => {
 				)
 				.orderBy('createdAt', 'asc')
 				.get();
+
 			messageHistory =
 				messagesDoc.docs
 					.filter((doc) => doc.exists)
 					.map((doc) => doc.data() as ChatMessage) ?? [];
-			if (!req.body.previousMessage.path) {
+
+			if (req.body.previousMessage.newBranch) {
 				messageHistory.forEach((message) => {
 					batch.update(messagesRef.doc(message.id), {
 						path: [...(message.path ?? []), newMessageRef.id],
@@ -90,17 +92,15 @@ export const aiText = onRequest(async (req, res) => {
 				});
 
 				batch.update(chatRef, {
-					branches: {
-						[req.body.previousMessage.id]: FieldValue.arrayUnion({
-							id: newMessageRef.id,
-							prompt: req.body.text.slice(0, 25),
-						}),
-					},
+					[`branches.${req.body.previousMessage.id}`]: FieldValue.arrayUnion({
+						id: newMessageRef.id,
+						prompt: req.body.text.slice(0, 25),
+					}),
 				});
 			}
 		}
 
-		const newMessagePath = !req.body.previousMessage?.path
+		const newMessagePath = req.body.previousMessage?.newBranch
 			? [newMessageRef.id]
 			: (messageHistory.at(-1)?.path ?? [newMessageRef.id]);
 
@@ -267,7 +267,7 @@ export const aiImage = onRequest(async (req, res) => {
 
 		if (req.body.previousMessage) {
 			const messagesDoc = await messagesRef
-				.where('path', 'array-contains', req.body.previousMessage.id)
+				.where('path', 'array-contains', req.body.previousMessage.path)
 				.where(
 					'createdAt',
 					'<=',
@@ -279,7 +279,7 @@ export const aiImage = onRequest(async (req, res) => {
 				messagesDoc.docs
 					.filter((doc) => doc.exists)
 					.map((doc) => doc.data() as ChatMessage) ?? [];
-			if (!req.body.previousMessage.path) {
+			if (req.body.previousMessage.newBranch) {
 				messageHistory.forEach((message) => {
 					batch.update(messagesRef.doc(message.id), {
 						path: [...(message.path ?? []), newMessageRef.id],
@@ -288,16 +288,9 @@ export const aiImage = onRequest(async (req, res) => {
 			}
 		}
 
-		const newMessagePath = [
-			...(messageHistory.at(-1)?.path
-				? !req.body.previousMessage?.path
-					? []
-					: messageHistory.at(-1)!.path
-				: [newMessageRef.id]),
-			...(messageHistory.length && !req.body.previousMessage?.path
-				? [newMessageRef.id]
-				: []),
-		];
+		const newMessagePath = req.body.previousMessage?.newBranch
+			? [newMessageRef.id]
+			: (messageHistory.at(-1)?.path ?? [newMessageRef.id]);
 
 		messageId = newMessageRef.id;
 		batch.set(newMessageRef, {
@@ -391,12 +384,22 @@ export const chatDelete = onRequest(async (req, res) => {
 		return;
 	}
 
+	const batch = firestore.batch();
+
 	const chatRef = firestore
 		.collection('users')
 		.doc(uid)
 		.collection('chats')
 		.doc(req.body.chatId);
-	await chatRef.delete();
+
+	const messagesRef = chatRef.collection('messages');
+	const messages = await messagesRef.get();
+	messages.forEach((message) => {
+		batch.delete(message.ref);
+	});
+	batch.delete(chatRef);
+
+	await batch.commit();
 
 	res.status(200).json({ message: 'Chat deleted' });
 });

@@ -100,15 +100,12 @@ export const useChat = (id?: string | null) => {
 								: (currentChatId ?? wantedChatId),
 						previousMessage: options.previousMessage
 							? {
-									id: options.isNewBranch
-										? options.previousMessage.id
-										: options.previousMessage.path.at(0),
+									id: options.previousMessage.id,
 									timestamp: new Date(
 										options.previousMessage.createdAt.toMillis() + 1000,
 									).toISOString(),
-									path: options.isNewBranch
-										? undefined
-										: options.previousMessage.path.at(0),
+									path: options.previousMessage.path.at(0),
+									newBranch: options.isNewBranch,
 								}
 							: undefined,
 					}),
@@ -362,7 +359,7 @@ export const useChat = (id?: string | null) => {
 						? [where('path', 'array-contains', currentChat.lastMessageId)]
 						: []),
 			],
-			retainDataBetweenQueries: true,
+			retainDataBetweenQueries: !!currentChat,
 		},
 		[viewBranchId, currentChat?.lastMessageId],
 	);

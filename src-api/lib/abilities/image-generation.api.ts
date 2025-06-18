@@ -13,7 +13,8 @@ export const imageGenerationSchema = z.object({
 		.object({
 			id: z.string(),
 			timestamp: z.string(),
-			path: z.string().optional(),
+			path: z.string(),
+			newBranch: z.boolean().optional(),
 		})
 		.optional(),
 });
