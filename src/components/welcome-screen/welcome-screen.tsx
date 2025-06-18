@@ -34,11 +34,11 @@ export const WelcomeScreen = ({ show, className }: WelcomeScreenProps) => {
 			{/* Anchor points for arrows - Small screens */}
 			<div
 				id="mobile-input-target"
-				className="absolute bottom-38 left-1/6 block h-1 w-1 md:hidden"
+				className="absolute bottom-38 left-3/5 block h-1 w-1 md:hidden"
 			/>
 			<div
 				id="mobile-menu-target"
-				className="absolute top-20 left-9 block h-1 w-1 md:hidden"
+				className="absolute top-8 left-18 block h-1 w-1 md:hidden"
 			/>
 
 			{/* Anchor points for arrows - Medium+ screens */}
@@ -48,7 +48,7 @@ export const WelcomeScreen = ({ show, className }: WelcomeScreenProps) => {
 			/>
 			<div
 				id="input-area-target"
-				className="absolute bottom-40 left-[27rem] hidden h-1 w-1 md:block"
+				className="absolute bottom-40 left-3/5 hidden h-1 w-1 md:block"
 			/>
 			<div
 				id="settings-target"
@@ -58,7 +58,7 @@ export const WelcomeScreen = ({ show, className }: WelcomeScreenProps) => {
 			{/* Small screen annotations */}
 			<div
 				id="input-help-text"
-				className="absolute bottom-64 left-2/6 block -translate-x-1/2 md:hidden"
+				className="absolute bottom-64 left-1/3 block -translate-x-1/2 md:hidden"
 			>
 				<div className="text-foreground py-4 text-center text-lg">
 					<div className="font-slab font-bold">Start Chatting</div>
@@ -72,7 +72,7 @@ export const WelcomeScreen = ({ show, className }: WelcomeScreenProps) => {
 				id="menu-help-text"
 				className="absolute top-28 left-24 block md:hidden"
 			>
-				<div className="text-foreground px-4 text-left text-lg">
+				<div className="text-foreground py-4 text-center text-lg">
 					<div className="font-slab font-bold">Menu</div>
 					<div className="text-foreground/75 text-base">
 						View your conversations and settings
@@ -120,7 +120,7 @@ export const WelcomeScreen = ({ show, className }: WelcomeScreenProps) => {
 			{/* Settings annotation */}
 			<div
 				id="settings-text"
-				className="absolute bottom-50 left-12 hidden md:left-[-1rem] md:block"
+				className="absolute bottom-50 left-12 hidden md:left-[4rem] md:block"
 			>
 				<div className="text-foreground font-slab py-4 text-center text-xl">
 					<div className="font-bold">Settings & Keys</div>
@@ -149,8 +149,8 @@ export const WelcomeScreen = ({ show, className }: WelcomeScreenProps) => {
 				<Xarrow
 					start="menu-help-text"
 					end="mobile-menu-target"
-					startAnchor="left"
-					endAnchor="bottom"
+					startAnchor="top"
+					endAnchor="right"
 					color="var(--color-tooltip)"
 					strokeWidth={3}
 					curveness={0.75}
