@@ -3,13 +3,13 @@
 import classNames from 'classnames';
 import { SearchX } from 'lucide-react';
 import Link from 'next/link';
-import { use, useEffect, useRef, useState } from 'react';
+import React, { use, useEffect, useRef, useState } from 'react';
 
 import { AI_PROVIDERS } from '~/api';
 import { useChat, useChatHistory } from '~/hooks/use-chat';
 
 import { ActionBarContext } from '../action-bar';
-// import { ConversationHistory } from '../conversation-history';
+import { ConversationHistory } from '../conversation-history';
 import { ToggleButton } from '../toggle-button';
 import { FeedMessage } from './lib/feed-message';
 
@@ -29,15 +29,77 @@ export const Feed = ({ view }: { view?: Parameters<typeof useChat>[0] }) => {
 	const [branchFromIndex, setBranchFromIndex] = useState<number | null>(null);
 	const actionBar = use(ActionBarContext);
 
-	// Mock conversation data for demonstration
-	// const mockConversations = [
-	// 	[{ id: '1', summary: 'Initial AI question', isActive: true }],
-	// 	[
-	// 		{ id: '2', summary: 'Follow-up question', isActive: true },
-	// 		{ id: '3', summary: 'Change my follow-up question', isActive: false },
-	// 	],
-	// 	[{ id: '4', summary: 'Final answer', isActive: true }],
-	// ];
+	const isBranchActive = (branchId: string) => {
+		return branchId === viewBranchId || messages.some((m) => m.id === branchId);
+	};
+
+	// Transform real messages into conversation history format
+	const conversationVertices = React.useMemo(() => {
+		if (!messages || messages.length === 0 || !currentChat) return [];
+
+		const branches = currentChat.branches ?? {};
+		let nextVertex:
+			| {
+					branchId: string | null;
+					branchMessages: {
+						id: string | null;
+						summary: string | undefined;
+						isActive: boolean;
+					}[];
+			  }
+			| undefined;
+		const vertices = messages.map((message) => {
+			const vertex = nextVertex;
+
+			const branch = branches[message.id];
+			if (branch) {
+				nextVertex = {
+					branchId: message.id,
+					branchMessages: Object.values(branch).map((branchMessage) => {
+						if (branchMessage.id) {
+							return {
+								id: branchMessage.id,
+								summary: branchMessage.prompt,
+								isActive: isBranchActive(branchMessage.id),
+							};
+						} else {
+							return {
+								id: message.path.at(0) ?? null,
+								summary: branchMessage.prompt,
+								isActive:
+									viewBranchId === message.path.at(0) ||
+									!Object.values(
+										currentChat?.branches?.[message.id] ?? {},
+									).some(
+										(otherBranch) =>
+											otherBranch.id && isBranchActive(otherBranch.id),
+									),
+							};
+						}
+					}),
+				};
+			} else {
+				nextVertex = undefined;
+			}
+
+			if (vertex) {
+				return vertex;
+			} else {
+				return {
+					branchId: message.id,
+					branchMessages: [
+						{
+							id: message.id,
+							summary: message.prompt,
+							isActive: true,
+						},
+					],
+				};
+			}
+		});
+
+		return vertices;
+	}, [messages, branchId, currentChat?.lastMessageId]);
 
 	const scrollToBottom = () => {
 		feedRef.current?.scrollTo({
@@ -69,9 +131,14 @@ export const Feed = ({ view }: { view?: Parameters<typeof useChat>[0] }) => {
 	return (
 		<div className="relative mx-auto flex w-full grow-1 flex-col items-center overflow-hidden">
 			{/* Conversation History - Responsive positioning */}
-			{/* <div className="absolute top-20 left-4 z-10 md:top-4 md:left-0">
-				<ConversationHistory vertices={mockConversations} />
-			</div> */}
+			<div className="absolute top-20 left-4 z-10 md:top-4 md:left-0">
+				<ConversationHistory
+					vertices={conversationVertices}
+					onMessageClick={(messageId) => {
+						setViewBranchId(messageId);
+					}}
+				/>
+			</div>
 
 			<div
 				className={classNames(
@@ -147,25 +214,26 @@ export const Feed = ({ view }: { view?: Parameters<typeof useChat>[0] }) => {
 
 							{currentChat?.branches?.[message.id]?.length ? (
 								<div className="flex flex-wrap gap-2">
-									<ToggleButton
-										active={viewBranchId === message.path.at(0)}
-										onToggle={() => {
-											setViewBranchId(message.path.at(0) ?? null);
-										}}
-										icon="GitCommitVertical"
-									/>
 									{Object.values(currentChat.branches[message.id]).map(
 										(branch) => (
 											<ToggleButton
-												key={branch.id}
+												key={`${branch.id}-${index}`}
 												active={
-													branch.id === viewBranchId ||
-													!!messages.find(
-														(message) => message.path.at(0) === branch.id,
-													)
+													branch.id
+														? isBranchActive(branch.id)
+														: viewBranchId === message.path.at(0) ||
+															!Object.values(
+																currentChat?.branches?.[message.id] ?? {},
+															).some(
+																(otherBranch) =>
+																	otherBranch.id &&
+																	isBranchActive(otherBranch.id),
+															)
 												}
 												onToggle={() => {
-													setViewBranchId(branch.id);
+													setViewBranchId(
+														branch.id ?? message.path.at(0) ?? null,
+													);
 												}}
 												icon="GitMerge"
 											>

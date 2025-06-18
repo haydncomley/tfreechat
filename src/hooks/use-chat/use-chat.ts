@@ -70,6 +70,10 @@ export const useChat = (view?: { userId: string; chatId: string } | null) => {
 			isOpenRouter?: boolean;
 			previousMessage?: ChatMessage;
 			isNewBranch?: boolean;
+			rootMessage?: {
+				id: string;
+				prompt: string;
+			};
 			onCreate?: (details: {
 				messageId: string;
 				chatId: string;
@@ -85,6 +89,14 @@ export const useChat = (view?: { userId: string; chatId: string } | null) => {
 				const functionsUrl = `https://us-central1-${process.env.NEXT_PUBLIC_FB_PROJECT_ID}.cloudfunctions.net`;
 
 				queryClient.setQueryData(['sendingPrompt'], options.text);
+
+				const previousMessageId = options.previousMessage?.id;
+				const isFirstBranchFromMessage =
+					options.previousMessage &&
+					options.isNewBranch &&
+					options.previousMessage.path.length === 1 &&
+					previousMessageId &&
+					currentChat?.branches?.[previousMessageId] === undefined;
 
 				const response = await fetch(`${functionsUrl}/aiText`, {
 					method: 'POST',
@@ -107,6 +119,9 @@ export const useChat = (view?: { userId: string; chatId: string } | null) => {
 									).toISOString(),
 									path: options.previousMessage.path.at(0),
 									newBranch: options.isNewBranch,
+									rootMessage: isFirstBranchFromMessage
+										? options.rootMessage
+										: undefined,
 								}
 							: undefined,
 					}),
