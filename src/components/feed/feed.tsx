@@ -36,23 +36,41 @@ export const Feed = ({ view }: { view?: Parameters<typeof useChat>[0] }) => {
 		const branches = currentChat.branches ?? {};
 		let nextVertex:
 			| {
-					id: string;
-					summary: string | undefined;
-					isActive: boolean;
-			  }[]
+					branchId: string | null;
+					branchMessages: {
+						id: string | null;
+						summary: string | undefined;
+						isActive: boolean;
+					}[];
+			  }
 			| undefined;
 		const vertices = messages.map((message) => {
 			const vertex = nextVertex;
 
-			const branchMessages = branches[message.id];
-			if (branchMessages) {
-				nextVertex = Object.values(branchMessages).map((branchMessage) => ({
-					id: branchMessage.id,
-					summary: branchMessage.prompt,
-					isActive: messages[messages.length - 1].path.includes(
-						branchMessage.id,
-					),
-				}));
+			const branch = branches[message.id];
+			if (branch) {
+				nextVertex = {
+					branchId: message.id,
+					branchMessages: Object.values(branch).map((branchMessage) => {
+						if (branchMessage.id) {
+							return {
+								id: branchMessage.id,
+								summary: branchMessage.prompt,
+								isActive:
+									branchMessage.id === viewBranchId ||
+									!!messages.find(
+										(message) => message.path.at(0) === branchMessage.id,
+									),
+							};
+						} else {
+							return {
+								id: message.path.at(0) ?? null,
+								summary: branchMessage.prompt,
+								isActive: viewBranchId === message.path.at(0),
+							};
+						}
+					}),
+				};
 			} else {
 				nextVertex = undefined;
 			}
@@ -60,13 +78,16 @@ export const Feed = ({ view }: { view?: Parameters<typeof useChat>[0] }) => {
 			if (vertex) {
 				return vertex;
 			} else {
-				return [
-					{
-						id: message.id,
-						summary: message.prompt,
-						isActive: true,
-					},
-				];
+				return {
+					branchId: message.id,
+					branchMessages: [
+						{
+							id: message.id,
+							summary: message.prompt,
+							isActive: true,
+						},
+					],
+				};
 			}
 		});
 
@@ -107,8 +128,6 @@ export const Feed = ({ view }: { view?: Parameters<typeof useChat>[0] }) => {
 				<ConversationHistory
 					vertices={conversationVertices}
 					onMessageClick={(messageId) => {
-						console.log('messageId', messageId);
-						setBranchId(messageId);
 						setViewBranchId(messageId);
 					}}
 				/>
@@ -191,12 +210,14 @@ export const Feed = ({ view }: { view?: Parameters<typeof useChat>[0] }) => {
 									{Object.values(currentChat.branches[message.id]).map(
 										(branch) => (
 											<ToggleButton
-												key={branch.id}
+												key={`${branch.id}-${index}`}
 												active={
-													branch.id === viewBranchId ||
-													!!messages.find(
-														(message) => message.path.at(0) === branch.id,
-													)
+													branch.id
+														? branch.id === viewBranchId ||
+															!!messages.find(
+																(message) => message.path.at(0) === branch.id,
+															)
+														: viewBranchId === message.path.at(0)
 												}
 												onToggle={() => {
 													setViewBranchId(

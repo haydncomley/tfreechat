@@ -14,7 +14,10 @@ export interface Message {
 
 export interface ConversationHistoryProps
 	extends React.HTMLAttributes<HTMLDivElement> {
-	vertices: Message[][];
+	vertices: {
+		branchId: string;
+		branchMessages: Message[];
+	}[];
 	onMessageClick: (messageId: string) => void;
 }
 
@@ -41,20 +44,20 @@ export const ConversationHistory = ({
 				{...props}
 			>
 				<div className="relative z-10 flex flex-col items-center space-y-3">
-					{vertices.map((vertex) => {
-						const hasBranches = vertex.length > 1;
+					{vertices.map((vertex, index) => {
+						const hasBranches = vertex.branchMessages.length > 1;
 
 						return (
 							<div
-								key={vertex[0].id}
+								key={`${vertex.branchId}-${index}`}
 								className="flex w-full flex-col"
 							>
 								<div className="flex w-full items-center">
 									{/* Main conversation dot */}
 									<button
 										className="border-foreground bg-foreground relative z-10 h-4 w-4 flex-shrink-0 rounded-full border-2 shadow-lg transition-all duration-300"
-										title={vertex[0].summary}
-										aria-label={`${vertex[0].summary}`}
+										title={vertex.branchMessages[0].summary}
+										aria-label={`${vertex.branchMessages[0].summary}`}
 									/>
 
 									{/* Branch count - becomes part of layout on hover */}
@@ -76,7 +79,7 @@ export const ConversationHistory = ({
 											})()}
 											{/* Branch count */}
 											<span className="flex-shrink-0 text-sm font-semibold">
-												{vertex.length}
+												{vertex.branchMessages.length}
 											</span>
 										</div>
 									)}
@@ -88,13 +91,14 @@ export const ConversationHistory = ({
 												className={classNames(
 													'truncate text-sm transition-all duration-300 ease-out',
 													{
-														'text-foreground font-bold': vertex[0].isActive,
+														'text-foreground font-bold':
+															vertex.branchMessages[0].isActive,
 														'text-foreground/80 font-normal':
-															!vertex[0].isActive,
+															!vertex.branchMessages[0].isActive,
 													},
 												)}
 											>
-												{vertex[0].summary}
+												{vertex.branchMessages[0].summary}
 											</div>
 										</div>
 									)}
@@ -112,9 +116,9 @@ export const ConversationHistory = ({
 										)}
 									>
 										<div className="ml-7 flex flex-col gap-2 pt-2">
-											{vertex.map((message) => (
+											{vertex.branchMessages.map((message) => (
 												<button
-													key={message.id}
+													key={message.id ?? vertex.branchId}
 													className="group/message hover:bg-foreground/10 flex w-full items-center gap-2 rounded-lg px-2 py-1 text-left transition-all duration-300"
 													onClick={() => {
 														onMessageClick(message.id);

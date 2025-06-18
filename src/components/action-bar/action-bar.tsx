@@ -134,7 +134,7 @@ export const ActionBar = ({
 			);
 			if (rootMessageIndex < messages.length - 1) {
 				rootMessage = {
-					id: messages[rootMessageIndex + 1].id,
+					id: messages[rootMessageIndex + 1].path.at(0) ?? '',
 					prompt: messages[rootMessageIndex + 1].prompt,
 				};
 			}

@@ -90,30 +90,12 @@ export const useChat = (view?: { userId: string; chatId: string } | null) => {
 
 				queryClient.setQueryData(['sendingPrompt'], options.text);
 
-				console.log(
-					JSON.stringify({
-						...options.ai,
-						text: options.text,
-						chatId:
-							currentChatId === null
-								? undefined
-								: (currentChatId ?? wantedChatId),
-						previousMessage: options.previousMessage
-							? {
-									id: options.previousMessage.id,
-									timestamp: new Date(
-										options.previousMessage.createdAt.toMillis() + 1000,
-									).toISOString(),
-									path: options.previousMessage.path.at(0),
-									newBranch: options.isNewBranch,
-									rootMessage:
-										options.previousMessage.path.length === 1
-											? options.rootMessage
-											: undefined,
-								}
-							: undefined,
-					}),
-				);
+				const isFirstBranchFromMessage =
+					options.previousMessage &&
+					!options.isNewBranch &&
+					options.previousMessage.path.length === 1 &&
+					currentChat?.branches?.[options.previousMessage.path.at(0) ?? ''] ===
+						undefined;
 
 				const response = await fetch(`${functionsUrl}/aiText`, {
 					method: 'POST',
@@ -136,7 +118,9 @@ export const useChat = (view?: { userId: string; chatId: string } | null) => {
 									).toISOString(),
 									path: options.previousMessage.path.at(0),
 									newBranch: options.isNewBranch,
-									rootMessage: options.rootMessage,
+									rootMessage: isFirstBranchFromMessage
+										? options.rootMessage
+										: undefined,
 								}
 							: undefined,
 					}),
