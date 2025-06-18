@@ -13,6 +13,7 @@ export default function Home() {
 	const { replace } = useRouter();
 	const { signIn, user } = useAuth();
 
+	console.log(user);
 	useEffect(() => {
 		if (user) replace('/');
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -37,18 +38,16 @@ export default function Home() {
 
 				<div className="flex flex-wrap items-center justify-center gap-2">
 					<button
-						className="bg-foreground text-background font-base font-slab flex cursor-pointer items-center gap-1 rounded-lg px-4 py-2 transition-all duration-75 hover:scale-105"
+						className="bg-foreground text-background font-base font-slab flex cursor-pointer items-center gap-1 rounded-lg px-4 py-2 text-sm transition-all duration-75 hover:scale-105"
 						onClick={() => signIn('google')}
 					>
-						Login w/ <b>Google</b>
-						{/* <LogIn className="h-6 w-6"></LogIn> */}
+						Login with <b className="text-base">Google</b>
 					</button>
 					<button
-						className="bg-foreground text-background font-base font-slab flex cursor-pointer items-center gap-1 rounded-lg px-4 py-2 transition-all duration-75 hover:scale-105"
+						className="bg-foreground text-background font-base font-slab flex cursor-pointer items-center gap-1 rounded-lg px-4 py-2 text-sm transition-all duration-75 hover:scale-105"
 						onClick={() => signIn('github')}
 					>
-						Login w/ <b>GitHub</b>
-						{/* <LogIn className="h-6 w-6"></LogIn> */}
+						Login with <b className="text-base">GitHub</b>
 					</button>
 				</div>
 

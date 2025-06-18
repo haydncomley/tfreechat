@@ -136,7 +136,6 @@ export const ActionBar = ({
 						previousMessage: prevMessage,
 						isNewBranch: !!branchId,
 						onCreate: ({ chatId, path }) => {
-							console.log('onCreate', { chatId, path });
 							if (!currentChatId) setCurrentChat(chatId);
 							if (branchId && path) setViewBranchId(path[0]);
 						},
