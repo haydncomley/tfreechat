@@ -34,7 +34,7 @@ export const WelcomeScreen = ({ show, className }: WelcomeScreenProps) => {
 			{/* Anchor points for arrows - Small screens */}
 			<div
 				id="mobile-input-target"
-				className="absolute bottom-38 left-3/5 block h-1 w-1 md:hidden"
+				className="absolute bottom-38 left-1/5 block h-1 w-1 md:hidden"
 			/>
 			<div
 				id="mobile-menu-target"
@@ -58,24 +58,24 @@ export const WelcomeScreen = ({ show, className }: WelcomeScreenProps) => {
 			{/* Small screen annotations */}
 			<div
 				id="input-help-text"
-				className="absolute bottom-64 left-1/3 block -translate-x-1/2 md:hidden"
+				className="absolute bottom-64 left-1/2 block -translate-x-1/2 md:hidden"
 			>
 				<div className="text-foreground py-4 text-center text-lg">
 					<div className="font-slab font-bold">Start Chatting</div>
 					<div className="text-foreground/75 text-base">
-						Get started by typing down here
+						Get started by typing below
 					</div>
 				</div>
 			</div>
 
 			<div
 				id="menu-help-text"
-				className="absolute top-28 left-24 block md:hidden"
+				className="absolute top-28 left-40 block md:hidden"
 			>
 				<div className="text-foreground py-4 text-center text-lg">
 					<div className="font-slab font-bold">Menu</div>
 					<div className="text-foreground/75 text-base">
-						View your conversations and settings
+						View your conversations
 					</div>
 				</div>
 			</div>
