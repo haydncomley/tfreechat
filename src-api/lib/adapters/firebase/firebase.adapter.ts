@@ -91,20 +91,21 @@ export const aiText = onRequest(async (req, res) => {
 					});
 				});
 
+				if (req.body.previousMessage.rootMessage) {
+					batch.update(chatRef, {
+						[`branches.${req.body.previousMessage.id}`]: FieldValue.arrayUnion({
+							id: req.body.previousMessage.rootMessage.id,
+							prompt: req.body.previousMessage.rootMessage.prompt.slice(0, 25),
+						}),
+					});
+				}
+
 				batch.update(chatRef, {
 					[`branches.${req.body.previousMessage.id}`]: FieldValue.arrayUnion({
 						id: newMessageRef.id,
 						prompt: req.body.text.slice(0, 25),
 					}),
 				});
-
-				if (req.body.previousMessage.rootMessagePrompt) {
-					batch.update(chatRef, {
-						[`branches.${req.body.previousMessage.id}`]: FieldValue.arrayUnion({
-							prompt: req.body.previousMessage.rootMessagePrompt.slice(0, 25),
-						}),
-					});
-				}
 			}
 		}
 

@@ -107,6 +107,7 @@ export const Feed = ({ view }: { view?: Parameters<typeof useChat>[0] }) => {
 				<ConversationHistory
 					vertices={conversationVertices}
 					onMessageClick={(messageId) => {
+						console.log('messageId', messageId);
 						setBranchId(messageId);
 						setViewBranchId(messageId);
 					}}
@@ -187,13 +188,6 @@ export const Feed = ({ view }: { view?: Parameters<typeof useChat>[0] }) => {
 
 							{currentChat?.branches?.[message.id]?.length ? (
 								<div className="flex flex-wrap gap-2">
-									<ToggleButton
-										active={viewBranchId === message.path.at(0)}
-										onToggle={() => {
-											setViewBranchId(message.path.at(0) ?? null);
-										}}
-										icon="GitCommitVertical"
-									/>
 									{Object.values(currentChat.branches[message.id]).map(
 										(branch) => (
 											<ToggleButton
@@ -205,7 +199,9 @@ export const Feed = ({ view }: { view?: Parameters<typeof useChat>[0] }) => {
 													)
 												}
 												onToggle={() => {
-													setViewBranchId(branch.id);
+													setViewBranchId(
+														branch.id ?? message.path.at(0) ?? null,
+													);
 												}}
 												icon="GitMerge"
 											>

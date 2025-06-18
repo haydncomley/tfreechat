@@ -70,7 +70,10 @@ export const useChat = (view?: { userId: string; chatId: string } | null) => {
 			isOpenRouter?: boolean;
 			previousMessage?: ChatMessage;
 			isNewBranch?: boolean;
-			rootMessagePrompt?: string;
+			rootMessage?: {
+				id: string;
+				prompt: string;
+			};
 			onCreate?: (details: {
 				messageId: string;
 				chatId: string;
@@ -103,9 +106,9 @@ export const useChat = (view?: { userId: string; chatId: string } | null) => {
 									).toISOString(),
 									path: options.previousMessage.path.at(0),
 									newBranch: options.isNewBranch,
-									rootMessagePrompt:
+									rootMessage:
 										options.previousMessage.path.length === 1
-											? options.rootMessagePrompt
+											? options.rootMessage
 											: undefined,
 								}
 							: undefined,
@@ -133,7 +136,7 @@ export const useChat = (view?: { userId: string; chatId: string } | null) => {
 									).toISOString(),
 									path: options.previousMessage.path.at(0),
 									newBranch: options.isNewBranch,
-									rootMessagePrompt: options.rootMessagePrompt,
+									rootMessage: options.rootMessage,
 								}
 							: undefined,
 					}),
