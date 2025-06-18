@@ -100,7 +100,7 @@
 	}
 
 	::selection {
-		@apply text-accent bg-[#171717];
+		@apply text-accent bg-black/10;
 	}
 
 	html,

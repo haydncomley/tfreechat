@@ -75,7 +75,7 @@ export const Feed = ({ view }: { view?: Parameters<typeof useChat>[0] }) => {
 
 			<div
 				className={classNames(
-					'relative mx-auto flex w-full grow-1 flex-col-reverse gap-4 overflow-auto px-4 py-4',
+					'no-scrollbar relative mx-auto flex w-full grow-1 flex-col-reverse gap-4 overflow-auto px-4 py-4',
 					{
 						'my-auto !grow-0': !!view,
 					},

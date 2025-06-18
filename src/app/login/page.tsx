@@ -27,7 +27,7 @@ export default function Home() {
 		>
 			<main className="bg-glass flex w-sm max-w-5/6 flex-col items-center gap-4 p-6 pb-4">
 				<div className="flex flex-col gap-1">
-					<h1 className="font-slab text-center text-xl font-black">
+					<h1 className="font-slab text-center text-3xl font-black">
 						tfree.chat
 					</h1>
 					<p className="text-foreground/75 text-center text-sm">
