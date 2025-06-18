@@ -73,7 +73,7 @@ export const WelcomeScreen = ({ show, className }: WelcomeScreenProps) => {
 				className="absolute top-28 left-40 block md:hidden"
 			>
 				<div className="text-foreground py-4 text-center text-lg">
-					<div className="font-slab font-bold">Menu</div>
+					<div className="font-slab font-bold">Chat History</div>
 					<div className="text-foreground/75 text-base">
 						View your conversations
 					</div>
@@ -109,12 +109,12 @@ export const WelcomeScreen = ({ show, className }: WelcomeScreenProps) => {
 			{/* Settings annotation */}
 			<div
 				id="settings-text"
-				className="absolute bottom-50 left-4 hidden md:block"
+				className="absolute bottom-50 left-8 hidden md:block"
 			>
-				<div className="text-foreground font-slab py-4 text-center text-xl">
-					<div className="font-bold">Settings & Keys</div>
+				<div className="text-foreground py-4 text-center text-xl">
+					<div className="font-slab font-bold">Settings & Keys</div>
 					<div className="text-foreground/75 text-base">
-						API keys, Dark-mode, and more
+						Edit your API keys over here
 					</div>
 				</div>
 			</div>

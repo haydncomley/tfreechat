@@ -32,6 +32,8 @@ export const Sidebar = ({
 		setBranchId,
 		deleteChat,
 		isDeletingChat,
+		isSharingChat,
+		shareChat,
 	} = useChatHistory();
 	const { toggleDarkMode, isDarkMode } = useDarkMode();
 	const actionBar = use(ActionBarContext);
@@ -161,13 +163,7 @@ export const Sidebar = ({
 		return keys;
 	}, []);
 
-	useEffect(() => {
-		const hasAnyKeys = Object.values(apiKeys).some((key) => !!key);
-		if (!hasAnyKeys) {
-			setShowKeyInput(true);
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [JSON.stringify(chats)]);
+	console.log(currentChat);
 
 	return (
 		<>
@@ -180,6 +176,37 @@ export const Sidebar = ({
 					onClick={() => setShowMobileMenu(!showMobileMenu)}
 				/>
 			</div>
+
+			{currentChat ? (
+				<div className="fixed top-4 right-4 z-50 md:right-4">
+					<Button
+						size="icon"
+						variant={!currentChat.public ? 'primary' : 'secondary'}
+						icon="Share2"
+						disabled={isSharingChat}
+						onClick={() => {
+							if (currentChat.public) {
+								window.open(
+									`${window.location.origin}/share/${currentChat.id}`,
+									'_blank',
+								);
+							} else {
+								shareChat({
+									chatId: currentChat.id,
+									shouldShare: true,
+								}).then(() => {
+									if (!currentChat.public) {
+										window.open(
+											`${window.location.origin}/share/${currentChat.id}`,
+											'_blank',
+										);
+									}
+								});
+							}
+						}}
+					/>
+				</div>
+			) : null}
 
 			<aside
 				ref={sidebarRef}
@@ -228,43 +255,56 @@ export const Sidebar = ({
 										<span className="font-slab truncate text-sm font-bold whitespace-nowrap">
 											{chat.prompt}
 										</span>
-										<span className="text-xs opacity-75">
-											{FormatDateSince(chat.createdAt.toDate())}
+										<span className="flex gap-2 text-xs opacity-75">
+											<span>{FormatDateSince(chat.createdAt.toDate())}</span>
+											{chat.branches ? (
+												<>
+													<span>•</span>
+													<span>
+														{`${
+															Object.keys(Object.values(chat.branches).flat())
+																.length + 1
+														} branches`}
+													</span>
+												</>
+											) : null}
 										</span>
 									</div>
 
-									<button
-										onClick={(e) => {
-											e.preventDefault();
-											e.stopPropagation();
-											deleteChat({ chatId: chat.id }).then(() => {
-												setCurrentChat(null);
-												setViewBranchId(null);
-												setBranchId(null);
-											});
-										}}
-										className={classNames(
-											'shrink-0 cursor-pointer transition-all duration-75 group-hover:opacity-100 hover:scale-110 hover:opacity-50',
-											{
-												'opacity-0': currentChat?.id !== chat.id,
-											},
-										)}
-									>
-										{isDeletingChat ? (
-											<Loader2 className="h-5 w-5 animate-spin" />
-										) : (
-											<X className="h-5 w-5" />
-										)}
-									</button>
+									<div className="flex items-center gap-2">
+										<button
+											onClick={(e) => {
+												e.preventDefault();
+												e.stopPropagation();
+												deleteChat({ chatId: chat.id }).then(() => {
+													setCurrentChat(null);
+													setViewBranchId(null);
+													setBranchId(null);
+												});
+											}}
+											className={classNames(
+												'shrink-0 cursor-pointer transition-all duration-75 group-hover:opacity-100 hover:scale-110 hover:opacity-50',
+												{
+													'opacity-0': currentChat?.id !== chat.id,
+												},
+											)}
+										>
+											{isDeletingChat ? (
+												<Loader2 className="h-5 w-5 animate-spin" />
+											) : (
+												<X className="h-5 w-5" />
+											)}
+										</button>
+									</div>
 								</Link>
 							))}
 						</React.Fragment>
 					))}
 					{!chats.length ? (
 						<div className="text-center text-sm font-bold">
-							No chat history
-							<p className="text-foreground/75 font-normal">
-								Start a new chat to get started!
+							No History
+							<p className="text-foreground/75 text-xs font-normal">
+								Create a new chat below
 							</p>
 						</div>
 					) : null}

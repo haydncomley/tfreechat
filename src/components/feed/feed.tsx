@@ -1,6 +1,8 @@
 'use client';
 
 import classNames from 'classnames';
+import { SearchX } from 'lucide-react';
+import Link from 'next/link';
 import { use, useEffect, useRef, useState } from 'react';
 
 import { AI_PROVIDERS } from '~/api';
@@ -11,8 +13,8 @@ import { ActionBarContext } from '../action-bar';
 import { ToggleButton } from '../toggle-button';
 import { FeedMessage } from './lib/feed-message';
 
-export const Feed = () => {
-	const { messages, responseStream, reasoningStream } = useChat();
+export const Feed = ({ id }: { id?: string | null }) => {
+	const { messages, responseStream, reasoningStream } = useChat(id);
 	const {
 		currentChatId,
 		branchId,
@@ -64,6 +66,8 @@ export const Feed = () => {
 		}
 	}, [currentChatId, messages.length, lastChatId]);
 
+	console.log(messages);
+
 	return (
 		<div className="relative mx-auto flex w-full grow-1 flex-col items-center overflow-hidden">
 			{/* Conversation History - Responsive positioning */}
@@ -72,7 +76,12 @@ export const Feed = () => {
 			</div> */}
 
 			<div
-				className="relative mx-auto flex w-full grow-1 flex-col-reverse gap-4 overflow-auto px-4 py-4"
+				className={classNames(
+					'relative mx-auto flex w-full grow-1 flex-col-reverse gap-4 overflow-auto px-4 py-4',
+					{
+						'my-auto !grow-0': !!id,
+					},
+				)}
 				ref={feedRef}
 				onScroll={(e) => {
 					// With flex-col-reverse, we're at the bottom when scrollTop is close to 0
@@ -139,7 +148,7 @@ export const Feed = () => {
 							) : null}
 
 							{currentChat?.branches?.[message.id]?.length ? (
-								<div className="flex gap-2">
+								<div className="flex flex-wrap gap-2">
 									<ToggleButton
 										active={viewBranchId === message.path.at(0)}
 										onToggle={() => {
@@ -189,6 +198,22 @@ export const Feed = () => {
 					);
 				})}
 			</div>
+
+			{id && !messages.length ? (
+				<div className="flex h-full w-full flex-col items-center justify-center gap-3">
+					<SearchX className="h-10 w-10" />
+					<p className="font-slab text-lg font-bold">There is nothing here</p>
+					<p className="text-sm">
+						The chat you&apos;re trying to access is either invalid or expired
+					</p>
+					<Link
+						href="/"
+						className="font-slab text-foreground font-bold underline"
+					>
+						Back to safety
+					</Link>
+				</div>
+			) : null}
 
 			<div
 				className={classNames(

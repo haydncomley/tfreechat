@@ -268,7 +268,7 @@ export const ActionBar = ({
 					<div className="no-scrollbar -mx-4 flex gap-2.5 overflow-auto px-4 whitespace-nowrap">
 						<div className="bg-foreground text-background relative flex cursor-pointer items-center gap-2 rounded-full p-2 px-3">
 							<span className="font-slab text-xs font-bold">
-								{AI_PROVIDERS.find((p) => p.id === currentProvider)?.label} -{' '}
+								{AI_PROVIDERS.find((p) => p.id === currentProvider)?.label} •{' '}
 								{modelDetails?.label}
 							</span>
 							<select

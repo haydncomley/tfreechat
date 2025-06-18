@@ -41,11 +41,19 @@ export const useCollectionSnapshot = <T>(
 			listeners.set(path, entry);
 		}
 
-		entry.subscribers.add(setData);
+		const setDataFn = (data: T[]) => {
+			if (!settings?.retainDataBetweenQueries) {
+				setData(data);
+			} else if (data?.length) {
+				setData(data);
+			}
+		};
+
+		entry.subscribers.add(setDataFn);
 		if (!settings?.retainDataBetweenQueries) setData(entry.data);
 
 		return () => {
-			entry.subscribers.delete(setData);
+			entry.subscribers.delete(setDataFn);
 			if (entry.subscribers.size === 0) {
 				entry.unsub();
 				listeners.delete(path);
