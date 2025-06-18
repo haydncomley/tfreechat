@@ -218,6 +218,9 @@ export const ActionBar = ({
 		} finally {
 			setPrompt('');
 			setBranchId(null);
+			setTimeout(() => {
+				textareaRef.current?.focus();
+			}, 100);
 		}
 	};
 

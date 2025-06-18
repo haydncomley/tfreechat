@@ -1,11 +1,12 @@
 'use client';
 
 import classNames from 'classnames';
-import { useEffect, useRef, useState } from 'react';
+import { use, useEffect, useRef, useState } from 'react';
 
 import { AI_PROVIDERS } from '~/api';
 import { useChat, useChatHistory } from '~/hooks/use-chat';
 
+import { ActionBarContext } from '../action-bar';
 import { ConversationHistory } from '../conversation-history';
 import { ToggleButton } from '../toggle-button';
 import { FeedMessage } from './lib/feed-message';
@@ -24,6 +25,7 @@ export const Feed = () => {
 	const [autoScroll, setAutoScroll] = useState(true);
 	const [lastChatId, setLastChatId] = useState<string | null>(null);
 	const [branchFromIndex, setBranchFromIndex] = useState<number | null>(null);
+	const actionBar = use(ActionBarContext);
 
 	// Mock conversation data for demonstration
 	const mockConversations = [
@@ -126,6 +128,9 @@ export const Feed = () => {
 													} else {
 														setBranchId(message.id);
 														setBranchFromIndex(index);
+														setTimeout(() => {
+															actionBar?.focusInput();
+														}, 100);
 													}
 												}}
 												icon="GitBranchPlus"
