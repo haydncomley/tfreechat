@@ -1,7 +1,9 @@
-import * as React from 'react';
 import classNames from 'classnames';
-import { glass } from '~/utils';
 import { icons } from 'lucide-react';
+import * as React from 'react';
+
+import { glass } from '~/utils';
+
 import { Button } from '../button';
 
 export interface Message {
@@ -37,8 +39,7 @@ export const ConversationHistory = ({
 				{...props}
 			>
 				<div className="relative z-10 flex flex-col items-center space-y-3">
-					{vertices.map((vertex, index) => {
-						const isLast = index === vertices.length - 1;
+					{vertices.map((vertex) => {
 						const hasBranches = vertex.length > 1;
 
 						return (

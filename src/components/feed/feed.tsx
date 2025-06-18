@@ -6,8 +6,8 @@ import { useEffect, useRef, useState } from 'react';
 import { AI_PROVIDERS } from '~/api';
 import { useChat, useChatHistory } from '~/hooks/use-chat';
 
-import { ToggleButton } from '../toggle-button';
 import { ConversationHistory } from '../conversation-history';
+import { ToggleButton } from '../toggle-button';
 import { FeedMessage } from './lib/feed-message';
 
 export const Feed = () => {
@@ -50,6 +50,7 @@ export const Feed = () => {
 	useEffect(() => {
 		if (currentChatId !== lastChatId && messages.length > 0) {
 			setLastChatId(currentChatId);
+			setBranchFromIndex(null);
 			setTimeout(() => {
 				scrollToBottom();
 			}, 150);

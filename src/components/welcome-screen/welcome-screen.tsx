@@ -94,21 +94,12 @@ export const WelcomeScreen = ({ show, className }: WelcomeScreenProps) => {
 			</div>
 
 			{/* Main welcome message */}
-<<<<<<< HEAD
-			<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-				<div className="bg-glass-pane font-slab rounded-3xl border p-6 text-center shadow-lg backdrop-blur-md">
-					<div className="mb-2 text-3xl font-bold">tfree.chat</div>
-					<div className="text-foreground/75 max-w-sm text-sm">
-						Your AI-powered chat experience starts here. Ask questions, get
-						help, or just have a conversation!
-=======
 			<div className="absolute top-1/2 left-1/2 w-5/6 -translate-x-1/2 -translate-y-2/3 md:w-sm md:-translate-y-1/2">
 				<div className="bg-glass-pane rounded-xl border p-6 text-center shadow-lg backdrop-blur-md">
 					<div className="font-slab mb-2 text-3xl font-bold">tfree.chat</div>
 					<div className="text-foreground/75 max-w-sm">
 						Submission for the T3.chat Cloneathon. <br />
 						All tokens are only ever stored in your browser.
->>>>>>> 2c113de (small fixups + image gen fix)
 					</div>
 				</div>
 			</div>
