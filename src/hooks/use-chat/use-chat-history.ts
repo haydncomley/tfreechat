@@ -1,17 +1,22 @@
 import { useMutation } from '@tanstack/react-query';
 import { orderBy } from 'firebase/firestore';
+import { useParams } from 'next/navigation';
 import { useQueryState } from 'nuqs';
 
 import { Chat } from '~/api';
 
 import { useAuth } from '../use-auth';
-import { useCollectionSnapshot } from '../use-snapshot';
+import { useCollectionSnapshot, useDocSnapshot } from '../use-snapshot';
 
 export const useChatHistory = () => {
 	const { user } = useAuth();
+	const { chatId: sharedChatId, userId: sharedUserId } = useParams();
+
 	const [currentChatId, setCurrentChatId] = useQueryState('chat');
 	const [branchId, setBranchId] = useQueryState('branch');
 	const [viewBranchId, setViewBranchId] = useQueryState('viewBranch');
+
+	const wantedChatId = sharedChatId ?? currentChatId;
 
 	const { mutateAsync: deleteChat, isPending: isDeletingChat } = useMutation({
 		mutationKey: ['deleteChat'],
@@ -68,6 +73,10 @@ export const useChatHistory = () => {
 		[user?.uid],
 	);
 
+	const sharedChat = useDocSnapshot<Chat>(
+		sharedChatId ? `users/${sharedUserId}/chats/${sharedChatId}` : undefined,
+	);
+
 	const setCurrentChat = (chat?: string | Chat | null) => {
 		if (typeof chat === 'string') {
 			setCurrentChatId(chat);
@@ -81,7 +90,8 @@ export const useChatHistory = () => {
 	return {
 		chats,
 		currentChatId,
-		currentChat: chats.find((chat) => chat.id === currentChatId) ?? null,
+		currentChat:
+			sharedChat ?? chats.find((chat) => chat.id === wantedChatId) ?? null,
 		setCurrentChat,
 		deleteChat,
 		isDeletingChat,
