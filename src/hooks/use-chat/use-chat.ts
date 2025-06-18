@@ -90,12 +90,13 @@ export const useChat = (view?: { userId: string; chatId: string } | null) => {
 
 				queryClient.setQueryData(['sendingPrompt'], options.text);
 
+				const previousMessageId = options.previousMessage?.id;
 				const isFirstBranchFromMessage =
 					options.previousMessage &&
-					!options.isNewBranch &&
+					options.isNewBranch &&
 					options.previousMessage.path.length === 1 &&
-					currentChat?.branches?.[options.previousMessage.path.at(0) ?? ''] ===
-						undefined;
+					previousMessageId &&
+					currentChat?.branches?.[previousMessageId] === undefined;
 
 				const response = await fetch(`${functionsUrl}/aiText`, {
 					method: 'POST',

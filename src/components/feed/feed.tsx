@@ -29,6 +29,10 @@ export const Feed = ({ view }: { view?: Parameters<typeof useChat>[0] }) => {
 	const [branchFromIndex, setBranchFromIndex] = useState<number | null>(null);
 	const actionBar = use(ActionBarContext);
 
+	const isBranchActive = (branchId: string) => {
+		return branchId === viewBranchId || messages.some((m) => m.id === branchId);
+	};
+
 	// Transform real messages into conversation history format
 	const conversationVertices = React.useMemo(() => {
 		if (!messages || messages.length === 0 || !currentChat) return [];
@@ -56,17 +60,20 @@ export const Feed = ({ view }: { view?: Parameters<typeof useChat>[0] }) => {
 							return {
 								id: branchMessage.id,
 								summary: branchMessage.prompt,
-								isActive:
-									branchMessage.id === viewBranchId ||
-									!!messages.find(
-										(message) => message.path.at(0) === branchMessage.id,
-									),
+								isActive: isBranchActive(branchMessage.id),
 							};
 						} else {
 							return {
 								id: message.path.at(0) ?? null,
 								summary: branchMessage.prompt,
-								isActive: viewBranchId === message.path.at(0),
+								isActive:
+									viewBranchId === message.path.at(0) ||
+									!Object.values(
+										currentChat?.branches?.[message.id] ?? {},
+									).some(
+										(otherBranch) =>
+											otherBranch.id && isBranchActive(otherBranch.id),
+									),
 							};
 						}
 					}),
@@ -213,11 +220,15 @@ export const Feed = ({ view }: { view?: Parameters<typeof useChat>[0] }) => {
 												key={`${branch.id}-${index}`}
 												active={
 													branch.id
-														? branch.id === viewBranchId ||
-															!!messages.find(
-																(message) => message.path.at(0) === branch.id,
+														? isBranchActive(branch.id)
+														: viewBranchId === message.path.at(0) ||
+															!Object.values(
+																currentChat?.branches?.[message.id] ?? {},
+															).some(
+																(otherBranch) =>
+																	otherBranch.id &&
+																	isBranchActive(otherBranch.id),
 															)
-														: viewBranchId === message.path.at(0)
 												}
 												onToggle={() => {
 													setViewBranchId(
