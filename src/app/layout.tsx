@@ -44,7 +44,7 @@ export default async function RootLayout({
 			<head>
 				<meta
 					name="theme-color"
-					content={darkMode ? '#231a1a' : '#f26a51'}
+					content={darkMode ? '#231a1a' : '#f7d3d0'}
 				/>
 				<meta
 					name="viewport"
