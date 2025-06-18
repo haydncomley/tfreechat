@@ -15,6 +15,7 @@ export const textGenerationSchema = z.object({
 			timestamp: z.string(),
 			path: z.string(),
 			newBranch: z.boolean().optional(),
+			rootMessagePrompt: z.string().optional(),
 		})
 		.optional(),
 	isOpenRouter: z.boolean().optional(),

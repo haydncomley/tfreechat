@@ -121,6 +121,17 @@ export const ActionBar = ({
 			? messages.find((m) => m.id === branchId)
 			: messages.at(-1);
 
+		// Get the index of the root message sent after the previous message
+		let rootMessagePrompt;
+		if (prevMessage !== undefined) {
+			const rootMessageIndex = messages.findIndex(
+				(m) => m.id === prevMessage.id,
+			);
+			if (rootMessageIndex < messages.length - 1) {
+				rootMessagePrompt = messages[rootMessageIndex + 1]?.prompt;
+			}
+		}
+
 		try {
 			switch (actionType) {
 				case 'image':
@@ -156,6 +167,7 @@ export const ActionBar = ({
 						chatId: currentChat?.id,
 						previousMessage: prevMessage,
 						isNewBranch: !!branchId,
+						rootMessagePrompt: rootMessagePrompt,
 						onCreate: ({ chatId, path }) => {
 							if (!currentChatId) setCurrentChat(chatId);
 							if (branchId && path) setViewBranchId(path[0]);

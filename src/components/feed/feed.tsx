@@ -3,13 +3,13 @@
 import classNames from 'classnames';
 import { SearchX } from 'lucide-react';
 import Link from 'next/link';
-import { use, useEffect, useRef, useState } from 'react';
+import React, { use, useEffect, useRef, useState } from 'react';
 
 import { AI_PROVIDERS } from '~/api';
 import { useChat, useChatHistory } from '~/hooks/use-chat';
 
 import { ActionBarContext } from '../action-bar';
-// import { ConversationHistory } from '../conversation-history';
+import { ConversationHistory } from '../conversation-history';
 import { ToggleButton } from '../toggle-button';
 import { FeedMessage } from './lib/feed-message';
 
@@ -29,15 +29,49 @@ export const Feed = ({ view }: { view?: Parameters<typeof useChat>[0] }) => {
 	const [branchFromIndex, setBranchFromIndex] = useState<number | null>(null);
 	const actionBar = use(ActionBarContext);
 
-	// Mock conversation data for demonstration
-	// const mockConversations = [
-	// 	[{ id: '1', summary: 'Initial AI question', isActive: true }],
-	// 	[
-	// 		{ id: '2', summary: 'Follow-up question', isActive: true },
-	// 		{ id: '3', summary: 'Change my follow-up question', isActive: false },
-	// 	],
-	// 	[{ id: '4', summary: 'Final answer', isActive: true }],
-	// ];
+	// Transform real messages into conversation history format
+	const conversationVertices = React.useMemo(() => {
+		if (!messages || messages.length === 0 || !currentChat) return [];
+
+		const branches = currentChat.branches ?? {};
+		let nextVertex:
+			| {
+					id: string;
+					summary: string | undefined;
+					isActive: boolean;
+			  }[]
+			| undefined;
+		const vertices = messages.map((message) => {
+			const vertex = nextVertex;
+
+			const branchMessages = branches[message.id];
+			if (branchMessages) {
+				nextVertex = Object.values(branchMessages).map((branchMessage) => ({
+					id: branchMessage.id,
+					summary: branchMessage.prompt,
+					isActive: messages[messages.length - 1].path.includes(
+						branchMessage.id,
+					),
+				}));
+			} else {
+				nextVertex = undefined;
+			}
+
+			if (vertex) {
+				return vertex;
+			} else {
+				return [
+					{
+						id: message.id,
+						summary: message.prompt,
+						isActive: true,
+					},
+				];
+			}
+		});
+
+		return vertices;
+	}, [messages, branchId, currentChat?.lastMessageId]);
 
 	const scrollToBottom = () => {
 		feedRef.current?.scrollTo({
@@ -69,9 +103,15 @@ export const Feed = ({ view }: { view?: Parameters<typeof useChat>[0] }) => {
 	return (
 		<div className="relative mx-auto flex w-full grow-1 flex-col items-center overflow-hidden">
 			{/* Conversation History - Responsive positioning */}
-			{/* <div className="absolute top-20 left-4 z-10 md:top-4 md:left-0">
-				<ConversationHistory vertices={mockConversations} />
-			</div> */}
+			<div className="absolute top-20 left-4 z-10 md:top-4 md:left-0">
+				<ConversationHistory
+					vertices={conversationVertices}
+					onMessageClick={(messageId) => {
+						setBranchId(messageId);
+						setViewBranchId(messageId);
+					}}
+				/>
+			</div>
 
 			<div
 				className={classNames(
