@@ -362,6 +362,7 @@ export const useChat = (id?: string | null) => {
 						? [where('path', 'array-contains', currentChat.lastMessageId)]
 						: []),
 			],
+			retainDataBetweenQueries: true,
 		},
 		[viewBranchId, currentChat?.lastMessageId],
 	);

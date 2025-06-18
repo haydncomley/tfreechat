@@ -223,101 +223,104 @@ export const ActionBar = ({
 
 	return (
 		<>
-			<div className="bg-glass-pane flex w-full flex-col-reverse gap-3 rounded-t-md border border-b-0 p-4 shadow-md md:flex-col md:gap-2.5 md:rounded-t-3xl">
-				<div className="flex w-full items-end gap-2">
-					<div
-						className={classNames(
-							'bg-glass flex max-h-[20rem] w-full flex-col gap-2 overflow-auto !rounded-3xl transition-all duration-150',
-							{
-								'opacity-50': isLoading,
-								'focus-within:bg-accent-foreground focus-within:!rounded-xl focus-within:text-black':
-									!isLoading,
-							},
-						)}
-					>
-						<textarea
-							ref={textareaRef}
-							className="w-full resize-none bg-transparent p-3 px-4 text-base text-inherit outline-0 placeholder:text-inherit"
-							placeholder={`Ask ${modelDetails?.label ?? 'something'}...`}
-							value={prompt}
-							rows={1}
-							inputMode="text"
-							enterKeyHint="send"
-							onChange={(e) => setPrompt(e.target.value)}
-							onKeyDown={(e) => {
-								if (e.key === 'Enter' && !e.shiftKey) {
-									e.preventDefault();
-									handleSendMessage();
-								}
-							}}
-							disabled={isLoading}
+			<div className="bg-glass-pane flex w-full flex-col rounded-t-md border border-b-0 p-4 shadow-md md:rounded-t-3xl">
+				<div className="flex flex-col-reverse gap-3 md:flex-col md:gap-2.5">
+					<div className="flex w-full items-end gap-2">
+						<div
+							className={classNames(
+								'bg-glass flex max-h-[20rem] w-full flex-col gap-2 overflow-auto !rounded-3xl transition-all duration-150',
+								{
+									'opacity-50': isLoading,
+									'focus-within:bg-accent-foreground focus-within:!rounded-xl focus-within:text-black':
+										!isLoading,
+								},
+							)}
+						>
+							<textarea
+								ref={textareaRef}
+								className="w-full resize-none bg-transparent p-3 px-4 text-base text-inherit outline-0 placeholder:text-inherit"
+								placeholder={`Ask ${modelDetails?.label ?? 'something'}...`}
+								value={prompt}
+								rows={1}
+								inputMode="text"
+								enterKeyHint="send"
+								onChange={(e) => setPrompt(e.target.value)}
+								onKeyDown={(e) => {
+									if (e.key === 'Enter' && !e.shiftKey) {
+										e.preventDefault();
+										handleSendMessage();
+									}
+								}}
+								disabled={isLoading}
+							/>
+						</div>
+						<Button
+							variant="primary"
+							size="icon"
+							icon="SendHorizontal"
+							onClick={handleSendMessage}
+							disabled={isLoading || prompt.length < 3}
 						/>
 					</div>
-					<Button
-						variant="primary"
-						size="icon"
-						icon="SendHorizontal"
-						onClick={handleSendMessage}
-						disabled={isLoading || prompt.length < 3}
-					/>
-				</div>
 
-				<div className="no-scrollbar -mx-4 flex gap-2.5 overflow-auto px-4 whitespace-nowrap">
-					<div className="bg-foreground text-background relative flex cursor-pointer items-center gap-2 rounded-full p-2 px-3">
-						<span className="font-slab text-xs font-bold">
-							{AI_PROVIDERS.find((p) => p.id === currentProvider)?.label} -{' '}
-							{modelDetails?.label}
-						</span>
-						<select
-							className="font-slab absolute inset-0 appearance-none text-xs font-bold opacity-0 outline-0"
-							onChange={(e) => {
-								const [provider, model] = e.target.value.split('~');
-								setCurrentProvider(provider);
-								setCurrentModel(model);
-							}}
-							defaultValue={`${currentProvider}~${currentModel}`}
+					<div className="no-scrollbar -mx-4 flex gap-2.5 overflow-auto px-4 whitespace-nowrap">
+						<div className="bg-foreground text-background relative flex cursor-pointer items-center gap-2 rounded-full p-2 px-3">
+							<span className="font-slab text-xs font-bold">
+								{AI_PROVIDERS.find((p) => p.id === currentProvider)?.label} -{' '}
+								{modelDetails?.label}
+							</span>
+							<select
+								className="font-slab absolute inset-0 appearance-none text-xs font-bold opacity-0 outline-0"
+								onChange={(e) => {
+									const [provider, model] = e.target.value.split('~');
+									setCurrentProvider(provider);
+									setCurrentModel(model);
+								}}
+								defaultValue={`${currentProvider}~${currentModel}`}
+							>
+								{AI_PROVIDERS.map((provider) => (
+									<optgroup
+										key={provider.id}
+										label={provider.label}
+									>
+										{provider.models.map((model) => (
+											<option
+												key={`${provider.id}~${model.id}`}
+												value={`${provider.id}~${model.id}`}
+											>
+												{model.label}
+											</option>
+										))}
+									</optgroup>
+								))}
+							</select>
+							<ChevronsUpDown className="h-4 w-4" />
+						</div>
+						{/* 
+							TODO: I can't get the web searching to work rn, does not seem to return a stream...
+							can come back to this later.
+						*/}
+						{/* <ToggleButton
+							disabled={!modelDetails?.capabilities?.webSearch}
+							active={webSearchActive}
+							onToggle={setWebSearchActive}
+							icon="Globe"
 						>
-							{AI_PROVIDERS.map((provider) => (
-								<optgroup
-									key={provider.id}
-									label={provider.label}
-								>
-									{provider.models.map((model) => (
-										<option
-											key={`${provider.id}~${model.id}`}
-											value={`${provider.id}~${model.id}`}
-										>
-											{model.label}
-										</option>
-									))}
-								</optgroup>
-							))}
-						</select>
-						<ChevronsUpDown className="h-4 w-4" />
+							Web Search
+						</ToggleButton> */}
+						<ToggleButton
+							disabled={!modelDetails?.capabilities?.imageGeneration}
+							active={
+								createImageActive || modelDetails?.capabilities?.imageGeneration
+							}
+							icon="Image"
+						>
+							Create Image
+						</ToggleButton>
 					</div>
-					{/* 
-
-						TODO: I can't get the web searching to work rn, does not seem to return a stream...
-						can come back to this later.
-					*/}
-					{/* <ToggleButton
-						disabled={!modelDetails?.capabilities?.webSearch}
-						active={webSearchActive}
-						onToggle={setWebSearchActive}
-						icon="Globe"
-					>
-						Web Search
-					</ToggleButton> */}
-					<ToggleButton
-						disabled={!modelDetails?.capabilities?.imageGeneration}
-						active={
-							createImageActive || modelDetails?.capabilities?.imageGeneration
-						}
-						icon="Image"
-					>
-						Create Image
-					</ToggleButton>
 				</div>
+
+				<div className="safe-bottom" />
 			</div>
 
 			<MessageDialog

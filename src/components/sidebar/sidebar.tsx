@@ -4,7 +4,7 @@
 import classNames from 'classnames';
 import { Loader2, LogOut, Plus, User, X } from 'lucide-react';
 import Link from 'next/link';
-import React, { use, useEffect, useState } from 'react';
+import React, { use, useEffect, useState, useRef } from 'react';
 import { useMemo } from 'react';
 
 import { AI_PROVIDERS, Chat } from '~/api';
@@ -37,6 +37,99 @@ export const Sidebar = ({
 	const actionBar = use(ActionBarContext);
 
 	const showMenu = showMobileMenu || (!user && loading);
+
+	// Swipe gesture handling
+	const sidebarRef = useRef<HTMLElement>(null);
+	const [touchStart, setTouchStart] = useState<number | null>(null);
+	const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+	// Minimum swipe distance (in px)
+	const minSwipeDistance = 50;
+
+	const onTouchStart = (e: TouchEvent) => {
+		setTouchEnd(null);
+		setTouchStart(e.targetTouches[0].clientX);
+	};
+
+	const onTouchMove = (e: TouchEvent) => {
+		setTouchEnd(e.targetTouches[0].clientX);
+	};
+
+	const onTouchEnd = () => {
+		if (!touchStart || !touchEnd) {
+			return;
+		}
+
+		const distance = touchStart - touchEnd;
+		const isLeftSwipe = distance > minSwipeDistance;
+
+		if (isLeftSwipe && showMobileMenu) {
+			// Swipe left to close sidebar
+			setShowMobileMenu(false);
+		}
+	};
+
+	// Handle swipe from edge to open sidebar
+	useEffect(() => {
+		let localTouchStart: number | null = null;
+		let localTouchEnd: number | null = null;
+
+		const handleEdgeSwipe = (e: TouchEvent) => {
+			const touch = e.touches[0];
+			// Check if touch started from left edge (within 50px for better touch target)
+			if (touch.clientX < 250 && !showMobileMenu) {
+				localTouchStart = touch.clientX;
+			}
+		};
+
+		const handleEdgeSwipeMove = (e: TouchEvent) => {
+			if (localTouchStart !== null) {
+				const touch = e.touches[0];
+				localTouchEnd = touch.clientX;
+			}
+		};
+
+		const handleEdgeSwipeEnd = () => {
+			if (localTouchStart !== null && localTouchEnd !== null) {
+				const distance = localTouchEnd - localTouchStart;
+				// Open sidebar if swiped right more than minSwipeDistance
+				if (distance > minSwipeDistance && !showMobileMenu) {
+					setShowMobileMenu(true);
+				}
+			}
+
+			// Reset local values
+			localTouchStart = null;
+			localTouchEnd = null;
+		};
+
+		// Add edge swipe listeners to document
+		document.addEventListener('touchstart', handleEdgeSwipe);
+		document.addEventListener('touchmove', handleEdgeSwipeMove);
+		document.addEventListener('touchend', handleEdgeSwipeEnd);
+
+		return () => {
+			document.removeEventListener('touchstart', handleEdgeSwipe);
+			document.removeEventListener('touchmove', handleEdgeSwipeMove);
+			document.removeEventListener('touchend', handleEdgeSwipeEnd);
+		};
+	}, [showMobileMenu, setShowMobileMenu]);
+
+	// Add swipe listeners to sidebar
+	useEffect(() => {
+		const sidebar = sidebarRef.current;
+		if (!sidebar) return;
+
+		sidebar.addEventListener('touchstart', onTouchStart);
+		sidebar.addEventListener('touchmove', onTouchMove);
+		sidebar.addEventListener('touchend', onTouchEnd);
+
+		return () => {
+			sidebar.removeEventListener('touchstart', onTouchStart);
+			sidebar.removeEventListener('touchmove', onTouchMove);
+			sidebar.removeEventListener('touchend', onTouchEnd);
+		};
+	}, [showMobileMenu, touchStart, touchEnd]);
 
 	const chatsGroupedByDate = useMemo(() => {
 		return chats.reduce(
@@ -89,6 +182,7 @@ export const Sidebar = ({
 			</div>
 
 			<aside
+				ref={sidebarRef}
 				className={classNames(
 					'absolute top-0 right-0 bottom-0 left-0 !z-10 flex shrink-0 flex-col p-4 pt-20 transition-all duration-200 md:relative md:!z-1 md:h-full md:w-xs md:p-4 md:pr-0',
 					{
@@ -245,6 +339,8 @@ export const Sidebar = ({
 							<LogOut className="h-4 w-4" />
 						</button>
 					</div>
+
+					<div className="safe-bottom -mt-2" />
 				</div>
 			</aside>
 

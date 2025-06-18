@@ -88,6 +88,10 @@
 		-ms-overflow-style: none;
 		scrollbar-width: none;
 	}
+
+	.safe-bottom {
+		height: env(safe-area-inset-bottom, 0px);
+	}
 }
 
 @layer base {

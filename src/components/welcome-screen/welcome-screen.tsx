@@ -83,7 +83,7 @@ export const WelcomeScreen = ({ show, className }: WelcomeScreenProps) => {
 			{/* Medium+ screen annotations */}
 			<div
 				id="chat-history-text"
-				className="absolute top-50 left-4 hidden md:left-[17.5rem] md:block"
+				className="absolute top-60 left-4 hidden md:left-[17.5rem] md:block"
 			>
 				<div className="text-foreground px-4 text-xl">
 					<div className="font-slab font-bold">Chat History</div>
@@ -93,21 +93,10 @@ export const WelcomeScreen = ({ show, className }: WelcomeScreenProps) => {
 				</div>
 			</div>
 
-			{/* Main welcome message */}
-			<div className="absolute top-1/2 left-1/2 w-5/6 -translate-x-1/2 -translate-y-2/3 md:w-sm md:-translate-y-1/2">
-				<div className="bg-glass-pane rounded-xl border p-6 text-center shadow-lg backdrop-blur-md">
-					<div className="font-slab mb-2 text-3xl font-bold">tfree.chat</div>
-					<div className="text-foreground/75 max-w-sm">
-						Submission for the T3.chat Cloneathon. <br />
-						All tokens are only ever stored in your browser.
-					</div>
-				</div>
-			</div>
-
 			{/* Input area annotation */}
 			<div
 				id="input-text"
-				className="absolute bottom-60 left-6/12 hidden -translate-x-1/2 py-4 md:block"
+				className="absolute bottom-80 left-6/12 hidden -translate-x-1/2 py-4 md:block"
 			>
 				<div className="text-foreground text-center text-xl">
 					<div className="font-slab font-bold">Start Chatting</div>
@@ -120,7 +109,7 @@ export const WelcomeScreen = ({ show, className }: WelcomeScreenProps) => {
 			{/* Settings annotation */}
 			<div
 				id="settings-text"
-				className="absolute bottom-50 left-12 hidden md:left-[4rem] md:block"
+				className="absolute bottom-50 left-4 hidden md:block"
 			>
 				<div className="text-foreground font-slab py-4 text-center text-xl">
 					<div className="font-bold">Settings & Keys</div>

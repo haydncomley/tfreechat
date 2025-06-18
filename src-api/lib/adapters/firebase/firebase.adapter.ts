@@ -64,7 +64,6 @@ export const aiText = onRequest(async (req, res) => {
 				createdAt: FieldValue.serverTimestamp(),
 				updatedAt: FieldValue.serverTimestamp(),
 				prompt: req.body.text,
-				lastMessageId: newMessageRef.id,
 			});
 			chatId = chatRef.id;
 		}
@@ -89,19 +88,25 @@ export const aiText = onRequest(async (req, res) => {
 						path: [...(message.path ?? []), newMessageRef.id],
 					});
 				});
+
+				batch.update(chatRef, {
+					branches: {
+						[req.body.previousMessage.id]: FieldValue.arrayUnion({
+							id: newMessageRef.id,
+							prompt: req.body.text.slice(0, 25),
+						}),
+					},
+				});
 			}
 		}
 
-		const newMessagePath = [
-			...(messageHistory.at(-1)?.path
-				? !req.body.previousMessage?.path
-					? []
-					: messageHistory.at(-1)!.path
-				: [newMessageRef.id]),
-			...(messageHistory.length && !req.body.previousMessage?.path
-				? [newMessageRef.id]
-				: []),
-		];
+		const newMessagePath = !req.body.previousMessage?.path
+			? [newMessageRef.id]
+			: (messageHistory.at(-1)?.path ?? [newMessageRef.id]);
+
+		batch.update(chatRef, {
+			lastMessageId: newMessagePath.at(-1),
+		});
 
 		messageId = newMessageRef.id;
 		batch.set(newMessageRef, {
@@ -320,26 +325,6 @@ export const aiImage = onRequest(async (req, res) => {
 		res.write(
 			`data: ${JSON.stringify({ path: newMessagePath, messageId, chatId })}\n\n`,
 		);
-
-		// const messages = messageHistory
-		// 	.slice(-5)
-		// 	.map((message) => [
-		// 		{
-		// 			role: 'user' as const,
-		// 			content: message.prompt,
-		// 			createdAt: message.createdAt.toDate(),
-		// 		},
-		// 		...(message.reply?.text
-		// 			? [
-		// 					{
-		// 						role: 'assistant' as const,
-		// 						content: message.reply.text,
-		// 						createdAt: message.reply.createdAt.toDate(),
-		// 					},
-		// 				]
-		// 			: []),
-		// 	])
-		// 	.flat();
 
 		const { image, extension, mimeType } = await imageGeneration({
 			...req.body,

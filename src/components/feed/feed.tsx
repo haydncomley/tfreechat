@@ -41,11 +41,18 @@ export const Feed = () => {
 		});
 	};
 
+	console.log(messages);
+
 	useEffect(() => {
 		if (!feedRef.current || !autoScroll) return;
 		requestAnimationFrame(scrollToBottom);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [responseStream]);
+
+	useEffect(() => {
+		setBranchFromIndex(null);
+		setBranchId(null);
+	}, [viewBranchId]);
 
 	useEffect(() => {
 		if (currentChatId !== lastChatId && messages.length > 0) {

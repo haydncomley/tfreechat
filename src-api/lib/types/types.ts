@@ -40,6 +40,14 @@ export interface Chat {
 	summary?: string;
 	lastMessageId?: string;
 	public?: boolean;
+	branches?: Record<
+		string,
+		{
+			id: string;
+			summary?: string;
+			prompt?: string;
+		}[]
+	>;
 }
 
 export interface ChatMessage {
