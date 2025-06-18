@@ -2,7 +2,7 @@
 
 import type { QueryConstraint } from 'firebase/firestore';
 import { collection, onSnapshot, query } from 'firebase/firestore';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, DependencyList } from 'react';
 
 import { firestore } from '~/utils/firebase.utils';
 
@@ -10,7 +10,11 @@ const listeners = new Map();
 
 export const useCollectionSnapshot = <T>(
 	path?: string,
-	...queryConstraints: QueryConstraint[]
+	settings?: {
+		filters: QueryConstraint[];
+		retainDataBetweenQueries?: boolean;
+	},
+	deps?: DependencyList,
 ) => {
 	const [data, setData] = useState(() => {
 		const entry = listeners.get(path);
@@ -22,7 +26,10 @@ export const useCollectionSnapshot = <T>(
 		let entry = listeners.get(path);
 
 		if (!entry) {
-			const q = query(collection(firestore, path), ...queryConstraints);
+			const q = query(
+				collection(firestore, path),
+				...(settings?.filters ?? []),
+			);
 			const unsub = onSnapshot(q, (snap) => {
 				const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 				const e = listeners.get(path);
@@ -35,7 +42,7 @@ export const useCollectionSnapshot = <T>(
 		}
 
 		entry.subscribers.add(setData);
-		setData(entry.data);
+		if (!settings?.retainDataBetweenQueries) setData(entry.data);
 
 		return () => {
 			entry.subscribers.delete(setData);
@@ -45,7 +52,7 @@ export const useCollectionSnapshot = <T>(
 			}
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [path, JSON.stringify(queryConstraints)]);
+	}, [path, ...(deps || []), settings?.retainDataBetweenQueries]);
 
 	return data as T[];
 };

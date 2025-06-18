@@ -15,7 +15,6 @@ import {
 import { AI_PROVIDERS } from '~/api';
 import { Button, MessageDialog, ToggleButton } from '~/components';
 import { useChat, useChatHistory } from '~/hooks/use-chat';
-import { FormatDateSince } from '~/utils';
 
 export const ActionBarContext = createContext<ActionBarRef | null>(null);
 
@@ -32,11 +31,11 @@ export const ActionBar = ({
 		useChat();
 	const {
 		currentChat,
-		chats,
 		setCurrentChat,
 		currentChatId,
 		branchId,
 		setBranchId,
+		setViewBranchId,
 	} = useChatHistory();
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -83,13 +82,6 @@ export const ActionBar = ({
 		);
 	}, [currentModel, currentProvider]);
 
-	useEffect(() => {
-		if (!isLoading && prompt) {
-			setPrompt('');
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [isLoading]);
-
 	// Auto-resize textarea
 	useEffect(() => {
 		const textarea = textareaRef.current;
@@ -98,20 +90,6 @@ export const ActionBar = ({
 			textarea.style.height = `${textarea.scrollHeight}px`;
 		}
 	}, [prompt]);
-
-	useEffect(() => {
-		if (currentChatId || !isLoading) return;
-		const lastChatIsNew = chats.find((chat) => chat.prompt === prompt);
-		const isRecent = lastChatIsNew
-			? FormatDateSince(lastChatIsNew.createdAt.toDate()) ===
-				FormatDateSince(new Date())
-			: false;
-
-		if (lastChatIsNew && isRecent) {
-			setCurrentChat(lastChatIsNew.id);
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [chats.length, isLoading, currentChatId]);
 
 	// Expose the focus method through the ref
 	useImperativeHandle(ref, () => ({
@@ -155,6 +133,13 @@ export const ActionBar = ({
 							provider: currentProvider,
 						},
 						chatId: currentChat?.id,
+						previousMessage: prevMessage,
+						isNewBranch: !!branchId,
+						onCreate: ({ chatId, path }) => {
+							console.log('onCreate', { chatId, path });
+							if (!currentChatId) setCurrentChat(chatId);
+							if (branchId && path) setViewBranchId(path[0]);
+						},
 					});
 					break;
 				case 'text':
@@ -172,6 +157,10 @@ export const ActionBar = ({
 						chatId: currentChat?.id,
 						previousMessage: prevMessage,
 						isNewBranch: !!branchId,
+						onCreate: ({ chatId, path }) => {
+							if (!currentChatId) setCurrentChat(chatId);
+							if (branchId && path) setViewBranchId(path[0]);
+						},
 					});
 					break;
 			}
@@ -227,6 +216,7 @@ export const ActionBar = ({
 
 			setShowErrorDialog(true);
 		} finally {
+			setPrompt('');
 			setBranchId(null);
 		}
 	};

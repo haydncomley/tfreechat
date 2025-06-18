@@ -60,7 +60,8 @@ export const textGeneration = async (
 		capabilities: config.capabilities,
 	});
 
-	const { fullStream, providerMetadata } = streamText({
+	// TODO: Look into better ways of doing message history, the issue atm is it'll soak up tokens as messages are added to the history
+	const { fullStream } = streamText({
 		model,
 		...extras,
 		...(messageHistory?.length
@@ -95,6 +96,4 @@ export const textGeneration = async (
 			callbacks?.onError?.({ error: part.error });
 		}
 	}
-
-	console.log('Meta', await providerMetadata);
 };

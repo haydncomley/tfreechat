@@ -13,7 +13,7 @@ export const useChat = (id?: string | null) => {
 	const { user } = useAuth();
 	const queryClient = useQueryClient();
 
-	const { currentChatId, viewBranchId } = useChatHistory();
+	const { currentChatId, viewBranchId, currentChat } = useChatHistory();
 	const wantedChatId = id ?? currentChatId;
 
 	const { data: prompt } = useQuery({
@@ -69,6 +69,11 @@ export const useChat = (id?: string | null) => {
 			isOpenRouter?: boolean;
 			previousMessage?: ChatMessage;
 			isNewBranch?: boolean;
+			onCreate?: (details: {
+				messageId: string;
+				chatId: string;
+				path: string[];
+			}) => void;
 		}) => {
 			try {
 				if (!user) throw new Error('User not authenticated');
@@ -124,6 +129,9 @@ export const useChat = (id?: string | null) => {
 				let buffer = '';
 				let accumulatedText = '';
 				let accumulatedReasoning = '';
+				let messageId: string | undefined = undefined;
+				let chatId: string | undefined = undefined;
+				let path: string[] | undefined = undefined;
 
 				while (true) {
 					const { done, value } = await reader.read();
@@ -157,6 +165,23 @@ export const useChat = (id?: string | null) => {
 										accumulatedReasoning,
 									);
 								}
+								if (parsed.path) {
+									path = parsed.path;
+								}
+								if (parsed.messageId) {
+									messageId = parsed.messageId;
+								}
+								if (parsed.chatId) {
+									chatId = parsed.chatId;
+								}
+
+								if (parsed.path && path && messageId && chatId) {
+									options.onCreate?.({
+										messageId,
+										chatId,
+										path,
+									});
+								}
 							} catch (e) {
 								console.error('Failed to parse SSE data:', e);
 							}
@@ -164,7 +189,13 @@ export const useChat = (id?: string | null) => {
 					}
 				}
 
-				return accumulatedText;
+				return {
+					messageId,
+					chatId,
+					path,
+					accumulatedText,
+					accumulatedReasoning,
+				};
 			} catch (err) {
 				throw new Error(
 					err instanceof Error ? err.message : 'An error occurred',
@@ -191,6 +222,13 @@ export const useChat = (id?: string | null) => {
 			ai: Agent;
 			chatId?: string | null;
 			isOpenRouter?: boolean;
+			previousMessage?: ChatMessage;
+			isNewBranch?: boolean;
+			onCreate?: (details: {
+				messageId: string;
+				chatId: string;
+				path: string[];
+			}) => void;
 		}) => {
 			try {
 				if (!user) throw new Error('User not authenticated');
@@ -215,6 +253,19 @@ export const useChat = (id?: string | null) => {
 							currentChatId === null
 								? undefined
 								: (currentChatId ?? wantedChatId),
+						previousMessage: options.previousMessage
+							? {
+									id: options.isNewBranch
+										? options.previousMessage.id
+										: options.previousMessage.path.at(0),
+									timestamp: new Date(
+										options.previousMessage.createdAt.toMillis() + 1000,
+									).toISOString(),
+									path: options.isNewBranch
+										? undefined
+										: options.previousMessage.path.at(0),
+								}
+							: undefined,
 					}),
 				});
 
@@ -224,6 +275,66 @@ export const useChat = (id?: string | null) => {
 					}
 					throw new Error(`HTTP error! status: ${response.status}`);
 				}
+
+				const reader = response.body?.getReader();
+				const decoder = new TextDecoder();
+
+				if (!reader) throw new Error('No response body');
+
+				let buffer = '';
+				let messageId: string | undefined = undefined;
+				let chatId: string | undefined = undefined;
+				let path: string[] | undefined = undefined;
+
+				while (true) {
+					const { done, value } = await reader.read();
+
+					if (done) break;
+
+					buffer += decoder.decode(value, { stream: true });
+					const lines = buffer.split('\n');
+
+					buffer = lines.pop() || '';
+
+					for (const line of lines) {
+						if (line.startsWith('data: ')) {
+							const data = line.slice(6);
+
+							if (data === '[DONE]') {
+								continue;
+							}
+
+							try {
+								const parsed = JSON.parse(data);
+								if (parsed.path) {
+									path = parsed.path;
+								}
+								if (parsed.messageId) {
+									messageId = parsed.messageId;
+								}
+								if (parsed.chatId) {
+									chatId = parsed.chatId;
+								}
+
+								if (parsed.path && path && messageId && chatId) {
+									options.onCreate?.({
+										messageId,
+										chatId,
+										path,
+									});
+								}
+							} catch (e) {
+								console.error('Failed to parse SSE data:', e);
+							}
+						}
+					}
+				}
+
+				return {
+					messageId,
+					chatId,
+					path,
+				};
 			} catch (err) {
 				throw new Error(
 					err instanceof Error ? err.message : 'An error occurred',
@@ -242,10 +353,17 @@ export const useChat = (id?: string | null) => {
 		user?.uid && wantedChatId
 			? `users/${user.uid}/chats/${wantedChatId}/messages`
 			: undefined,
-		...[
-			orderBy('createdAt', 'asc'),
-			...(viewBranchId ? [where('path', 'array-contains', viewBranchId)] : []),
-		],
+		{
+			filters: [
+				orderBy('createdAt', 'asc'),
+				...(viewBranchId
+					? [where('path', 'array-contains', viewBranchId)]
+					: currentChat?.lastMessageId
+						? [where('path', 'array-contains', currentChat.lastMessageId)]
+						: []),
+			],
+		},
+		[viewBranchId, currentChat?.lastMessageId],
 	);
 
 	// TODO: This hook could do with some refactoring to split logic out, but it works for now.

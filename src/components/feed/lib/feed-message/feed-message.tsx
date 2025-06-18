@@ -48,7 +48,7 @@ export const FeedMessage = ({
 
 		if (isImage) {
 			return (
-				<div className="relative flex h-full w-full items-center justify-center">
+				<div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-2xl rounded-bl-sm">
 					{hasImageLoaded ? (
 						<img
 							src={image}

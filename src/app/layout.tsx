@@ -41,6 +41,12 @@ export default async function RootLayout({
 				darkMode !== undefined ? (darkMode ? 'dark' : 'light') : undefined
 			}
 		>
+			<head>
+				<meta
+					name="theme-color"
+					content="#f26a51"
+				/>
+			</head>
 			<body
 				className={`${robotoFlex.variable} ${robotoMono.variable} ${robotoSlab.variable} antialiased`}
 			>

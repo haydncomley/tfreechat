@@ -1,10 +1,5 @@
 import { initializeApp } from 'firebase-admin/app';
-import {
-	DocumentReference,
-	FieldValue,
-	getFirestore,
-	Timestamp,
-} from 'firebase-admin/firestore';
+import { FieldValue, getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
 import { onRequest } from 'firebase-functions/v2/https';
 import z from 'zod';
@@ -97,19 +92,21 @@ export const aiText = onRequest(async (req, res) => {
 			}
 		}
 
+		const newMessagePath = [
+			...(messageHistory.at(-1)?.path
+				? !req.body.previousMessage?.path
+					? []
+					: messageHistory.at(-1)!.path
+				: [newMessageRef.id]),
+			...(messageHistory.length && !req.body.previousMessage?.path
+				? [newMessageRef.id]
+				: []),
+		];
+
 		messageId = newMessageRef.id;
 		batch.set(newMessageRef, {
 			id: newMessageRef.id,
-			path: [
-				...(messageHistory.at(-1)?.path
-					? !req.body.previousMessage?.path
-						? []
-						: messageHistory.at(-1)!.path
-					: [newMessageRef.id]),
-				...(messageHistory.length && !req.body.previousMessage?.path
-					? [newMessageRef.id]
-					: []),
-			],
+			path: newMessagePath,
 			createdAt: FieldValue.serverTimestamp(),
 			prompt: req.body.text,
 			ai: {
@@ -145,6 +142,10 @@ export const aiText = onRequest(async (req, res) => {
 		res.setHeader('Connection', 'keep-alive');
 
 		let fullText = '';
+
+		res.write(
+			`data: ${JSON.stringify({ path: newMessagePath, messageId, chatId })}\n\n`,
+		);
 
 		await textGeneration(
 			{
@@ -220,8 +221,6 @@ export const aiImage = onRequest(async (req, res) => {
 		return;
 	}
 
-	let newMessageRef: DocumentReference | undefined = undefined;
-
 	const user = await isAuthenticated(req.headers);
 
 	if (!user) {
@@ -241,34 +240,64 @@ export const aiImage = onRequest(async (req, res) => {
 	try {
 		chatId = req.body.chatId ?? '';
 		const userRef = firestore.collection('users').doc(uid);
+		let messageHistory: ChatMessage[] = [];
+		const batch = firestore.batch();
+
+		const chatRef = chatId
+			? userRef.collection('chats').doc(chatId)
+			: userRef.collection('chats').doc();
+		const messagesRef = chatRef.collection('messages');
+		const newMessageRef = messagesRef.doc();
 
 		if (!chatId) {
-			const chatRef = userRef.collection('chats').doc();
-			await chatRef.set(
-				{
-					id: chatRef.id,
-					createdAt: FieldValue.serverTimestamp(),
-					updatedAt: FieldValue.serverTimestamp(),
-					prompt: req.body.text,
-				},
-				{ merge: true },
-			);
+			batch.set(chatRef, {
+				id: chatRef.id,
+				createdAt: FieldValue.serverTimestamp(),
+				updatedAt: FieldValue.serverTimestamp(),
+				prompt: req.body.text,
+				lastMessageId: newMessageRef.id,
+			});
 			chatId = chatRef.id;
 		}
 
-		const chatRef = userRef.collection('chats').doc(chatId);
-		const messagesRef = chatRef.collection('messages');
-		const messagesDoc = await messagesRef.orderBy('createdAt', 'asc').get();
-		const messagesData =
-			messagesDoc.docs
-				.filter((doc) => doc.exists)
-				.map((doc) => doc.data() as ChatMessage) ?? [];
+		if (req.body.previousMessage) {
+			const messagesDoc = await messagesRef
+				.where('path', 'array-contains', req.body.previousMessage.id)
+				.where(
+					'createdAt',
+					'<=',
+					Timestamp.fromDate(new Date(req.body.previousMessage.timestamp)),
+				)
+				.orderBy('createdAt', 'asc')
+				.get();
+			messageHistory =
+				messagesDoc.docs
+					.filter((doc) => doc.exists)
+					.map((doc) => doc.data() as ChatMessage) ?? [];
+			if (!req.body.previousMessage.path) {
+				messageHistory.forEach((message) => {
+					batch.update(messagesRef.doc(message.id), {
+						path: [...(message.path ?? []), newMessageRef.id],
+					});
+				});
+			}
+		}
 
-		newMessageRef = messagesRef.doc();
+		const newMessagePath = [
+			...(messageHistory.at(-1)?.path
+				? !req.body.previousMessage?.path
+					? []
+					: messageHistory.at(-1)!.path
+				: [newMessageRef.id]),
+			...(messageHistory.length && !req.body.previousMessage?.path
+				? [newMessageRef.id]
+				: []),
+		];
+
 		messageId = newMessageRef.id;
-		await newMessageRef.set({
+		batch.set(newMessageRef, {
 			id: newMessageRef.id,
-			path: messagesData.at(-1)?.path ?? [],
+			path: newMessagePath,
 			createdAt: FieldValue.serverTimestamp(),
 			prompt: req.body.text,
 			ai: {
@@ -281,13 +310,36 @@ export const aiImage = onRequest(async (req, res) => {
 				image: '',
 			},
 		});
-		await chatRef.update({
-			lastMessageId: newMessageRef.id,
-			updatedAt: FieldValue.serverTimestamp(),
-		});
 
+		res.setHeader('Content-Type', 'text/event-stream');
 		res.setHeader('Cache-Control', 'no-cache');
 		res.setHeader('Connection', 'keep-alive');
+
+		await batch.commit();
+
+		res.write(
+			`data: ${JSON.stringify({ path: newMessagePath, messageId, chatId })}\n\n`,
+		);
+
+		// const messages = messageHistory
+		// 	.slice(-5)
+		// 	.map((message) => [
+		// 		{
+		// 			role: 'user' as const,
+		// 			content: message.prompt,
+		// 			createdAt: message.createdAt.toDate(),
+		// 		},
+		// 		...(message.reply?.text
+		// 			? [
+		// 					{
+		// 						role: 'assistant' as const,
+		// 						content: message.reply.text,
+		// 						createdAt: message.reply.createdAt.toDate(),
+		// 					},
+		// 				]
+		// 			: []),
+		// 	])
+		// 	.flat();
 
 		const { image, extension, mimeType } = await imageGeneration({
 			...req.body,
@@ -307,7 +359,8 @@ export const aiImage = onRequest(async (req, res) => {
 			'reply.image': file.publicUrl(),
 		});
 
-		res.status(200);
+		res.write('data: [DONE]\n\n');
+		res.end();
 	} catch (err) {
 		console.error(err);
 

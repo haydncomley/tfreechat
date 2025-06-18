@@ -1,6 +1,7 @@
 'use client';
 
 import classNames from 'classnames';
+import { useEffect, useState } from 'react';
 import Xarrow from 'react-xarrows';
 
 interface WelcomeScreenProps {
@@ -9,80 +10,105 @@ interface WelcomeScreenProps {
 }
 
 export const WelcomeScreen = ({ show, className }: WelcomeScreenProps) => {
-	if (!show) return null;
+	const [showTimeout, setShowTimeout] = useState(false);
+
+	useEffect(() => {
+		if (show) {
+			setTimeout(() => {
+				setShowTimeout(true);
+			}, 100);
+		} else {
+			setShowTimeout(false);
+		}
+	}, [show]);
+
+	if (!show || !showTimeout) return null;
 
 	return (
 		<div
 			className={classNames(
-				'animate-fade-in pointer-events-none absolute inset-0 z-20',
+				'animate-fade-in pointer-events-none absolute inset-0 z-20 duration-75',
 				className,
 			)}
 		>
 			{/* Anchor points for arrows - Small screens */}
 			<div
 				id="mobile-input-target"
-				className="absolute bottom-40 left-3/5 block h-1 w-1 md:hidden"
+				className="absolute bottom-38 left-1/6 block h-1 w-1 md:hidden"
 			/>
 			<div
 				id="mobile-menu-target"
-				className="absolute top-8 left-20 block h-1 w-1 md:hidden"
+				className="absolute top-20 left-9 block h-1 w-1 md:hidden"
 			/>
 
 			{/* Anchor points for arrows - Medium+ screens */}
 			<div
 				id="chat-history-target"
-				className="absolute top-32 left-4 hidden h-1 w-1 md:left-[12rem] md:block"
+				className="absolute top-32 left-[10rem] hidden h-1 w-1 md:block"
 			/>
 			<div
 				id="input-area-target"
-				className="absolute bottom-40 left-8/11 hidden h-1 w-1 md:block"
+				className="absolute bottom-40 left-[27rem] hidden h-1 w-1 md:block"
 			/>
 			<div
 				id="settings-target"
-				className="absolute bottom-36 left-6 hidden h-1 w-1 md:left-[14rem] md:block"
+				className="absolute bottom-36 left-[17rem] hidden h-1 w-1 md:block"
 			/>
 
 			{/* Small screen annotations */}
 			<div
 				id="input-help-text"
-				className="absolute bottom-64 left-1/2 block -translate-x-1/2 md:hidden"
+				className="absolute bottom-64 left-2/6 block -translate-x-1/2 md:hidden"
 			>
-				<div className="text-tooltip font-slab text-md py-4 text-center">
-					<div className="font-semibold">Start Chatting</div>
-					<div className="text-sm">Type your message below</div>
+				<div className="text-foreground py-4 text-center text-lg">
+					<div className="font-slab font-bold">Start Chatting</div>
+					<div className="text-foreground/75 text-base">
+						Get started by typing down here
+					</div>
 				</div>
 			</div>
 
 			<div
 				id="menu-help-text"
-				className="absolute top-16 left-1/2 block md:hidden"
+				className="absolute top-28 left-24 block md:hidden"
 			>
-				<div className="text-tooltip font-slab text-md px-4 text-left">
-					<div className="font-semibold">Menu</div>
-					<div className="text-sm">Tap here to open</div>
+				<div className="text-foreground px-4 text-left text-lg">
+					<div className="font-slab font-bold">Menu</div>
+					<div className="text-foreground/75 text-base">
+						View your conversations and settings
+					</div>
 				</div>
 			</div>
 
 			{/* Medium+ screen annotations */}
 			<div
 				id="chat-history-text"
-				className="absolute top-50 left-4 hidden md:left-[calc(20rem+2rem)] md:block"
+				className="absolute top-50 left-4 hidden md:left-[17.5rem] md:block"
 			>
-				<div className="text-tooltip font-slab px-4 text-xl">
-					<div className="font-semibold">Chat History</div>
-					<div className="text-sm">
-						Your previous conversations will appear here
+				<div className="text-foreground px-4 text-xl">
+					<div className="font-slab font-bold">Chat History</div>
+					<div className="text-foreground/75 text-base">
+						You conversations will show up here
 					</div>
 				</div>
 			</div>
 
 			{/* Main welcome message */}
+<<<<<<< HEAD
 			<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
 				<div className="bg-glass-pane font-slab rounded-3xl border p-6 text-center shadow-lg backdrop-blur-md">
 					<div className="mb-2 text-3xl font-bold">tfree.chat</div>
 					<div className="text-foreground/75 max-w-sm text-sm">
 						Your AI-powered chat experience starts here. Ask questions, get
 						help, or just have a conversation!
+=======
+			<div className="absolute top-1/2 left-1/2 w-5/6 -translate-x-1/2 -translate-y-2/3 md:w-sm md:-translate-y-1/2">
+				<div className="bg-glass-pane rounded-xl border p-6 text-center shadow-lg backdrop-blur-md">
+					<div className="font-slab mb-2 text-3xl font-bold">tfree.chat</div>
+					<div className="text-foreground/75 max-w-sm">
+						Submission for the T3.chat Cloneathon. <br />
+						All tokens are only ever stored in your browser.
+>>>>>>> 2c113de (small fixups + image gen fix)
 					</div>
 				</div>
 			</div>
@@ -90,38 +116,42 @@ export const WelcomeScreen = ({ show, className }: WelcomeScreenProps) => {
 			{/* Input area annotation */}
 			<div
 				id="input-text"
-				className="absolute bottom-80 left-7/11 hidden -translate-x-1/2 py-4 md:block"
+				className="absolute bottom-60 left-6/12 hidden -translate-x-1/2 py-4 md:block"
 			>
-				<div className="text-tooltip font-slab text-center text-xl">
-					<div className="font-semibold">Start Here</div>
-					<div className="text-sm">Get started by typing something below</div>
+				<div className="text-foreground text-center text-xl">
+					<div className="font-slab font-bold">Start Chatting</div>
+					<div className="text-foreground/75 text-base">
+						Get started by typing something below
+					</div>
 				</div>
 			</div>
 
 			{/* Settings annotation */}
 			<div
 				id="settings-text"
-				className="absolute bottom-64 left-12 hidden md:left-[12rem] md:block"
+				className="absolute bottom-50 left-12 hidden md:left-[-1rem] md:block"
 			>
-				<div className="text-tooltip font-slab py-4 text-center text-xl">
-					<div className="font-semibold">Settings & Profile</div>
-					<div className="text-sm">API keys, dark mode</div>
+				<div className="text-foreground font-slab py-4 text-center text-xl">
+					<div className="font-bold">Settings & Keys</div>
+					<div className="text-foreground/75 text-base">
+						API keys, Dark-mode, and more
+					</div>
 				</div>
 			</div>
 
 			{/* Arrows for small screens */}
-			<div className="animate-fade-in block md:hidden">
+			<div className="block duration-75 md:hidden">
 				<Xarrow
 					start="input-help-text"
 					end="mobile-input-target"
 					startAnchor="bottom"
 					endAnchor="top"
 					color="var(--color-tooltip)"
-					strokeWidth={4}
-					curveness={0.5}
+					strokeWidth={3}
+					curveness={0.75}
 					showHead={true}
-					animateDrawing={true}
-					headSize={4}
+					animateDrawing={0.5}
+					headSize={5}
 					tailSize={0}
 				/>
 
@@ -129,31 +159,30 @@ export const WelcomeScreen = ({ show, className }: WelcomeScreenProps) => {
 					start="menu-help-text"
 					end="mobile-menu-target"
 					startAnchor="left"
-					endAnchor="right"
+					endAnchor="bottom"
 					color="var(--color-tooltip)"
-					strokeWidth={4}
-					curveness={0.6}
+					strokeWidth={3}
+					curveness={0.75}
 					showHead={true}
-					animateDrawing={true}
-					headSize={4}
+					animateDrawing={0.5}
+					headSize={5}
 					tailSize={0}
 				/>
 			</div>
 
 			{/* Arrows for medium+ screens */}
-			<div className="animate-fade-in hidden md:block">
+			<div className="hidden duration-75 md:block">
 				<Xarrow
 					start="chat-history-text"
 					end="chat-history-target"
 					startAnchor="left"
 					endAnchor="bottom"
 					color="var(--color-tooltip)"
-					strokeWidth={4}
-					curveness={0.6}
+					strokeWidth={3}
+					curveness={0.75}
 					showHead={true}
-					animateDrawing={true}
-					headSize={4}
-					tailSize={0}
+					animateDrawing={0.5}
+					headSize={5}
 				/>
 
 				<Xarrow
@@ -162,11 +191,11 @@ export const WelcomeScreen = ({ show, className }: WelcomeScreenProps) => {
 					startAnchor="bottom"
 					endAnchor="top"
 					color="var(--color-tooltip)"
-					strokeWidth={4}
-					curveness={0.6}
+					strokeWidth={3}
+					curveness={0.75}
 					showHead={true}
-					animateDrawing={true}
-					headSize={4}
+					animateDrawing={0.5}
+					headSize={5}
 					tailSize={0}
 				/>
 
@@ -176,11 +205,11 @@ export const WelcomeScreen = ({ show, className }: WelcomeScreenProps) => {
 					startAnchor="bottom"
 					endAnchor="bottom"
 					color="var(--color-tooltip)"
-					strokeWidth={4}
-					curveness={0.7}
+					strokeWidth={3}
+					curveness={0.75}
 					showHead={true}
-					animateDrawing={true}
-					headSize={4}
+					animateDrawing={0.5}
+					headSize={5}
 					tailSize={0}
 				/>
 			</div>

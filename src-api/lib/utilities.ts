@@ -63,7 +63,7 @@ export const createAgent = (details: {
 		throw new HttpsError('invalid-argument', 'Invalid model');
 	}
 
-	if (details.isOpenRouter && model.openRouterId) {
+	if (details.isOpenRouter && model.openRouterId && details.isOpenRouter) {
 		return createOpenRouter({ apiKey: details.key })(model.openRouterId);
 	}
 

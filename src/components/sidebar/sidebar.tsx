@@ -16,12 +16,24 @@ import { FormatChatDate, FormatDateSince } from '~/utils';
 import { ActionBarContext, Button, MessageDialog, ToggleButton } from '../';
 import styles from './sidebar.module.css';
 
-export const Sidebar = () => {
+export const Sidebar = ({
+	showMobileMenu,
+	setShowMobileMenu,
+}: {
+	showMobileMenu: boolean;
+	setShowMobileMenu: (show: boolean) => void;
+}) => {
 	const { user, signOut, loading } = useAuth();
-	const { chats, currentChat, setCurrentChat, deleteChat, isDeletingChat } =
-		useChatHistory();
+	const {
+		chats,
+		currentChat,
+		setCurrentChat,
+		setViewBranchId,
+		setBranchId,
+		deleteChat,
+		isDeletingChat,
+	} = useChatHistory();
 	const { toggleDarkMode, isDarkMode } = useDarkMode();
-	const [showMobileMenu, setShowMobileMenu] = useState(false);
 	const actionBar = use(ActionBarContext);
 
 	const showMenu = showMobileMenu || (!user && loading);
@@ -64,8 +76,6 @@ export const Sidebar = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [JSON.stringify(chats)]);
 
-	console.log(user?.uid);
-
 	return (
 		<>
 			{/* Mobile menu button - always visible */}
@@ -106,6 +116,8 @@ export const Sidebar = () => {
 									onClick={(e) => {
 										e.preventDefault();
 										setCurrentChat(chat);
+										setViewBranchId(null);
+										setBranchId(null);
 										setShowMobileMenu(false);
 									}}
 									className={classNames(
@@ -119,10 +131,10 @@ export const Sidebar = () => {
 									)}
 								>
 									<div className="flex flex-col truncate">
-										<span className="truncate whitespace-nowrap">
+										<span className="font-slab truncate text-sm font-bold whitespace-nowrap">
 											{chat.prompt}
 										</span>
-										<span className="font-slab -mt-0.5 text-xs opacity-75">
+										<span className="text-xs opacity-75">
 											{FormatDateSince(chat.createdAt.toDate())}
 										</span>
 									</div>
@@ -133,6 +145,8 @@ export const Sidebar = () => {
 											e.stopPropagation();
 											deleteChat({ chatId: chat.id }).then(() => {
 												setCurrentChat(null);
+												setViewBranchId(null);
+												setBranchId(null);
 											});
 										}}
 										className={classNames(
@@ -166,6 +180,8 @@ export const Sidebar = () => {
 					<button
 						onClick={() => {
 							setCurrentChat(null);
+							setViewBranchId(null);
+							setBranchId(null);
 							setShowMobileMenu(false);
 							// Focus the input after a short delay to ensure the context is available
 							setTimeout(() => {
@@ -215,7 +231,7 @@ export const Sidebar = () => {
 							<div>
 								<p>{user?.displayName ?? 'Not logged in'}</p>
 								{user ? (
-									<p className="font-slab text-foreground/75 -mt-0.5 text-xs">
+									<p className="text-foreground/75 -mt-0.5 text-xs">
 										{user?.email ?? 'No email'}
 									</p>
 								) : null}

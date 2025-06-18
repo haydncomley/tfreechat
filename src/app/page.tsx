@@ -2,7 +2,7 @@
 
 import classNames from 'classnames';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import {
 	ActionBar,
@@ -23,6 +23,7 @@ export default function Home() {
 	const { messages } = useChat();
 	const { chats } = useChatHistory();
 	const actionBarRef = useRef<ActionBarRef>(null);
+	const [showSidebar, setShowSidebar] = useState(false);
 
 	// Show welcome screen only when user has no chats and no messages
 	const showWelcomeScreen = chats.length === 0 && messages.length === 0;
@@ -40,9 +41,12 @@ export default function Home() {
 					styles.page,
 				)}
 			>
-				<div className="relative flex h-full w-full max-w-[64rem] justify-center gap-4">
-					<WelcomeScreen show={showWelcomeScreen} />
-					<Sidebar />
+				<div className="relative flex h-full w-full max-w-[80rem] justify-center gap-4">
+					<WelcomeScreen show={showWelcomeScreen && !showSidebar} />
+					<Sidebar
+						showMobileMenu={showSidebar}
+						setShowMobileMenu={setShowSidebar}
+					/>
 					<main className="flex h-full w-full flex-col overflow-hidden transition-all duration-200 md:pr-4">
 						<Feed />
 						<ActionBar ref={actionBarRef} />

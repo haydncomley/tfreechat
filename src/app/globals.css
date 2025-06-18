@@ -9,7 +9,7 @@
 	--color-outline: #ffffff45;
 	--color-background-glass: #ffffff40;
 
-	--color-accent: #ff6378;
+	--color-accent: #f26a51;
 	--color-accent-foreground: #fafafa;
 
 	--color-tooltip: #171717bf;
@@ -51,7 +51,7 @@
 		}
 	}
 
-	--animate-fade-in: fade-in 0.8s ease 0.5s both;
+	--animate-fade-in: fade-in 1s ease 0.1s both;
 	@keyframes fade-in {
 		0% {
 			opacity: 0;
@@ -103,6 +103,7 @@
 	body {
 		width: 100%;
 		height: 100%;
+		min-height: calc(100svh + env(safe-area-inset-top));
 	}
 
 	body {

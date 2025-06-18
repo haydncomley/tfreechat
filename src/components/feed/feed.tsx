@@ -18,10 +18,12 @@ export const Feed = () => {
 		setBranchId,
 		viewBranchId,
 		setViewBranchId,
+		currentChat,
 	} = useChatHistory();
 	const feedRef = useRef<HTMLDivElement>(null);
 	const [autoScroll, setAutoScroll] = useState(true);
 	const [lastChatId, setLastChatId] = useState<string | null>(null);
+	const [branchFromIndex, setBranchFromIndex] = useState<number | null>(null);
 
 	// Mock conversation data for demonstration
 	const mockConversations = [
@@ -69,97 +71,97 @@ export const Feed = () => {
 					setAutoScroll(Math.abs(e.currentTarget.scrollTop) < 150);
 				}}
 			>
-				{messages
-					.slice()
-					.reverse()
-					.map((message, index) => {
-						const model = AI_PROVIDERS.find(
-							(p) => p.id === message.ai.provider,
-						)?.models.find((m) => m.id === message.ai.model);
+				{messages.toReversed().map((message, index) => {
+					const model = AI_PROVIDERS.find(
+						(p) => p.id === message.ai.provider,
+					)?.models.find((m) => m.id === message.ai.model);
 
-						return (
-							<div
-								key={message.id}
-								className={classNames(
-									'animate-message-in flex w-full origin-bottom flex-col gap-4',
-								)}
-								style={{
-									animationFillMode: 'backwards',
-									animationDelay: `${index * 0.08}s`, // Messages start after main content, oldest first
-								}}
-							>
+					return (
+						<div
+							key={message.id}
+							className={classNames(
+								'animate-message-in flex w-full origin-center flex-col gap-4 transition-all duration-150',
+								{
+									'scale-95 opacity-50':
+										branchFromIndex && index < branchFromIndex,
+								},
+							)}
+							style={{
+								animationFillMode: 'backwards',
+								animationDelay: `${index * 0.08}s`, // Messages start after main content, oldest first
+							}}
+						>
+							<FeedMessage
+								sender="user"
+								text={message.prompt}
+								date={message.createdAt.toDate()}
+							/>
+
+							{message.reply ? (
 								<FeedMessage
-									sender="user"
-									text={message.prompt}
-									date={message.createdAt.toDate()}
-								/>
-
-								{message.reply ? (
-									<FeedMessage
-										sender="ai"
-										text={
-											message.reply?.image ? message.prompt : message.reply.text
-										}
-										image={message.reply?.image}
-										date={message.reply?.createdAt?.toDate()}
-										error={message.reply?.error ?? undefined}
-										meta={model?.label ? [model?.label] : undefined}
-										actions={
-											!message.reply?.error ? (
-												<ToggleButton
-													active={branchId === message.id}
-													onToggle={() => {
-														if (branchId === message.id) {
-															setBranchId(null);
-														} else {
-															setBranchId(message.id);
-														}
-													}}
-													icon="GitBranchPlus"
-												/>
-											) : null
-										}
-									/>
-								) : null}
-
-								{message.path.length > 1 ? (
-									<div className="flex gap-2">
-										{message.path.map((id) => (
+									sender="ai"
+									text={
+										message.reply?.image ? message.prompt : message.reply.text
+									}
+									image={message.reply?.image}
+									date={message.reply?.createdAt?.toDate()}
+									error={message.reply?.error ?? undefined}
+									meta={model?.label ? [model?.label] : undefined}
+									actions={
+										!message.reply?.error && index !== 0 ? (
 											<ToggleButton
-												key={id}
-												active={viewBranchId === id}
+												active={branchId === message.id}
 												onToggle={() => {
-													setViewBranchId(viewBranchId === id ? null : id);
+													if (branchId === message.id) {
+														setBranchId(null);
+														setBranchFromIndex(null);
+													} else {
+														setBranchId(message.id);
+														setBranchFromIndex(index);
+													}
 												}}
-												icon="GitBranch"
+												icon="GitBranchPlus"
 											/>
-										))}
-									</div>
-								) : null}
+										) : null
+									}
+								/>
+							) : null}
 
-								{index === 0 && !message.reply ? (
-									<FeedMessage
-										isDynamic
-										text={responseStream || reasoningStream || 'Thinking...'}
-										sender="ai"
-										meta={
-											!!responseStream
-												? ['Streaming...']
-												: !!reasoningStream
-													? ['Reasoning...']
-													: undefined
-										}
-									/>
-								) : null}
-							</div>
-						);
-					})}
+							{message.path.length > 1 ? (
+								<div className="flex gap-2">
+									{message.path.map((id) => (
+										<ToggleButton
+											key={id}
+											active={
+												viewBranchId === id ||
+												(!viewBranchId && id === currentChat?.lastMessageId)
+											}
+											onToggle={() => {
+												setViewBranchId(viewBranchId === id ? null : id);
+											}}
+											icon="GitBranch"
+										/>
+									))}
+								</div>
+							) : null}
 
-				{!messages.length && !currentChatId ? (
-					<p className="font-slab text-foreground/75 text-center text-sm">
-						Get started by typing something below.
-					</p>
-				) : null}
+							{index === 0 && !message.reply ? (
+								<FeedMessage
+									isDynamic
+									text={responseStream || reasoningStream || 'Thinking...'}
+									sender="ai"
+									meta={
+										!!responseStream
+											? ['Streaming...']
+											: !!reasoningStream
+												? ['Reasoning...']
+												: undefined
+									}
+								/>
+							) : null}
+						</div>
+					);
+				})}
 			</div>
 
 			<div
