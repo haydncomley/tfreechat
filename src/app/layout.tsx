@@ -44,8 +44,12 @@ export default async function RootLayout({
 			<head>
 				<meta
 					name="theme-color"
-					content="#f26a51"
+					content={darkMode ? '#231a1a' : '#f26a51'}
 				/>
+				<meta
+					name="viewport"
+					content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
+				></meta>
 			</head>
 			<body
 				className={`${robotoFlex.variable} ${robotoMono.variable} ${robotoSlab.variable} antialiased`}
