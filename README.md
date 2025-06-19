@@ -1,36 +1,99 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚀 tfree.chat
 
-## Getting Started
+Welcome to **tfree.chat** - our submission for the **T3 Cloneathon**! 🎉
 
-First, run the development server:
+A simple but sleek, open-source chat application built with Next.js and Firebase (to be abstracted).
+
+## ✨ Features
+
+- 💬 Real-time chat functionality
+- 🔥 Firebase backend integration
+- 🎨 Modern UI with dark mode support
+- 🔐 Authentication & Syncing
+- 📱 Responsive design
+- 🌠 Image-gen Support
+- 🔗 Shareable chat links
+
+## 🛠️ Getting Started
+
+### Prerequisites
+
+Before you begin, make sure you have [Bun](https://bun.sh/) installed on your machine.
+
+### Installation
+
+1. Clone the repository:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
+git clone https://github.com/yourusername/tfreechat.git
+cd tfreechat
+```
+
+2. Install dependencies:
+
+```bash
+bun install
+```
+
+3. Start the development server:
+
+```bash
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Your app should now be running on [http://localhost:3000](http://localhost:3000) 🎊
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🔧 Backend Setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+To run the full application, you'll need to set up the backend. You have several options:
 
-## Learn More
+### Option 1: Firebase Emulator (Recommended for Development)
 
-To learn more about Next.js, take a look at the following resources:
+We provide a Firebase adapter (though it needs some refactoring love ❤️). You can run it locally using the Firebase emulator:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+firebase emulators:start
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Option 2: Self-Host
 
-## Deploy on Vercel
+Deploy the backend to your own Firebase project or compatible service.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Option 3: Use the Live Site
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Visit [https://tfree.chat](https://tfree.chat) and use your own API keys to get started immediately! ⚡
+
+## 🤝 Contributing
+
+We're excited to continue developing tfree.chat beyond the hackathon! PRs are not just welcome - they're celebrated! 🎈
+
+Whether it's:
+
+- 🐛 Bug fixes
+- ✨ New features
+- 📚 Documentation improvements
+- 🎨 UI/UX enhancements
+
+We'd love to see your contributions!
+
+### How to Contribute
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📝 License
+
+This project is open source and available under the [Apache License 2.0](LICENCE.md).
+
+## 🏆 Acknowledgments
+
+Built with ❤️ for the **T3 Cloneathon** hackathon.
+
+---
+
+<div align="center">
+  <b>Happy chatting! 💬</b>
+</div>
