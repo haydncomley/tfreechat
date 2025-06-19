@@ -7,18 +7,18 @@ import { glass } from '~/utils';
 import { Button } from '../button';
 
 export interface Message {
-	id: string;
-	summary: string;
+	id: string | null;
+	summary?: string | null;
 	isActive: boolean;
 }
 
 export interface ConversationHistoryProps
 	extends React.HTMLAttributes<HTMLDivElement> {
 	vertices: {
-		branchId: string;
+		branchId: string | null;
 		branchMessages: Message[];
 	}[];
-	onMessageClick: (messageId: string) => void;
+	onMessageClick: (messageId: string | null) => void;
 }
 
 export const ConversationHistory = ({
@@ -56,7 +56,7 @@ export const ConversationHistory = ({
 									{/* Main conversation dot */}
 									<button
 										className="border-foreground bg-foreground relative z-10 h-4 w-4 flex-shrink-0 rounded-full border-2 shadow-lg transition-all duration-300"
-										title={vertex.branchMessages[0].summary}
+										title={vertex.branchMessages[0].summary ?? ''}
 										aria-label={`${vertex.branchMessages[0].summary}`}
 									/>
 

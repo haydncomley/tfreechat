@@ -3,13 +3,13 @@
 import classNames from 'classnames';
 import { SearchX } from 'lucide-react';
 import Link from 'next/link';
-import React, { use, useEffect, useRef, useState } from 'react';
+import React, { use, useEffect, useMemo, useRef, useState } from 'react';
 
 import { AI_PROVIDERS } from '~/api';
 import { useChat, useChatHistory } from '~/hooks/use-chat';
 
 import { ActionBarContext } from '../action-bar';
-import { ConversationHistory } from '../conversation-history';
+import { ConversationHistory, Message } from '../conversation-history';
 import { ToggleButton } from '../toggle-button';
 import { FeedMessage } from './lib/feed-message';
 
@@ -34,18 +34,14 @@ export const Feed = ({ view }: { view?: Parameters<typeof useChat>[0] }) => {
 	};
 
 	// Transform real messages into conversation history format
-	const conversationVertices = React.useMemo(() => {
+	const conversationVertices = useMemo(() => {
 		if (!messages || messages.length === 0 || !currentChat) return [];
 
 		const branches = currentChat.branches ?? {};
 		let nextVertex:
 			| {
 					branchId: string | null;
-					branchMessages: {
-						id: string | null;
-						summary: string | undefined;
-						isActive: boolean;
-					}[];
+					branchMessages: Message[];
 			  }
 			| undefined;
 		const vertices = messages.map((message) => {
