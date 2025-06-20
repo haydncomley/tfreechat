@@ -73,7 +73,9 @@ export const ConversationHistory = ({ vertices }: ConversationHistoryProps) => {
 						key={index}
 						className={classNames('relative', {
 							'mt-1':
-								vertices[index - 1]?.branchMessages.length > 1 && isExpanded,
+								vertices[index]?.branchMessages.length > 1 &&
+								vertices[index - 1]?.branchMessages.length > 1 &&
+								isExpanded,
 						})}
 					>
 						{vertex.branchMessages.length > 1 ? (
