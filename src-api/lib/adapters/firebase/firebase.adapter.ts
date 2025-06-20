@@ -66,6 +66,10 @@ export const aiText = onRequest(async (req, res) => {
 				prompt: req.body.text,
 			});
 			chatId = chatRef.id;
+		} else {
+			batch.update(chatRef, {
+				updatedAt: FieldValue.serverTimestamp(),
+			});
 		}
 
 		if (req.body.previousMessage) {
@@ -271,6 +275,10 @@ export const aiImage = onRequest(async (req, res) => {
 				lastMessageId: newMessageRef.id,
 			});
 			chatId = chatRef.id;
+		} else {
+			batch.update(chatRef, {
+				updatedAt: FieldValue.serverTimestamp(),
+			});
 		}
 
 		if (req.body.previousMessage) {

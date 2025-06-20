@@ -95,7 +95,7 @@ export const Feed = ({ view }: { view?: Parameters<typeof useChat>[0] }) => {
 		});
 
 		return vertices;
-	}, [messages, branchId, currentChat?.lastMessageId]);
+	}, [messages, currentChat, isBranchActive, viewBranchId]);
 
 	const scrollToBottom = () => {
 		feedRef.current?.scrollTo({
@@ -112,6 +112,7 @@ export const Feed = ({ view }: { view?: Parameters<typeof useChat>[0] }) => {
 	useEffect(() => {
 		setBranchFromIndex(null);
 		setBranchId(null);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [viewBranchId]);
 
 	useEffect(() => {
@@ -126,14 +127,8 @@ export const Feed = ({ view }: { view?: Parameters<typeof useChat>[0] }) => {
 
 	return (
 		<div className="relative mx-auto flex w-full grow-1 flex-col items-center overflow-hidden">
-			{/* Conversation History - Responsive positioning */}
-			<div className="absolute top-20 left-4 z-10 md:top-4 md:left-0">
-				<ConversationHistory
-					vertices={conversationVertices}
-					onMessageClick={(messageId) => {
-						setViewBranchId(messageId);
-					}}
-				/>
+			<div className="absolute top-4 right-4 z-10">
+				<ConversationHistory vertices={conversationVertices} />
 			</div>
 
 			<div
@@ -168,6 +163,7 @@ export const Feed = ({ view }: { view?: Parameters<typeof useChat>[0] }) => {
 								animationFillMode: 'backwards',
 								animationDelay: `${index * 0.08}s`, // Messages start after main content, oldest first
 							}}
+							id={message.id}
 						>
 							<FeedMessage
 								sender="user"
@@ -211,33 +207,34 @@ export const Feed = ({ view }: { view?: Parameters<typeof useChat>[0] }) => {
 							{currentChat?.branches?.[message.id]?.length ? (
 								<div className="flex flex-wrap gap-2">
 									{Object.values(currentChat.branches[message.id]).map(
-										(branch) => (
-											<ToggleButton
-												key={`${branch.id}-${index}`}
-												active={
-													branch.id
-														? isBranchActive(branch.id)
-														: viewBranchId === message.path.at(0) ||
-															!Object.values(
-																currentChat?.branches?.[message.id] ?? {},
-															).some(
-																(otherBranch) =>
-																	otherBranch.id &&
-																	isBranchActive(otherBranch.id),
-															)
-												}
-												onToggle={() => {
-													setViewBranchId(
-														branch.id ?? message.path.at(0) ?? null,
+										(branch) => {
+											const isActive = branch.id
+												? isBranchActive(branch.id)
+												: viewBranchId === message.path.at(0) ||
+													!Object.values(
+														currentChat?.branches?.[message.id] ?? {},
+													).some(
+														(otherBranch) =>
+															otherBranch.id && isBranchActive(otherBranch.id),
 													);
-												}}
-												icon="GitMerge"
-											>
-												<div className="capitalize">
-													{branch.prompt?.slice(0, 10)}...
-												</div>
-											</ToggleButton>
-										),
+
+											return (
+												<ToggleButton
+													key={`${branch.id}-${index}`}
+													active={isActive}
+													onToggle={() => {
+														setViewBranchId(
+															branch.id ?? message.path.at(0) ?? null,
+														);
+													}}
+													icon={isActive ? 'CircleCheck' : 'Circle'}
+												>
+													<div className="capitalize">
+														{branch.prompt?.slice(0, 10)}...
+													</div>
+												</ToggleButton>
+											);
+										},
 									)}
 								</div>
 							) : null}
@@ -279,7 +276,7 @@ export const Feed = ({ view }: { view?: Parameters<typeof useChat>[0] }) => {
 
 			<div
 				className={classNames(
-					'absolute right-2 bottom-2 transition-all duration-75 hover:opacity-75',
+					'absolute right-4 bottom-4 transition-all duration-75 hover:opacity-75',
 					{
 						'pointer-events-none !opacity-0': autoScroll,
 					},

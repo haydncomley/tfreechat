@@ -69,7 +69,7 @@ export const useChatHistory = () => {
 
 	const chats = useCollectionSnapshot<Chat>(
 		user?.uid ? `users/${user.uid}/chats` : undefined,
-		{ filters: [orderBy('createdAt', 'desc')] },
+		{ filters: [orderBy('updatedAt', 'desc')] },
 		[user?.uid],
 	);
 

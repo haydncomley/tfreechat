@@ -1,10 +1,15 @@
+'use client';
+
 import classNames from 'classnames';
-import { icons } from 'lucide-react';
-import * as React from 'react';
+import { Circle, CircleCheck, GitCommitVertical, Split } from 'lucide-react';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import { useState } from 'react';
 
-import { glass } from '~/utils';
+import { useAuth } from '~/hooks/use-auth';
+import { useChatHistory } from '~/hooks/use-chat';
 
-import { Button } from '../button';
+import { ToggleButton } from '../toggle-button';
 
 export interface Message {
 	id: string | null;
@@ -12,185 +17,169 @@ export interface Message {
 	isActive: boolean;
 }
 
-export interface ConversationHistoryProps
-	extends React.HTMLAttributes<HTMLDivElement> {
+export interface ConversationHistoryProps {
 	vertices: {
 		branchId: string | null;
 		branchMessages: Message[];
 	}[];
-	onMessageClick: (messageId: string | null) => void;
 }
 
-export const ConversationHistory = ({
-	vertices,
-	className,
-	onMessageClick,
-	...props
-}: ConversationHistoryProps) => {
-	const [isExpanded, setIsExpanded] = React.useState(false);
+export const ConversationHistory = ({ vertices }: ConversationHistoryProps) => {
+	const { chatId: sharedChatId } = useParams();
+	const { user } = useAuth();
+	const [isExpanded, setIsExpanded] = useState(false);
+	const {
+		setViewBranchId,
+		currentChat,
+		isSharingChat,
+		shareChat,
+		viewBranchId,
+	} = useChatHistory();
+
+	if (!currentChat) return null;
 
 	return (
-		<div className="items-left flex flex-col gap-2">
-			<div
-				className={classNames(
-					'group relative rounded-3xl p-4 shadow-2xl transition-all duration-300 ease-out',
-					{
-						'w-auto': isExpanded,
-						'hover:w-auto': !isExpanded,
-					},
-					className,
-					glass(),
-				)}
-				{...props}
-			>
-				<div className="relative z-10 flex flex-col items-center space-y-3">
-					{vertices.map((vertex, index) => {
-						const hasBranches = vertex.branchMessages.length > 1;
+		<div className="flex flex-col items-end gap-2">
+			{!sharedChatId ? (
+				<ToggleButton
+					active={currentChat.public}
+					icon="Share2"
+					disabled={isSharingChat}
+					onToggle={() => {
+						let url = `${window.location.origin}/share/${user?.uid}/${currentChat.id}`;
+						if (viewBranchId) {
+							url += `?viewBranch=${viewBranchId}`;
+						}
 
-						return (
-							<div
-								key={`${vertex.branchId}-${index}`}
-								className="flex w-full flex-col"
-							>
-								<div className="flex w-full items-center">
-									{/* Main conversation dot */}
-									<button
-										className="border-foreground bg-foreground relative z-10 h-4 w-4 flex-shrink-0 rounded-full border-2 shadow-lg transition-all duration-300"
-										title={vertex.branchMessages[0].summary ?? ''}
-										aria-label={`${vertex.branchMessages[0].summary}`}
-									/>
+						if (currentChat.public) {
+							window.open(url, '_blank');
+						} else {
+							shareChat({
+								chatId: currentChat.id,
+								shouldShare: true,
+							}).then(() => {
+								if (!currentChat.public) {
+									window.open(url, '_blank');
+								}
+							});
+						}
+					}}
+				/>
+			) : null}
 
-									{/* Branch count - becomes part of layout on hover */}
-									{hasBranches && (
-										<div
-											className={classNames(
-												'ml-0 flex w-0 items-center gap-0.5 overflow-hidden whitespace-nowrap opacity-0 transition-all duration-300 ease-out group-hover:ml-3 group-hover:w-auto group-hover:opacity-100',
-												{
-													'ml-3 w-auto opacity-100': isExpanded,
-												},
-											)}
-										>
-											{/* Small dot separator */}
-											<div className="bg-foreground/60 mr-2 h-1 w-1 flex-shrink-0 rounded-full" />
-											{/* Branch icon */}
-											{(() => {
-												const LucideIcon = icons['Split'];
-												return <LucideIcon size={16} />;
-											})()}
-											{/* Branch count */}
-											<span className="flex-shrink-0 text-sm font-semibold">
-												{vertex.branchMessages.length}
-											</span>
-										</div>
-									)}
+			<div className="group bg-glass no-scrollbar relative max-h-[50vh] overflow-auto !backdrop-blur-2xl transition-all duration-300 ease-out">
+				{vertices.map((vertex, index) => (
+					<div
+						key={index}
+						className={classNames('relative', {
+							'mt-1':
+								vertices[index - 1]?.branchMessages.length > 1 && isExpanded,
+						})}
+					>
+						{vertex.branchMessages.length > 1 ? (
+							<span
+								className={classNames(
+									'border-accent pointer-events-none absolute inset-0 border-x-2',
+									{
+										'bg-accent/15 z-[-1]': isExpanded,
+									},
+								)}
+							/>
+						) : null}
 
-									{/* Single message - shown inline when no branches and expanded */}
-									{!hasBranches && isExpanded && (
-										<div className="ml-3 flex items-center">
-											<div
-												className={classNames(
-													'truncate text-sm transition-all duration-300 ease-out',
-													{
-														'text-foreground font-bold':
-															vertex.branchMessages[0].isActive,
-														'text-foreground/80 font-normal':
-															!vertex.branchMessages[0].isActive,
-													},
-												)}
-											>
-												{vertex.branchMessages[0].summary}
-											</div>
-										</div>
-									)}
-								</div>
+						<Link
+							href={`#${vertex.branchMessages[0]?.id}`}
+							onClick={(e) => {
+								e.preventDefault();
 
-								{/* Multiple messages - shown below when has branches and expanded */}
-								{hasBranches && (
-									<div
+								if (vertex.branchMessages.length > 1) {
+									if (!isExpanded) setIsExpanded(true);
+								} else if (vertex.branchMessages[0]?.id) {
+									document
+										.getElementById(vertex.branchMessages[0].id)
+										?.scrollIntoView({
+											behavior: 'smooth',
+											block: 'end',
+										});
+								}
+							}}
+							className={classNames(
+								'hover:bg-foreground/5 flex items-center justify-end gap-2 px-3 py-2',
+								{
+									hidden: vertex.branchMessages.length > 1 && isExpanded,
+								},
+							)}
+						>
+							{isExpanded && vertex.branchMessages.length === 1 ? (
+								<span className="font-slab text-sm">
+									{vertex.branchMessages[0]?.summary}
+								</span>
+							) : (
+								vertex.branchMessages.length > 1 && (
+									<span
+										className={classNames('font-slab gap-2', {
+											'flex text-sm': isExpanded,
+											'hidden text-xs font-semibold group-hover:flex':
+												!isExpanded,
+										})}
+									>
+										{vertex.branchMessages.length}
+										<span>•</span>
+									</span>
+								)
+							)}
+
+							{vertex.branchMessages.length > 1 ? (
+								<Split className="h-4 w-4 rotate-180" />
+							) : (
+								<GitCommitVertical className="h-4 w-4" />
+							)}
+						</Link>
+
+						{isExpanded && vertex.branchMessages.length > 1 ? (
+							<div className="flex flex-col gap-1">
+								{vertex.branchMessages.map((message) => (
+									<Link
+										href={`?chat=${currentChat.id}&viewBranch=${message.id}`}
+										onClick={(e) => {
+											e.preventDefault();
+											if (!message.isActive) setViewBranchId(message.id);
+										}}
+										key={message.id}
 										className={classNames(
-											'overflow-hidden transition-all duration-300 ease-out',
+											'hover:bg-foreground/5 flex items-center justify-end gap-2 px-3 py-2',
 											{
-												'max-h-0 max-w-0 opacity-0': !isExpanded,
-												'max-h-96 max-w-none opacity-100': isExpanded,
+												'text-foreground/75': !message.isActive,
+												'font-semibold': message.isActive,
 											},
 										)}
 									>
-										<div className="ml-7 flex flex-col gap-2 pt-2">
-											{vertex.branchMessages.map((message) => (
-												<button
-													key={message.id ?? vertex.branchId}
-													className="group/message hover:bg-foreground/10 flex w-full items-center gap-2 rounded-lg px-2 py-1 text-left transition-all duration-300"
-													onClick={() => {
-														onMessageClick(message.id);
-													}}
-												>
-													{/* Message status icon */}
-													<div
-														className={classNames(
-															'flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all duration-300 group-hover/message:scale-110',
-															{
-																'border-foreground bg-transparent':
-																	message.isActive,
-																'border-foreground/40 group-hover/message:bg-foreground/20 bg-transparent':
-																	!message.isActive,
-															},
-														)}
-													>
-														{message.isActive && (
-															<svg
-																className="text-foreground h-2.5 w-2.5"
-																fill="currentColor"
-																viewBox="0 0 20 20"
-															>
-																<path
-																	fillRule="evenodd"
-																	d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-																	clipRule="evenodd"
-																/>
-															</svg>
-														)}
-													</div>
+										{isExpanded ? (
+											<span
+												className="font-slab max-w-[10rem] truncate text-sm"
+												title={message.summary ?? 'No summary'}
+											>
+												{message.summary}
+											</span>
+										) : null}
 
-													{/* Message text */}
-													<div
-														className={classNames(
-															'truncate text-sm transition-all duration-300 ease-out',
-															{
-																'text-foreground font-bold': message.isActive,
-																'text-foreground/80 font-normal':
-																	!message.isActive,
-															},
-														)}
-													>
-														{message.summary}
-													</div>
-												</button>
-											))}
-										</div>
-									</div>
-								)}
+										{message.isActive ? (
+											<CircleCheck className="h-4 w-4" />
+										) : (
+											<Circle className="h-4 w-4" />
+										)}
+									</Link>
+								))}
 							</div>
-						);
-					})}
-
-					{/* Current message dot */}
-					<div className="flex w-full items-center">
-						<button
-							className="border-foreground relative z-10 h-4 w-4 flex-shrink-0 rounded-full border-2 bg-transparent transition-all duration-300"
-							title=""
-							aria-label=""
-						/>
+						) : null}
 					</div>
-				</div>
+				))}
 			</div>
 
-			{/* Expand button */}
-			<Button
-				variant="secondary"
-				size="icon"
-				icon={isExpanded ? 'ChevronUp' : 'ChevronDown'}
-				onClick={() => setIsExpanded(!isExpanded)}
-				className="ml-0.25"
+			<ToggleButton
+				icon={isExpanded ? 'ChevronsDownUp' : 'ChevronsUpDown'}
+				active
+				onToggle={() => setIsExpanded(!isExpanded)}
 			/>
 		</div>
 	);

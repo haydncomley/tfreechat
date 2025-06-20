@@ -32,8 +32,6 @@ export const Sidebar = ({
 		setBranchId,
 		deleteChat,
 		isDeletingChat,
-		isSharingChat,
-		shareChat,
 	} = useChatHistory();
 	const { toggleDarkMode, isDarkMode } = useDarkMode();
 	const actionBar = use(ActionBarContext);
@@ -136,7 +134,7 @@ export const Sidebar = ({
 	const chatsGroupedByDate = useMemo(() => {
 		return chats.reduce(
 			(acc, chat) => {
-				const date = FormatChatDate(chat.createdAt.toDate());
+				const date = FormatChatDate(chat.updatedAt.toDate());
 				if (!acc[date]) acc[date] = [];
 				acc[date].push(chat);
 				return acc;
@@ -144,7 +142,7 @@ export const Sidebar = ({
 			{} as Record<string, Chat[]>,
 		);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [chats.map((chat) => chat.createdAt.toDate()).join(',')]);
+	}, [chats.map((chat) => chat.updatedAt.toDate()).join(',')]);
 
 	const [showKeyInput, setShowKeyInput] = useState(false);
 
@@ -174,32 +172,6 @@ export const Sidebar = ({
 					onClick={() => setShowMobileMenu(!showMobileMenu)}
 				/>
 			</div>
-
-			{currentChat ? (
-				<div className="fixed top-4 right-4 z-50 md:right-4">
-					<Button
-						size="icon"
-						variant={!currentChat.public ? 'primary' : 'secondary'}
-						icon="Share2"
-						disabled={isSharingChat}
-						onClick={() => {
-							const url = `${window.location.origin}/share/${user?.uid}/${currentChat.id}`;
-							if (currentChat.public) {
-								window.open(url, '_blank');
-							} else {
-								shareChat({
-									chatId: currentChat.id,
-									shouldShare: true,
-								}).then(() => {
-									if (!currentChat.public) {
-										window.open(url, '_blank');
-									}
-								});
-							}
-						}}
-					/>
-				</div>
-			) : null}
 
 			<aside
 				ref={sidebarRef}
@@ -249,7 +221,7 @@ export const Sidebar = ({
 											{chat.prompt}
 										</span>
 										<span className="flex gap-2 text-xs opacity-75">
-											<span>{FormatDateSince(chat.createdAt.toDate())}</span>
+											<span>{FormatDateSince(chat.updatedAt.toDate())}</span>
 											{chat.branches ? (
 												<>
 													<span>•</span>

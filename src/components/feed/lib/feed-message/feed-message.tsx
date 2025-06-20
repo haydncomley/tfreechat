@@ -229,7 +229,7 @@ export const FeedMessage = ({
 	return (
 		<div
 			className={classNames(
-				'flex w-full flex-col gap-2',
+				'flex w-full flex-col gap-4 md:gap-2',
 				{
 					'items-end': sender === 'user',
 					'items-start': sender === 'ai',
@@ -255,7 +255,7 @@ export const FeedMessage = ({
 				{renderContent}
 
 				{actions ? (
-					<div className="absolute bottom-0 left-full z-10 flex translate-x-2 gap-1.5">
+					<div className="absolute bottom-0 left-full z-10 flex translate-x-4 gap-1.5 md:translate-x-2">
 						{actions}
 					</div>
 				) : null}
